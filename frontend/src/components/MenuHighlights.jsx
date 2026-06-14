@@ -1,84 +1,35 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Flame, Leaf } from "lucide-react";
+import { useNav } from "../context/NavigationContext";
+import { MENU_ITEMS } from "../data/menuData";
 
-const MENU = [
-    {
-        id: 1,
-        emoji: "🥟",
-        name: "Steam Momos",
-        desc: "Soft, pillowy dumplings stuffed with spiced veggies or chicken, served with fiery chutney.",
-        price: "₹60",
-        tag: "Fan Fav",
-        tagColor: "bg-mm-gold/20 text-amber-900",
-        spicy: false,
-        veg: true,
-        gradient: "from-orange-500/10 to-mm-card",
-    },
-    {
-        id: 2,
-        emoji: "🥟",
-        name: "Fried Momos",
-        desc: "Pan-fried to a golden crisp — that crunch before the juicy filling? Pure bliss.",
-        price: "₹70",
-        tag: "Crispy 🔥",
-        tagColor: "bg-orange-100 text-orange-800",
-        spicy: true,
-        veg: true,
-        gradient: "from-amber-500/10 to-mm-card",
-    },
-    {
-        id: 3,
-        emoji: "🌯",
-        name: "Paneer Roll",
-        desc: "Flaky paratha wrapped around smoky spiced paneer with onion, chutney and love.",
-        price: "₹80",
-        tag: "Veg",
-        tagColor: "bg-green-100 text-green-800",
-        spicy: false,
-        veg: true,
-        gradient: "from-green-500/10 to-mm-card",
-    },
-    {
-        id: 4,
-        emoji: "🫕",
-        name: "Aloo Samosa",
-        desc: "The classic Delhi street hero — crispy, golden, filled with spiced potato & peas.",
-        price: "₹30",
-        tag: "Classic",
-        tagColor: "bg-yellow-100 text-yellow-800",
-        spicy: false,
-        veg: true,
-        gradient: "from-yellow-500/10 to-mm-card",
-    },
-    {
-        id: 5,
-        emoji: "🍟",
-        name: "French Fries",
-        desc: "Twice-fried golden strips dusted with our secret house seasoning. Impossible to eat just one.",
-        price: "₹70",
-        tag: "Crispy",
-        tagColor: "bg-orange-100 text-orange-800",
-        spicy: false,
-        veg: true,
-        gradient: "from-orange-500/10 to-mm-card",
-    },
-    {
-        id: 6,
-        emoji: "🌶️",
-        name: "Chilli Potato",
-        desc: "Wok-tossed Indo-Chinese potatoes with bell peppers, soy sauce and a punchy chilli kick.",
-        price: "₹80",
-        tag: "Spicy 🌶️",
-        tagColor: "bg-red-100 text-red-800",
-        spicy: true,
-        veg: true,
-        gradient: "from-red-500/10 to-mm-card",
-    },
-];
+const HIGHLIGHTS_METADATA = {
+  1: { tag: "Fan Fav", tagColor: "bg-mm-gold/20 text-amber-900", gradient: "from-orange-500/10 to-mm-card" },
+  3: { tag: "Crispy 🔥", tagColor: "bg-orange-100 text-orange-800", gradient: "from-amber-500/10 to-mm-card" },
+  7: { tag: "Veg", tagColor: "bg-green-100 text-green-800", gradient: "from-green-500/10 to-mm-card" },
+  11: { tag: "Classic", tagColor: "bg-yellow-100 text-yellow-800", gradient: "from-yellow-500/10 to-mm-card" },
+  15: { tag: "Crispy", tagColor: "bg-orange-100 text-orange-800", gradient: "from-orange-500/10 to-mm-card" },
+  16: { tag: "Spicy 🌶️", tagColor: "bg-red-100 text-red-800", gradient: "from-red-500/10 to-mm-card" }
+};
+
+const TARGET_IDS = [1, 3, 7, 11, 15, 16];
+
+const MENU = TARGET_IDS.map(id => {
+  const item = MENU_ITEMS.find(i => i.id === id);
+  const meta = HIGHLIGHTS_METADATA[id];
+  return {
+    ...item,
+    price: `₹${item.price}`,
+    tag: meta.tag,
+    tagColor: meta.tagColor,
+    gradient: meta.gradient
+  };
+});
 
 function MenuCard({ item, index }) {
     const [hovered, setHovered] = useState(false);
+    const { navigate } = useNav();
 
     return (
         <motion.div
@@ -91,6 +42,7 @@ function MenuCard({ item, index }) {
             className="relative group"
         >
             <motion.div
+                onClick={() => navigate("menu")}
                 whileHover={{ y: -6, scale: 1.02 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
                 className={`relative overflow-hidden rounded-2xl bg-gradient-to-b ${item.gradient}
@@ -135,6 +87,7 @@ function MenuCard({ item, index }) {
                     <span className="font-display text-xl text-mm-gold">{item.price}</span>
 
                     <motion.button
+                        onClick={(e) => { e.stopPropagation(); navigate("menu"); }}
                         whileHover={{ scale: 1.1, boxShadow: "0 0 18px rgba(232,40,75,0.5)" }}
                         whileTap={{ scale: 0.9 }}
                         className="flex items-center gap-1.5 bg-mm-red/90 hover:bg-mm-red
@@ -151,6 +104,8 @@ function MenuCard({ item, index }) {
 }
 
 export default function MenuHighlights() {
+    const { navigate } = useNav();
+
     return (
         <section id="menu" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">
             {/* ambient glow */}
@@ -195,7 +150,7 @@ export default function MenuHighlights() {
                 {/* grid */}
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {MENU.map((item, i) => (
-                        <MenuCard key={item.id} item={item} index={i} />
+                        <MenuCard key={item.id} item={item} index={i} navigate={navigate} />
                     ))}
                 </div>
 
@@ -208,6 +163,7 @@ export default function MenuHighlights() {
                     className="text-center mt-14"
                 >
                     <motion.button
+                        onClick={() => navigate("menu")}
                         whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(232,40,75,0.4)" }}
                         whileTap={{ scale: 0.95 }}
                         className="inline-flex items-center gap-2 border border-mm-red/50 text-mm-red

@@ -1,44 +1,25 @@
 import { motion } from "framer-motion";
 import { Star, TrendingUp, ArrowRight } from "lucide-react";
+import { useNav } from "../context/NavigationContext";
+import { MENU_ITEMS } from "../data/menuData";
 
-const PICKS = [
-  {
-    id: 1,
-    emoji: "🥟",
-    name: "Steam Momos",
-    subtitle: "The original magic — always steaming, always perfect.",
-    rating: 4.9,
-    reviews: 312,
-    orders: "2.4k orders",
-    price: "₹60",
-    accent: "#E8284B",
-    badge: "🏆 #1 Pick",
-  },
-  {
-    id: 2,
-    emoji: "🌶️",
-    name: "Chilli Potato",
-    subtitle: "A wok-tossed adventure with every saucy bite.",
-    rating: 4.8,
-    reviews: 198,
-    orders: "1.9k orders",
-    price: "₹80",
-    accent: "#F5A623",
-    badge: "🔥 Trending",
-  },
-  {
-    id: 3,
-    emoji: "🌯",
-    name: "Paneer Roll",
-    subtitle: "Flaky, smoky, and unapologetically indulgent.",
-    rating: 4.7,
-    reviews: 144,
-    orders: "1.2k orders",
-    price: "₹80",
-    accent: "#4CAF50",
-    badge: "💚 Staff Fav",
-  },
-];
+const PICKS_METADATA = {
+  1: { accent: "#E8284B", badge: "🏆 #1 Pick", orders: "2.4k orders", subtitle: "The original magic — always steaming, always perfect." },
+  16: { accent: "#F5A623", badge: "🔥 Trending", orders: "1.9k orders", subtitle: "A wok-tossed adventure with every saucy bite." },
+  7: { accent: "#4CAF50", badge: "💚 Staff Fav", orders: "1.2k orders", subtitle: "Flaky, smoky, and unapologetically indulgent." },
+};
+
+const PICKS = MENU_ITEMS.filter(item => [1, 16, 7].includes(item.id)).map(item => {
+  const meta = PICKS_METADATA[item.id];
+  return {
+    ...item,
+    price: `₹${item.price}`,
+    accent: meta.accent,
+    badge: meta.badge,
+    orders: meta.orders,
+    subtitle: meta.subtitle
+  };
+});
 
 /* scrolling ticker items */
 const TICKER_ITEMS = [
@@ -52,9 +33,11 @@ const TICKER_ITEMS = [
 
 function PickCard({ pick, index }) {
   const stars = Math.floor(pick.rating);
+  const { navigate } = useNav();
 
   return (
     <motion.div
+      onClick={() => navigate("menu")}
       initial={{ opacity: 0, y: 44 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -136,6 +119,7 @@ function PickCard({ pick, index }) {
 
 export default function BestSellers() {
   const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  const { navigate } = useNav();
 
   return (
     <section id="bestsellers" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">
@@ -170,6 +154,7 @@ export default function BestSellers() {
           </div>
 
           <motion.button
+            onClick={() => navigate("menu")}
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}

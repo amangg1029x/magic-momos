@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ChevronRight, Calendar, MapPin, Users } from "lucide-react";
-import { useNav } from "../../context/NavigationContext";
+import { useNav } from "../context/NavigationContext";
 
 const QUICK_FACTS = [
   { icon: Calendar, label: "Founded",  value: "2020"          },

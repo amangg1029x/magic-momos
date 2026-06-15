@@ -4,11 +4,13 @@ import { Menu, X, Phone, ShoppingBag } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 
 const NAV_LINKS = [
-  { label: "Home", href: "#home", page: "home", section: "home" },
-  { label: "Menu", href: "#menu", page: "menu" },
-  { label: "Why Us", href: "#why-us", page: "home", section: "why-us" },
-  { label: "Bestsellers", href: "#bestsellers", page: "home", section: "bestsellers" },
-  { label: "Reviews", href: "#reviews", page: "home", section: "reviews" },
+  { label: "Home", page: "home", section: "home" },
+  { label: "Menu", page: "menu" },
+  { label: "About", page: "about"},
+  { label: "Contact Us", page: "contact"},
+  { label: "Why Us", page: "home", section: "why-us" },
+  { label: "Bestsellers", page: "home", section: "bestsellers" },
+  { label: "Reviews", page: "home", section: "reviews" },
 ];
 
 /**

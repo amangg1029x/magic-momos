@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Flame, Leaf } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
-import { MENU_ITEMS } from "../data/menuData";
+import api from "../services/api";
 
 const HIGHLIGHTS_METADATA = {
   1: { tag: "Fan Fav", tagColor: "bg-mm-gold/20 text-amber-900", gradient: "from-orange-500/10 to-mm-card" },
@@ -13,19 +13,7 @@ const HIGHLIGHTS_METADATA = {
   16: { tag: "Spicy 🌶️", tagColor: "bg-red-100 text-red-800", gradient: "from-red-500/10 to-mm-card" }
 };
 
-const TARGET_IDS = [1, 3, 7, 11, 15, 16];
-
-const MENU = TARGET_IDS.map(id => {
-  const item = MENU_ITEMS.find(i => i.id === id);
-  const meta = HIGHLIGHTS_METADATA[id];
-  return {
-    ...item,
-    price: `₹${item.price}`,
-    tag: meta.tag,
-    tagColor: meta.tagColor,
-    gradient: meta.gradient
-  };
-});
+const TARGET_IDS = [1, 3, 7, 11, 15, 16];   
 
 function MenuCard({ item, index }) {
     const [hovered, setHovered] = useState(false);
@@ -105,6 +93,30 @@ function MenuCard({ item, index }) {
 
 export default function MenuHighlights() {
     const { navigate } = useNav();
+
+    const [menuItems, setMenuItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        api.menu.getAll()
+        .then(({ items }) => setMenuItems(items))
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }, []);
+
+    // Generate highlighted menu items based on fetched data
+    const MENU = TARGET_IDS.map(id => {
+      const item = menuItems.find(i => i.id === id) || {};
+      const meta = HIGHLIGHTS_METADATA[id] || {};
+      return {
+        ...item,
+        price: `₹${item.price ?? ''}`,
+        tag: meta.tag,
+        tagColor: meta.tagColor,
+        gradient: meta.gradient,
+        id,
+      };
+    });
 
     return (
         <section id="menu" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">

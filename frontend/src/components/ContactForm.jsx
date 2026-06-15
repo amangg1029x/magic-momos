@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, User, Mail, Phone, MessageSquare, CheckCircle, ChevronDown } from "lucide-react";
+import api from "../services/api";
 
 const SUBJECTS = [
   "General Enquiry",
@@ -45,9 +46,14 @@ export default function ContactForm() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1400)); // simulate network
-    setLoading(false);
-    setSubmitted(true);
+    try {
+      await api.contact.submit(form);
+      setSubmitted(true);
+    } catch (err) {
+        setErrors({ message: err.message || "Something went wrong. Please try again." });
+    } finally {
+        setLoading(false);
+    }
   };
 
   const inputClass = (field) =>

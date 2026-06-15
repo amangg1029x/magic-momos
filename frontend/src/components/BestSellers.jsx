@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Star, TrendingUp, ArrowRight } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
-import { MENU_ITEMS } from "../data/menuData";
+import api from "../services/api";
 
 const PICKS_METADATA = {
   1: { accent: "#E8284B", badge: "🏆 #1 Pick", orders: "2.4k orders", subtitle: "The original magic — always steaming, always perfect." },
@@ -9,17 +10,7 @@ const PICKS_METADATA = {
   7: { accent: "#4CAF50", badge: "💚 Staff Fav", orders: "1.2k orders", subtitle: "Flaky, smoky, and unapologetically indulgent." },
 };
 
-const PICKS = MENU_ITEMS.filter(item => [1, 16, 7].includes(item.id)).map(item => {
-  const meta = PICKS_METADATA[item.id];
-  return {
-    ...item,
-    price: `₹${item.price}`,
-    accent: meta.accent,
-    badge: meta.badge,
-    orders: meta.orders,
-    subtitle: meta.subtitle
-  };
-});
+// PICK generation moved inside component
 
 /* scrolling ticker items */
 const TICKER_ITEMS = [
@@ -118,9 +109,20 @@ function PickCard({ pick, index }) {
 }
 
 export default function BestSellers() {
+  const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
-  const { navigate } = useNav();
-
+  const PICKS = menuItems.filter(item => [1, 16, 7].includes(item.id)).map(item => {
+    const meta = PICKS_METADATA[item.id];
+    return {
+      ...item,
+      price: `₹${item.price}`,
+      accent: meta.accent,
+      badge: meta.badge,
+      orders: meta.orders,
+      subtitle: meta.subtitle,
+    };
+  });
   return (
     <section id="bestsellers" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">
       {/* ambient blobs */}

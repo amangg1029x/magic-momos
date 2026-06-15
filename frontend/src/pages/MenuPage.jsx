@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCart } from "../hooks/useCart";
-import { MENU_ITEMS } from "../data/menuData";
+import api from "../services/api";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -11,18 +11,28 @@ import CartSidebar from "../components/CartSidebar";
 
 export default function MenuPage() {
     const cart = useCart();
+    const [menuItems, setMenuItems] = useState([]);
+    const [menuLoading, setMenuLoading] = useState(true);
 
     const [cartOpen, setCartOpen] = useState(false);
     const [category, setCategory] = useState("all");
     const [search, setSearch] = useState("");
 
+    useEffect(() => {
+        api.menu.getAll()
+        .then(({ items }) => setMenuItems(items))
+        .catch(console.error)
+        .finally(() => setMenuLoading(false));
+    }, []);
+
     /* category → item count map (for filter pill badges) */
     const counts = useMemo(() => {
-        return MENU_ITEMS.reduce((acc, item) => {
+        return menuItems.reduce((acc, item) => {
             acc[item.category] = (acc[item.category] ?? 0) + 1;
             return acc;
         }, {});
-    }, []);
+    }, [menuItems]);
+
 
     return (
         <div className="relative min-h-screen bg-mm-black overflow-x-hidden">

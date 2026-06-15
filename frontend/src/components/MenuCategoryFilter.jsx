@@ -1,9 +1,30 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CATEGORIES } from "../data/menuData";
+import api from "../services/api";
 
 export default function MenuCategoryFilter({ active, onChange, counts }) {
   const barRef = useRef(null);
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories from API on mount
+  useEffect(() => {
+    api.menu.getAll()
+      .then(({ items }) => {
+        const unique = new Map();
+        items.forEach(item => {
+          if (!unique.has(item.category)) {
+            unique.set(item.category, {
+              id: item.category,
+              label: item.category.charAt(0).toUpperCase() + item.category.slice(1),
+              emoji: "" // placeholder, could be enhanced
+            });
+          }
+        });
+        const cats = [{ id: "all", label: "All", emoji: "" }, ...Array.from(unique.values())];
+        setCategories(cats);
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="sticky top-[72px] z-30 bg-mm-black/95 backdrop-blur-md
@@ -16,7 +37,7 @@ export default function MenuCategoryFilter({ active, onChange, counts }) {
                      scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none]
                      [&::-webkit-scrollbar]:hidden"
         >
-          {CATEGORIES.map(({ id, label, emoji }) => {
+          {categories.map(({ id, label, emoji }) => {
             const isActive = active === id;
             const count = id === "all"
               ? Object.values(counts ?? {}).reduce((a, b) => a + b, 0)

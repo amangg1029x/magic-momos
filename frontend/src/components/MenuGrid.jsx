@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal } from "lucide-react";
-import { MENU_ITEMS } from "../data/menuData";
+import api from "../services/api";
 import MenuItemCard from "./MenuItemCard";
 
 const SORT_OPTIONS = [
@@ -37,9 +37,19 @@ export default function MenuGrid({ category, search, cartItems, onAdd, onUpdate 
   const [vegOnly, setVegOnly]     = useState(false);
   const [sortOpen, setSortOpen]   = useState(false);
 
+  const [menuItems, setMenuItems] = useState([]);
+  const [menuLoading, setMenuLoading] = useState(true);
+
+  useEffect(() => {
+      api.menu.getAll()
+      .then(({ items }) => setMenuItems(items))
+      .catch(console.error)
+      .finally(() => setMenuLoading(false));
+  }, []);
+
   /* ── filtering + sorting pipeline ── */
   const filtered = useMemo(() => {
-    let items = MENU_ITEMS;
+    let items = menuItems;
 
     // category filter
     if (category !== "all") {
@@ -61,12 +71,19 @@ export default function MenuGrid({ category, search, cartItems, onAdd, onUpdate 
     if (vegOnly) items = items.filter((i) => i.veg);
 
     return sortItems(items, sort);
-  }, [category, search, vegOnly, sort]);
+  }, [category, search, vegOnly, sort, menuItems]);
 
   /* ── cart qty helper ── */
   const getQty = (id) => cartItems.find((i) => i.id === id)?.qty ?? 0;
 
-  return (
+  if (menuLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">
+        <p className="text-center text-mm-muted font-body">Loading menu...</p>
+      </div>
+    );
+  }
+    return (
     <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">
 
       {/* ── toolbar ── */}

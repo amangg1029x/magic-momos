@@ -1,5 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, ShoppingBag, Plus, Minus, ChevronRight } from "lucide-react";
+import api from "../services/api";
+import { useNav } from "../context/NavigationContext";
+import { useState } from "react";
 
 const DELIVERY_FEE  = 30;
 const FREE_DELIVERY = 199;
@@ -19,6 +22,37 @@ export default function CartSidebar({ open, onClose, items, total, onUpdate, onR
   const delivery      = total >= FREE_DELIVERY ? 0 : DELIVERY_FEE;
   const grandTotal    = total + delivery;
   const toFreeDelivery = Math.max(FREE_DELIVERY - total, 0);
+
+  const { navigate } = useNav();
+  const [ordering, setOrdering] = useState(false);
+
+  const handlePlaceOrder = async () => {
+    setOrdering(true);
+    try {
+      const payload = {
+        customer: {
+          name:  "Guest",          // replace with form data / logged-in user
+          phone: "9999999999",     // collect this in a checkout form
+          email: "",
+        },
+        items: items.map((i) => ({ itemId: i.id, qty: i.qty })),
+        address: {
+          street:  "To be collected",  // add a checkout address step
+          pincode: "110024",
+        },
+        paymentMethod: "cod",
+      };
+
+      const { order } = await api.orders.place(payload);
+      onClear();
+      onClose();
+      navigate("success", { orderData: order });
+    } catch (err) {
+      alert(err.message || "Order failed. Please try again.");
+    } finally {
+      setOrdering(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -257,6 +291,7 @@ export default function CartSidebar({ open, onClose, items, total, onUpdate, onR
 
                   {/* order button */}
                   <motion.button
+                    onClick={handlePlaceOrder}
                     whileHover={{
                       scale: 1.02,
                       boxShadow: "0 0 28px rgba(232,40,75,0.45)",

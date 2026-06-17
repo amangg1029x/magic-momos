@@ -4,16 +4,9 @@ import { ShoppingCart, Flame, Leaf } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 import api from "../services/api";
 
-const HIGHLIGHTS_METADATA = {
-  1: { tag: "Fan Fav", tagColor: "bg-mm-gold/20 text-amber-900", gradient: "from-orange-500/10 to-mm-card" },
-  3: { tag: "Crispy 🔥", tagColor: "bg-orange-100 text-orange-800", gradient: "from-amber-500/10 to-mm-card" },
-  7: { tag: "Veg", tagColor: "bg-green-100 text-green-800", gradient: "from-green-500/10 to-mm-card" },
-  11: { tag: "Classic", tagColor: "bg-yellow-100 text-yellow-800", gradient: "from-yellow-500/10 to-mm-card" },
-  15: { tag: "Crispy", tagColor: "bg-orange-100 text-orange-800", gradient: "from-orange-500/10 to-mm-card" },
-  16: { tag: "Spicy 🌶️", tagColor: "bg-red-100 text-red-800", gradient: "from-red-500/10 to-mm-card" }
-};
 
-const TARGET_IDS = [1, 3, 7, 11, 15, 16];   
+
+
 
 function MenuCard({ item, index }) {
     const [hovered, setHovered] = useState(false);
@@ -33,10 +26,15 @@ function MenuCard({ item, index }) {
                 onClick={() => navigate("menu")}
                 whileHover={{ y: -6, scale: 1.02 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className={`relative overflow-hidden rounded-2xl bg-gradient-to-b ${item.gradient}
-                    border border-mm-border hover:border-mm-red/40 transition-colors duration-300
-                    p-6 h-full flex flex-col gap-4 cursor-pointer shadow-card`}
+                className="relative group rounded-3xl bg-mm-card border border-mm-border
+                           overflow-hidden p-7 flex flex-col gap-5 cursor-pointer shadow-card
+                           hover:border-mm-red/30 transition-all duration-350"
             >
+                <div
+                    className="absolute top-0 left-0 right-0 h-1 transition-all duration-300 group-hover:h-1.5"
+                    style={{ background: item.gradient }}
+                />
+
                 {/* background glow on hover */}
                 <motion.div
                     animate={{ opacity: hovered ? 1 : 0 }}
@@ -99,24 +97,59 @@ export default function MenuHighlights() {
 
     useEffect(() => {
         api.menu.getAll()
-        .then(({ items }) => setMenuItems(items))
-        .catch(console.error)
-        .finally(() => setLoading(false));
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setMenuItems(data);
+                } else if (data && Array.isArray(data.items)) {
+                    setMenuItems(data.items);
+                } else {
+                    setMenuItems([]);
+                }
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
     }, []);
 
-    // Generate highlighted menu items based on fetched data
-    const MENU = TARGET_IDS.map(id => {
-      const item = menuItems.find(i => i.id === id) || {};
-      const meta = HIGHLIGHTS_METADATA[id] || {};
-      return {
-        ...item,
-        price: `₹${item.price ?? ''}`,
-        tag: meta.tag,
-        tagColor: meta.tagColor,
-        gradient: meta.gradient,
-        id,
-      };
-    });
+
+
+    // Define color and gradient mappings based on category
+    const TAG_COLOR_MAP = {
+        momos: "text-red-600",
+        rolls: "text-purple-600",
+        snacks: "text-green-600",
+        sides: "text-pink-600",
+        drinks: "text-blue-600",
+    };
+    const GRADIENT_MAP = {
+        momos: "bg-gradient-to-br from-red-500 to-pink-500",
+        rolls: "bg-gradient-to-br from-purple-500 to-indigo-500",
+        snacks: "bg-gradient-to-br from-green-500 to-yellow-500",
+        sides: "bg-gradient-to-br from-pink-500 to-purple-500",
+        drinks: "bg-gradient-to-br from-blue-500 to-teal-500",
+    };
+
+    // Use popular flag as a placeholder for highlights
+    const highlightsRaw = menuItems.filter(item => item.popular);
+
+    const HIGHLIGHTS = highlightsRaw.map(item => ({
+        id: item.itemId,
+        tag: item.category,
+        tagColor: TAG_COLOR_MAP[item.category] || "text-mm-muted",
+        gradient: GRADIENT_MAP[item.category] || "",
+        price: `₹${item.price}`,
+        name: item.name,
+        desc: item.desc,
+        emoji: item.emoji,
+    }));
+    if (loading) {
+        return (
+            <section id="menu" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">
+                <div className="max-w-7xl mx-auto px-5 sm:px-8">
+                    <p className="text-center text-mm-cream">Loading highlights...</p>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section id="menu" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">
@@ -161,8 +194,8 @@ export default function MenuHighlights() {
 
                 {/* grid */}
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {MENU.map((item, i) => (
-                        <MenuCard key={item.id} item={item} index={i} navigate={navigate} />
+                    {HIGHLIGHTS.map((item, i) => (
+                        <MenuCard key={item.id} item={item} index={i} />
                     ))}
                 </div>
 

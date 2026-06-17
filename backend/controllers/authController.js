@@ -63,7 +63,7 @@ const getMe = async (req, res) => {
 // ── PUT /api/auth/me ──────────────────────────────────────────────────────────
 const updateMe = async (req, res, next) => {
   try {
-    const allowed = ["name", "phone", "address"];
+    const allowed = ["name", "phone", "addresses"];
     const updates = {};
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) updates[field] = req.body[field];

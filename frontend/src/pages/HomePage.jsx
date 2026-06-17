@@ -1,4 +1,5 @@
 import Header       from "../components/Header";
+import DeliveryZoneBanner from "../components/DeliveryZoneBanner";
 import HeroSection   from "../components/HeroSection";
 import MenuHighlights from "../components/MenuHighlights";
 import WhyChooseUs   from "../components/WhyChooseUs";
@@ -11,6 +12,7 @@ export default function HomePage() {
   return (
     <div className="relative overflow-x-hidden">
       <Header />
+      <DeliveryZoneBanner />
       <main>
         <HeroSection />
         <MenuHighlights />

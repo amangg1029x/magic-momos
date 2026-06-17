@@ -1,20 +1,60 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+
+const CART_KEY          = "mm_cart";
+const FREE_DELIVERY_MIN = 199;
+const DELIVERY_FEE      = 30;
+
+// Valid coupons (in real app these would come from the backend)
+const COUPONS = {
+  MAGIC10:  { type: "percent", value: 10, label: "10% off" },
+  FIRST50:  { type: "flat",    value: 50, label: "₹50 off" },
+  NEWUSER:  { type: "percent", value: 15, label: "15% off" },
+};
 
 /**
- * useCart — manages the shopping cart state.
+ * useCart — manages cart state with localStorage persistence.
  *
  * Returns:
- *   items     — array of { id, name, emoji, price, qty }
- *   addItem   — (item) => void  – adds 1 of item or increments qty
- *   updateQty — (id, delta) => void  – +1 / -1; removes item when qty hits 0
- *   removeItem— (id) => void
- *   clearCart — () => void
- *   total     — number  (sum of price * qty)
- *   count     — number  (total number of individual items)
+ *   items        — [{ id, name, emoji, price, qty }]
+ *   addItem      — (item) => void
+ *   updateQty    — (id, delta) => void   (+1 / -1; removes at 0)
+ *   removeItem   — (id) => void
+ *   clearCart    — () => void
+ *   subtotal     — number  (sum of price × qty)
+ *   discount     — number  (coupon discount amount)
+ *   deliveryFee  — number  (0 if subtotal >= FREE_DELIVERY_MIN)
+ *   total        — number  (subtotal - discount + deliveryFee)
+ *   count        — number  (total individual items)
+ *   coupon       — { code, label } | null
+ *   couponError  — string
+ *   applyCoupon  — (code) => void
+ *   removeCoupon — () => void
+ *   FREE_DELIVERY_MIN
  */
 export function useCart() {
-  const [items, setItems] = useState([]);
+  // ── Initialise from localStorage ──────────────────────────────────────────
+  const [items, setItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CART_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
+  const [coupon,      setCoupon]      = useState(null);   // { code, type, value, label }
+  const [couponError, setCouponError] = useState("");
+
+  // ── Persist to localStorage on every change ───────────────────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(items));
+    } catch {
+      // quota exceeded — silent fail
+    }
+  }, [items]);
+
+  // ── Cart mutations ────────────────────────────────────────────────────────
   const addItem = useCallback((item) => {
     setItems((prev) => {
       const exists = prev.find((i) => i.id === item.id);
@@ -23,7 +63,16 @@ export function useCart() {
           i.id === item.id ? { ...i, qty: i.qty + 1 } : i
         );
       }
-      return [...prev, { id: item.id, name: item.name, emoji: item.emoji, price: item.price, qty: 1 }];
+      return [
+        ...prev,
+        {
+          id:    item.id,
+          name:  item.name,
+          emoji: item.emoji,
+          price: item.price,
+          qty:   1,
+        },
+      ];
     });
   }, []);
 
@@ -39,10 +88,60 @@ export function useCart() {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    setCoupon(null);
+    setCouponError("");
+  }, []);
 
-  const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const count = items.reduce((sum, i) => sum + i.qty, 0);
+  // ── Coupon logic ──────────────────────────────────────────────────────────
+  const applyCoupon = useCallback((code) => {
+    setCouponError("");
+    const key    = code.trim().toUpperCase();
+    const found  = COUPONS[key];
+    if (!found) {
+      setCouponError("Invalid coupon code.");
+      return false;
+    }
+    setCoupon({ code: key, ...found });
+    return true;
+  }, []);
 
-  return { items, addItem, updateQty, removeItem, clearCart, total, count };
+  const removeCoupon = useCallback(() => {
+    setCoupon(null);
+    setCouponError("");
+  }, []);
+
+  // ── Derived values ────────────────────────────────────────────────────────
+  const subtotal   = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+  const discount   = coupon
+    ? coupon.type === "percent"
+      ? Math.round(subtotal * coupon.value / 100)
+      : Math.min(coupon.value, subtotal)          // flat — can't exceed subtotal
+    : 0;
+
+  const discountedSubtotal = subtotal - discount;
+  const deliveryFee = discountedSubtotal >= FREE_DELIVERY_MIN ? 0 : DELIVERY_FEE;
+  const total       = discountedSubtotal + deliveryFee;
+  const count       = items.reduce((sum, i) => sum + i.qty, 0);
+
+  return {
+    items,
+    addItem,
+    updateQty,
+    removeItem,
+    clearCart,
+    subtotal,
+    discount,
+    deliveryFee,
+    total,
+    count,
+    coupon,
+    couponError,
+    applyCoupon,
+    removeCoupon,
+    FREE_DELIVERY_MIN,
+    DELIVERY_FEE,
+  };
 }

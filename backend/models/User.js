@@ -28,11 +28,14 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "Password must be at least 6 characters"],
       select:    false, // never returned in queries by default
     },
-    address: {
+    addresses: [{
       street:  { type: String, trim: true },
       city:    { type: String, trim: true, default: "New Delhi" },
       pincode: { type: String, trim: true },
-    },
+      label:   { type: String, trim: true },
+      lat:     { type: Number },
+      lng:     { type: Number },
+    }],
     isActive: {
       type:    Boolean,
       default: true,

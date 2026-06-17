@@ -90,6 +90,8 @@ const api = {
     /**
      * place(payload)
      * payload: { customer, items, address, paymentMethod, specialInstructions }
+     * Response includes `razorpay: { keyId, orderId, amount, currency }`
+     * when paymentMethod === "online", null otherwise.
      */
     place:   (data)    => post("/orders",     data),
     track:   (id)      => get(`/orders/${id}`),
@@ -98,6 +100,21 @@ const api = {
       return get(`/orders/my${qs ? `?${qs}` : ""}`);
     },
     cancel:  (id, reason) => post(`/orders/${id}/cancel`, { reason }),
+
+    /**
+     * verifyPayment(payload)
+     * Call immediately after Razorpay Checkout's success handler fires.
+     * payload: { razorpay_order_id, razorpay_payment_id, razorpay_signature }
+     */
+    verifyPayment: (data) => post("/orders/verify-payment", data),
+
+    /**
+     * retryPayment(orderId)
+     * For orders stuck at paymentStatus "Pending"/"Failed" after an
+     * abandoned or failed online payment. Returns fresh Razorpay
+     * Checkout params: { razorpay: { keyId, orderId, amount, currency } }
+     */
+    retryPayment: (orderId) => post(`/orders/${orderId}/retry-payment`, {}),
   },
 
   // ── Contact form ─────────────────────────────────────────────────────────────

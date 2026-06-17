@@ -1,4 +1,5 @@
 require("dotenv").config();
+const geocodeRouter = require("./routes/geocode.js");
 
 const express    = require("express");
 const cors       = require("cors");
@@ -43,8 +44,18 @@ app.use(
 );
 
 // ── Body parsers ──────────────────────────────────────────────────────────────
-app.use(express.json({ limit: "10kb" })); // reject abnormally large payloads
-app.use(express.urlencoded({ extended: true }));
+// IMPORTANT: the Razorpay webhook route needs the raw, unparsed request body
+// to verify its signature (re-serializing parsed JSON can change the byte
+// string and break verification). We skip the global JSON parser for that
+// one path and let routes/orders.js apply express.raw() there instead.
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/orders/razorpay-webhook") return next();
+  express.json({ limit: "10kb" })(req, res, next);
+});
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/orders/razorpay-webhook") return next();
+  express.urlencoded({ extended: true })(req, res, next);
+});
 
 // ── HTTP request logger (dev only) ───────────────────────────────────────────
 if (process.env.NODE_ENV !== "production") {
@@ -79,6 +90,7 @@ app.use("/api/admin",   adminRoutes);
 app.use("/api/menu",    menuRoutes);
 app.use("/api/orders",  orderRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/geocode", geocodeRouter);
 
 // ── 404 + global error handler ────────────────────────────────────────────────
 app.use(notFound);

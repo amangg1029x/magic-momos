@@ -62,7 +62,13 @@ const orderSchema = new mongoose.Schema(
       enum:    ["Pending", "Paid", "Failed", "Refunded"],
       default: "Pending",
     },
-    paymentId: String, // Razorpay / UPI ref for future
+
+    // ── Razorpay-specific fields (only populated when paymentMethod === "online") ──
+    razorpayOrderId:   String,  // order_xxx — created before payment, ties Razorpay to this order
+    razorpayPaymentId: String,  // pay_xxx   — set once payment is captured
+    razorpaySignature: String,  // stored for audit trail after verification
+    paymentId:         String,  // legacy/generic ref kept for COD or other gateways
+    paymentFailedReason: String,
 
     // Lifecycle
     status: {
@@ -111,5 +117,6 @@ orderSchema.pre("save", async function (next) {
 orderSchema.index({ "customer.userId": 1, createdAt: -1 });
 orderSchema.index({ status: 1, createdAt: -1 });
 orderSchema.index({ createdAt: -1 });
+orderSchema.index({ razorpayOrderId: 1 }, { sparse: true });
 
 module.exports = mongoose.model("Order", orderSchema);

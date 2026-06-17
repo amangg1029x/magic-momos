@@ -4,24 +4,6 @@ import { Star, TrendingUp, ArrowRight } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 import api from "../services/api";
 
-const PICKS_METADATA = {
-  1: { accent: "#E8284B", badge: "🏆 #1 Pick", orders: "2.4k orders", subtitle: "The original magic — always steaming, always perfect." },
-  16: { accent: "#F5A623", badge: "🔥 Trending", orders: "1.9k orders", subtitle: "A wok-tossed adventure with every saucy bite." },
-  7: { accent: "#4CAF50", badge: "💚 Staff Fav", orders: "1.2k orders", subtitle: "Flaky, smoky, and unapologetically indulgent." },
-};
-
-// PICK generation moved inside component
-
-/* scrolling ticker items */
-const TICKER_ITEMS = [
-  "🥟 Steam Momos",
-  "🌯 Paneer Roll",
-  "🫕 Aloo Samosa",
-  "🍟 French Fries",
-  "🌶️ Chilli Potato",
-  "🥟 Fried Momos",
-];
-
 function PickCard({ pick, index }) {
   const stars = Math.floor(pick.rating);
   const { navigate } = useNav();
@@ -111,18 +93,73 @@ function PickCard({ pick, index }) {
 export default function BestSellers() {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
-  const PICKS = menuItems.filter(item => [1, 16, 7].includes(item.id)).map(item => {
-    const meta = PICKS_METADATA[item.id];
-    return {
-      ...item,
-      price: `₹${item.price}`,
-      accent: meta.accent,
-      badge: meta.badge,
-      orders: meta.orders,
-      subtitle: meta.subtitle,
-    };
+  const { navigate } = useNav();
+
+  useEffect(() => {
+    api.menu.getAll()
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setMenuItems(data);
+          } else if (data && Array.isArray(data.items)) {
+            setMenuItems(data.items);
+          } else {
+            setMenuItems([]);
+          }
+        })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="bestsellers" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <p className="text-center text-mm-cream">Loading best sellers...</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Dynamically determine best seller items from API data
+  const bestSellerItems = menuItems.filter(item => item.popular);
+
+  // Map items to the shape expected by PickCard
+  const ACCENT_MAP = {
+    momos: "#FF6F61",
+    rolls: "#6B5B95",
+    snacks: "#88B04B",
+    sides: "#F7CAC9",
+    drinks: "#92A8D1",
+  };
+
+  const PICKS = bestSellerItems.map(item => ({
+    id: item.itemId,
+    accent: ACCENT_MAP[item.category] || "#CCCCCC",
+    badge: "Bestseller",
+    orders: item.reviews || 0,
+    subtitle: item.desc,
+    price: `₹${item.price}`,
+    name: item.name,
+    emoji: item.emoji,
+    rating: item.rating || 0,
+    reviews: item.reviews || 0,
+    // Preserve any extra fields needed by PickCard (none currently)
+  }));
+
+  // Validate required fields for each mapped pick; throw if missing
+  const REQUIRED_FIELDS = ["accent", "badge", "orders", "subtitle", "price", "name", "emoji"];
+  PICKS.forEach(pick => {
+    REQUIRED_FIELDS.forEach(field => {
+      if (!pick[field]) {
+        throw new Error(`Missing required field ${field} for best seller item with id ${pick.itemId}`);
+      }
+    });
   });
+
+  // Generate ticker items from best seller names
+  const TICKER_ITEMS = PICKS.map(pick => pick.name).filter(Boolean);
+  const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
+
   return (
     <section id="bestsellers" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">
       {/* ambient blobs */}
@@ -198,4 +235,4 @@ export default function BestSellers() {
       </div>
     </section>
   );
-}
+};

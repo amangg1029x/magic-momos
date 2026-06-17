@@ -1,7 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal } from "lucide-react";
-import api from "../services/api";
 import MenuItemCard from "./MenuItemCard";
 
 const SORT_OPTIONS = [
@@ -26,30 +25,21 @@ function sortItems(items, sortBy) {
 /**
  * MenuGrid
  * Props:
- *   category – active category id
- *   search   – search string
+ *   items     – full menu item array (from API)
+ *   category  – active category id
+ *   search    – search string
  *   cartItems – array of cart items [{ id, qty }]
- *   onAdd    – (item) => void
- *   onUpdate – (id, delta) => void
+ *   onAdd     – (item) => void
+ *   onUpdate  – (id, delta) => void
  */
-export default function MenuGrid({ category, search, cartItems, onAdd, onUpdate }) {
+export default function MenuGrid({ items: allItems, category, search, cartItems, onAdd, onUpdate }) {
   const [sort, setSort]           = useState("popular");
   const [vegOnly, setVegOnly]     = useState(false);
   const [sortOpen, setSortOpen]   = useState(false);
 
-  const [menuItems, setMenuItems] = useState([]);
-  const [menuLoading, setMenuLoading] = useState(true);
-
-  useEffect(() => {
-      api.menu.getAll()
-      .then(({ items }) => setMenuItems(items))
-      .catch(console.error)
-      .finally(() => setMenuLoading(false));
-  }, []);
-
   /* ── filtering + sorting pipeline ── */
   const filtered = useMemo(() => {
-    let items = menuItems;
+    let items = allItems;
 
     // category filter
     if (category !== "all") {
@@ -71,19 +61,26 @@ export default function MenuGrid({ category, search, cartItems, onAdd, onUpdate 
     if (vegOnly) items = items.filter((i) => i.veg);
 
     return sortItems(items, sort);
-  }, [category, search, vegOnly, sort, menuItems]);
+  }, [allItems, category, search, vegOnly, sort]);
 
-  /* ── cart qty helper ── */
-  const getQty = (id) => cartItems.find((i) => i.id === id)?.qty ?? 0;
+  /* ── cart qty helper ──────────────────────────────────────────────────────
+     Cart items use the numeric itemId (item.id from frontend / item.itemId
+     from the API), while menu items from the API carry _id + itemId. We match
+     on itemId so the cart stays consistent regardless of source. */
+  const getQty = (item) => {
+    const key = item.itemId ?? item.id;
+    return cartItems.find((i) => i.id === key)?.qty ?? 0;
+  };
 
-  if (menuLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">
-        <p className="text-center text-mm-muted font-body">Loading menu...</p>
-      </div>
-    );
-  }
-    return (
+  // Normalise an API menu item into the shape useCart expects (id = itemId)
+  const toCartItem = (item) => ({
+    id:    item.itemId ?? item.id,
+    name:  item.name,
+    emoji: item.emoji,
+    price: item.price,
+  });
+
+  return (
     <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">
 
       {/* ── toolbar ── */}
@@ -174,17 +171,17 @@ export default function MenuGrid({ category, search, cartItems, onAdd, onUpdate 
           >
             {filtered.map((item, idx) => (
               <motion.div
-                key={item.id}
+                key={item.itemId ?? item.id}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(idx * 0.05, 0.3), duration: 0.4, ease: [0.22,1,0.36,1] }}
               >
                 <MenuItemCard
                   item={item}
-                  cartQty={getQty(item.id)}
-                  onAdd={() => onAdd(item)}
-                  onInc={() => onUpdate(item.id,  1)}
-                  onDec={() => onUpdate(item.id, -1)}
+                  cartQty={getQty(item)}
+                  onAdd={() => onAdd(toCartItem(item))}
+                  onInc={() => onUpdate(item.itemId ?? item.id,  1)}
+                  onDec={() => onUpdate(item.itemId ?? item.id, -1)}
                 />
               </motion.div>
             ))}

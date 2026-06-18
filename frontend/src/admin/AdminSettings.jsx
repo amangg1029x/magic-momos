@@ -129,11 +129,12 @@ export default function AdminSettings() {
           <Toggle label="Online Payment" checked={form.onlinePaymentEnabled} onChange={(v) => update("onlinePaymentEnabled", v)} />
         </Section>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
             className="flex items-center gap-2 bg-[#E8284B] hover:bg-[#d11f40] text-white
-                       font-body font-700 text-sm px-5 py-3 rounded-xl transition-colors cursor-pointer"
+                       font-body font-700 text-sm px-5 py-3 rounded-xl transition-colors cursor-pointer
+                       w-full sm:w-auto justify-center"
           >
             <Save size={16} /> Save Changes
           </button>
@@ -149,7 +150,7 @@ export default function AdminSettings() {
       </form>
 
       {/* Delivery Partner Credentials Form */}
-      <form onSubmit={handleSaveDeliveryCredentials} className="space-y-6 max-w-2xl bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <form onSubmit={handleSaveDeliveryCredentials} className="space-y-6 max-w-2xl bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100">
         <div>
           <h3 className="font-display text-base text-gray-900 mb-2 tracking-wide">DELIVERY PARTNER CREDENTIALS</h3>
           <p className="font-body text-xs text-gray-400">Configure credentials for the delivery partner login portal.</p>
@@ -167,7 +168,7 @@ export default function AdminSettings() {
             <Input value={delEmail} onChange={setDelEmail} type="email" />
           </Row>
           <Row label="New Password">
-            <Input value={delPassword} onChange={setDelPassword} type="password" placeholder="•••••••• (Leave blank to keep current)" />
+            <Input value={delPassword} onChange={setDelPassword} type="password" placeholder="•••••••• (leave blank to keep current)" />
           </Row>
           {delPassword && (
             <Row label="Confirm Password">
@@ -176,12 +177,13 @@ export default function AdminSettings() {
           )}
         </div>
 
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <button
             type="submit"
             disabled={delLoading || !delEmail}
             className="flex items-center gap-2 bg-[#E8284B] hover:bg-[#d11f40] text-white
-                       font-body font-700 text-sm px-5 py-3 rounded-xl transition-colors disabled:opacity-60 cursor-pointer"
+                       font-body font-700 text-sm px-5 py-3 rounded-xl transition-colors disabled:opacity-60 cursor-pointer
+                       w-full sm:w-auto justify-center"
           >
             {delLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Update Credentials
           </button>
@@ -201,18 +203,23 @@ export default function AdminSettings() {
 
 function Section({ title, children }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100">
       <h3 className="font-display text-base text-gray-900 mb-4 tracking-wide">{title.toUpperCase()}</h3>
       <div className="space-y-4">{children}</div>
     </div>
   );
 }
 
+// ── Row ──────────────────────────────────────────────────────────────────────
+// Was a fixed-width (w-56) flex row that overflowed on narrow phones —
+// label + 224px input + gap couldn't fit under ~360px. Now stacks label
+// above the field on mobile (flex-col) and returns to a side-by-side row
+// from the sm breakpoint up, where there's room for it.
 function Row({ label, children }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-4">
       <label className="font-body text-sm text-gray-600 shrink-0">{label}</label>
-      <div className="w-56">{children}</div>
+      <div className="w-full sm:w-56">{children}</div>
     </div>
   );
 }
@@ -232,12 +239,12 @@ function Input({ value, onChange, type = "text", placeholder = "" }) {
 
 function Toggle({ label, checked, onChange }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-3">
       <span className="font-body text-sm text-gray-600">{label}</span>
       <button
         type="button"
         onClick={() => onChange(!checked)}
-        className={`w-11 h-6 rounded-full relative transition-colors ${checked ? "bg-[#E8284B]" : "bg-gray-200"}`}
+        className={`w-11 h-6 rounded-full relative transition-colors shrink-0 ${checked ? "bg-[#E8284B]" : "bg-gray-200"}`}
       >
         <span
           className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform

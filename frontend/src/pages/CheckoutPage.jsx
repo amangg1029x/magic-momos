@@ -262,7 +262,7 @@ export default function CheckoutPage({ cart }) {
       <Header />
 
       {/* ── page hero ── */}
-      <section className="relative bg-mm-card2 border-b border-mm-border overflow-hidden pt-28 pb-8">
+      <section className="relative bg-mm-card2 border-b border-mm-border overflow-hidden pt-20 sm:pt-28 pb-6 sm:pb-8">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-20 -right-20 w-[380px] h-[380px] rounded-full opacity-40"
             style={{ background: "radial-gradient(circle, rgba(232,40,75,0.08) 0%, transparent 65%)" }} />
@@ -271,7 +271,7 @@ export default function CheckoutPage({ cart }) {
           <p className="font-body text-mm-red text-xs tracking-[0.3em] uppercase font-600 mb-3">
             — Almost there —
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl text-mm-cream tracking-tight leading-none mb-5">
+          <h1 className="font-display text-3xl sm:text-5xl text-mm-cream tracking-tight leading-none mb-4 sm:mb-5">
             CHECKOUT
           </h1>
 
@@ -303,8 +303,8 @@ export default function CheckoutPage({ cart }) {
       </section>
 
       {/* ── main content ── */}
-      <div className="max-w-5xl mx-auto px-5 sm:px-8 py-10">
-        <div className="grid lg:grid-cols-[1fr_380px] gap-8 items-start">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+        <div className="grid lg:grid-cols-[1fr_380px] gap-6 sm:gap-8 items-start">
 
           {/* ── LEFT: form steps ── */}
           <div>
@@ -334,8 +334,8 @@ export default function CheckoutPage({ cart }) {
                   className="space-y-5"
                 >
                   {/* contact info */}
-                  <div className="bg-white border border-mm-border rounded-3xl p-7 shadow-card">
-                    <h2 className="font-display text-2xl text-mm-cream mb-5 flex items-center gap-2.5">
+                  <div className="bg-white border border-mm-border rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-card">
+                    <h2 className="font-display text-xl sm:text-2xl text-mm-cream mb-5 flex items-center gap-2.5">
                       <User size={18} className="text-mm-red" />
                       Contact Information
                     </h2>
@@ -358,7 +358,7 @@ export default function CheckoutPage({ cart }) {
                         {errors.name && <p className="text-red-500 text-xs mt-1 font-body">{errors.name}</p>}
                       </div>
 
-                      <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="grid md:grid-cols-2 gap-4">
                         <div>
                           <label className="block font-body text-xs font-700 text-mm-cream
                                             uppercase tracking-wider mb-1.5">Phone *</label>
@@ -397,8 +397,8 @@ export default function CheckoutPage({ cart }) {
                   </div>
 
                   {/* delivery address */}
-                  <div className="bg-white border border-mm-border rounded-3xl p-7 shadow-card">
-                    <h2 className="font-display text-2xl text-mm-cream mb-5 flex items-center gap-2.5">
+                  <div className="bg-white border border-mm-border rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-card">
+                    <h2 className="font-display text-xl sm:text-2xl text-mm-cream mb-5 flex items-center gap-2.5">
                       <MapPin size={18} className="text-mm-red" />
                       Delivery Address
                     </h2>
@@ -560,7 +560,7 @@ export default function CheckoutPage({ cart }) {
                   className="space-y-5"
                 >
                   {/* delivery summary (editable shortcut) */}
-                  <div className="bg-white border border-mm-border rounded-3xl p-6 shadow-card">
+                  <div className="bg-white border border-mm-border rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-card">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-display text-lg text-mm-cream flex items-center gap-2">
                         <MapPin size={15} className="text-mm-red" />
@@ -585,8 +585,8 @@ export default function CheckoutPage({ cart }) {
                   </div>
 
                   {/* payment method */}
-                  <div className="bg-white border border-mm-border rounded-3xl p-7 shadow-card">
-                    <h2 className="font-display text-2xl text-mm-cream mb-5 flex items-center gap-2.5">
+                  <div className="bg-white border border-mm-border rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-card">
+                    <h2 className="font-display text-xl sm:text-2xl text-mm-cream mb-5 flex items-center gap-2.5">
                       <Wallet size={18} className="text-mm-red" />
                       Payment Method
                     </h2>
@@ -698,9 +698,9 @@ export default function CheckoutPage({ cart }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:sticky lg:top-28"
+            className="lg:sticky lg:top-28 order-first lg:order-last"
           >
-            <div className="bg-white border border-mm-border rounded-3xl p-6 shadow-card">
+            <div className="bg-white border border-mm-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-card">
               <h3 className="font-display text-xl text-mm-cream mb-5 flex items-center gap-2">
                 <ShoppingBag size={16} className="text-mm-red" />
                 Order Summary

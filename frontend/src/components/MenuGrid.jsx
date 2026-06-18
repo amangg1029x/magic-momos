@@ -82,10 +82,10 @@ export default function MenuGrid({ items: allItems, category, search, cartItems,
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-3 sm:px-8 py-6 sm:py-10">
 
       {/* ── toolbar ── */}
-      <div className="flex items-center justify-between gap-4 mb-7 flex-wrap">
+      <div className="flex items-center justify-between gap-3 mb-5 sm:mb-7 flex-wrap">
         {/* result count */}
         <p className="font-body text-sm text-mm-muted">
           Showing{" "}
@@ -168,7 +168,7 @@ export default function MenuGrid({ items: allItems, category, search, cartItems,
             animate={{ opacity: 1 }}
             exit={{   opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5"
           >
             {filtered.map((item, idx) => (
               <motion.div

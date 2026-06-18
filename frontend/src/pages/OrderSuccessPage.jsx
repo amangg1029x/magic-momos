@@ -141,7 +141,7 @@ export default function OrderSuccessPage() {
       <Confetti active={confetti} />
 
       <div className="min-h-screen bg-mm-black flex items-center justify-center
-                      px-4 py-12 relative overflow-hidden">
+                      px-4 py-8 sm:py-12 relative overflow-hidden">
         {/* ambient blobs */}
         <div className="pointer-events-none absolute inset-0">
           <div className={`absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full blur-[140px]
@@ -175,7 +175,7 @@ export default function OrderSuccessPage() {
                   <AlertTriangle size={38} className="text-amber-500" />
                 </motion.div>
 
-                <h1 className="font-display text-3xl sm:text-4xl text-white tracking-tight">
+                <h1 className="font-display text-2xl sm:text-3xl sm:text-4xl text-white tracking-tight">
                   PAYMENT PENDING
                 </h1>
                 <p className="font-body text-amber-50 mt-2 text-sm">
@@ -196,7 +196,7 @@ export default function OrderSuccessPage() {
                   <CheckCircle size={42} className="text-green-600" />
                 </motion.div>
 
-                <h1 className="font-display text-4xl sm:text-5xl text-white tracking-tight">
+                <h1 className="font-display text-3xl sm:text-5xl text-white tracking-tight">
                   ORDER PLACED!
                 </h1>
                 <p className="font-body text-green-100 mt-2 text-sm">
@@ -206,7 +206,7 @@ export default function OrderSuccessPage() {
             )}
 
             {/* body */}
-            <div className="p-7 space-y-6">
+            <div className="p-5 sm:p-7 space-y-5 sm:space-y-6">
               {/* order number */}
               <div className="text-center py-4 bg-amber-50 rounded-2xl border border-amber-100">
                 <p className="font-body text-xs text-mm-muted uppercase tracking-widest mb-1">
@@ -274,15 +274,15 @@ export default function OrderSuccessPage() {
                     <div className="absolute top-5 left-5 h-0.5 bg-green-500 z-0"
                       style={{ width: `${(visualStep / (STEPS.length - 1)) * 100}%` }} />
                     {STEPS.map((step, i) => (
-                      <div key={step.label} className="flex flex-col items-center gap-2 relative z-10">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg
+                      <div key={step.label} className="flex flex-col items-center gap-1.5 sm:gap-2 relative z-10">
+                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-lg
                                          border-2 transition-all
                                          ${i <= visualStep
                                            ? "bg-green-500 border-green-500 shadow-[0_0_12px_rgba(34,197,94,0.4)]"
                                            : "bg-white border-gray-200"}`}>
                           {step.emoji}
                         </div>
-                        <span className={`font-body text-[10px] text-center leading-tight max-w-[56px]
+                        <span className={`font-body text-[9px] sm:text-[10px] text-center leading-tight max-w-[52px] sm:max-w-[64px]
                                           ${i <= visualStep ? "text-green-600 font-700" : "text-mm-muted"}`}>
                           {step.label}
                         </span>

@@ -19,6 +19,36 @@ function formatAddress(addr) {
   return [street, city, pincode].filter(Boolean).join(", ") || "—";
 }
 
+// ── OrderCard ─────────────────────────────────────────────────────────────────
+// Mobile stand-in for a table row. Keeps the same data/order as the table
+// but stacked so nothing gets clipped under ~600px.
+function OrderCard({ order, onSelect }) {
+  const id  = order._id || order.id;
+  const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.Pending;
+  return (
+    <button
+      onClick={() => onSelect(order)}
+      className="w-full text-left border border-gray-100 rounded-xl p-3.5 space-y-2
+                 hover:bg-gray-50/60 active:bg-gray-50 transition-colors"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-body font-600 text-gray-800 text-sm">
+          #{id.toString().slice(-6).toUpperCase()}
+        </span>
+        <span className={`font-body text-xs font-600 px-2.5 py-1 rounded-full shrink-0 ${cfg.bg} ${cfg.text}`}>
+          {order.status}
+        </span>
+      </div>
+      <div className="font-body text-sm text-gray-700">{order.customer?.name || order.customerName}</div>
+      <div className="flex items-center justify-between gap-3 font-body text-xs text-gray-400">
+        <span>{order.items?.length ?? "-"} items · {order.paymentMethod || "COD"}</span>
+        <span>{order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "-"}</span>
+      </div>
+      <p className="font-display text-sm text-gray-900">₹{order.totalAmount ?? order.total}</p>
+    </button>
+  );
+}
+
 export default function AdminOrders() {
   const [orders, setOrders]     = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
@@ -76,8 +106,8 @@ export default function AdminOrders() {
   return (
     <div className="space-y-5">
       {/* filters */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[220px]">
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3 sm:items-center">
+        <div className="relative flex-1 min-w-0">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             value={search}
@@ -91,7 +121,7 @@ export default function AdminOrders() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-4 py-2.5 rounded-xl border border-gray-200 font-body text-sm text-gray-700
-                     focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30"
+                     focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30 w-full sm:w-auto"
         >
           <option value="">All Statuses</option>
           {STATUSES.map((s) => (
@@ -100,7 +130,7 @@ export default function AdminOrders() {
         </select>
       </div>
 
-      {/* table */}
+      {/* orders list */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-20">
@@ -109,59 +139,69 @@ export default function AdminOrders() {
         ) : orders.length === 0 ? (
           <p className="font-body text-sm text-gray-400 text-center py-16">No orders found.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left font-body text-xs text-gray-400 bg-gray-50/80 border-b border-gray-100">
-                  <th className="px-5 py-3 font-500">Order ID</th>
-                  <th className="px-5 py-3 font-500">Customer</th>
-                  <th className="px-5 py-3 font-500">Items</th>
-                  <th className="px-5 py-3 font-500">Amount</th>
-                  <th className="px-5 py-3 font-500">Payment</th>
-                  <th className="px-5 py-3 font-500">Status</th>
-                  <th className="px-5 py-3 font-500">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((o) => {
-                  const id  = o._id || o.id;
-                  const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG.Pending;
-                  return (
-                    <tr
-                      key={id}
-                      onClick={() => setSelected(o)}
-                      className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 cursor-pointer transition-colors"
-                    >
-                      <td className="px-5 py-3.5 font-body font-600 text-gray-800">
-                        #{id.toString().slice(-6).toUpperCase()}
-                      </td>
-                      <td className="px-5 py-3.5 font-body text-gray-600">
-                        {o.customer?.name || o.customerName}
-                      </td>
-                      <td className="px-5 py-3.5 font-body text-gray-500">{o.items?.length ?? "-"} items</td>
-                      <td className="px-5 py-3.5 font-body font-600 text-gray-800">₹{o.totalAmount ?? o.total}</td>
-                      <td className="px-5 py-3.5 font-body text-gray-500">{o.paymentMethod || "COD"}</td>
-                      <td className="px-5 py-3.5">
-                        <span
-                          className={`font-body text-xs font-600 px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.text}`}
-                        >
-                          {o.status}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 font-body text-gray-400 text-xs">
-                        {o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "-"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* Mobile: stacked cards */}
+            <div className="sm:hidden p-4 space-y-2.5">
+              {orders.map((o) => (
+                <OrderCard key={o._id || o.id} order={o} onSelect={setSelected} />
+              ))}
+            </div>
+
+            {/* Tablet/desktop: table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left font-body text-xs text-gray-400 bg-gray-50/80 border-b border-gray-100">
+                    <th className="px-5 py-3 font-500">Order ID</th>
+                    <th className="px-5 py-3 font-500">Customer</th>
+                    <th className="px-5 py-3 font-500">Items</th>
+                    <th className="px-5 py-3 font-500">Amount</th>
+                    <th className="px-5 py-3 font-500">Payment</th>
+                    <th className="px-5 py-3 font-500">Status</th>
+                    <th className="px-5 py-3 font-500">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((o) => {
+                    const id  = o._id || o.id;
+                    const cfg = STATUS_CONFIG[o.status] || STATUS_CONFIG.Pending;
+                    return (
+                      <tr
+                        key={id}
+                        onClick={() => setSelected(o)}
+                        className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 cursor-pointer transition-colors"
+                      >
+                        <td className="px-5 py-3.5 font-body font-600 text-gray-800">
+                          #{id.toString().slice(-6).toUpperCase()}
+                        </td>
+                        <td className="px-5 py-3.5 font-body text-gray-600">
+                          {o.customer?.name || o.customerName}
+                        </td>
+                        <td className="px-5 py-3.5 font-body text-gray-500">{o.items?.length ?? "-"} items</td>
+                        <td className="px-5 py-3.5 font-body font-600 text-gray-800">₹{o.totalAmount ?? o.total}</td>
+                        <td className="px-5 py-3.5 font-body text-gray-500">{o.paymentMethod || "COD"}</td>
+                        <td className="px-5 py-3.5">
+                          <span
+                            className={`font-body text-xs font-600 px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.text}`}
+                          >
+                            {o.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 font-body text-gray-400 text-xs">
+                          {o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "-"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* pagination */}
         {!loading && pagination.pages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3.5 border-t border-gray-100">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 border-t border-gray-100">
             <p className="font-body text-xs text-gray-400">
               Page {pagination.page} of {pagination.pages} · {pagination.total} orders
             </p>
@@ -190,7 +230,7 @@ export default function AdminOrders() {
         {selected && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
             onClick={() => setSelected(null)}
           >
             <motion.div
@@ -198,26 +238,29 @@ export default function AdminOrders() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-6 md:p-7"
+              className="bg-white rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] sm:max-h-[85vh]
+                         overflow-y-auto p-5 sm:p-6 md:p-7"
             >
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-display text-lg text-gray-900 tracking-wide">
                   ORDER #{(selected._id || selected.id).toString().slice(-6).toUpperCase()}
                 </h3>
-                <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-700">
+                <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-700 shrink-0">
                   <X size={20} />
                 </button>
               </div>
 
               <div className="space-y-3 mb-5">
                 <div className="flex items-center gap-2.5 font-body text-sm text-gray-600">
-                  <Phone size={15} className="text-gray-400" />
-                  {selected.customer?.name || selected.customerName} · {selected.customer?.phone || selected.phone}
+                  <Phone size={15} className="text-gray-400 shrink-0" />
+                  <span className="break-words">
+                    {selected.customer?.name || selected.customerName} · {selected.customer?.phone || selected.phone}
+                  </span>
                 </div>
                 <div className="flex flex-col gap-1 w-full">
                   <div className="flex items-start gap-2.5 font-body text-sm text-gray-600">
                     <MapPin size={15} className="text-gray-400 mt-0.5 shrink-0" />
-                    <div>
+                    <div className="break-words">
                       {formatAddress(selected.deliveryAddress || selected.address)}
                     </div>
                   </div>
@@ -233,7 +276,7 @@ export default function AdminOrders() {
                   )}
                 </div>
                 <div className="flex items-center gap-2.5 font-body text-sm text-gray-600">
-                  <CreditCard size={15} className="text-gray-400" />
+                  <CreditCard size={15} className="text-gray-400 shrink-0" />
                   {selected.paymentMethod || "COD"}
                 </div>
               </div>
@@ -244,9 +287,9 @@ export default function AdminOrders() {
                 </p>
                 <div className="space-y-1.5">
                   {(selected.items || []).map((it, i) => (
-                    <div key={i} className="flex justify-between font-body text-sm text-gray-700">
-                      <span>{it.quantity || it.qty}× {it.name}</span>
-                      <span className="font-600">₹{(it.price || 0) * (it.quantity || it.qty || 1)}</span>
+                    <div key={i} className="flex justify-between gap-3 font-body text-sm text-gray-700">
+                      <span className="break-words">{it.quantity || it.qty}× {it.name}</span>
+                      <span className="font-600 shrink-0">₹{(it.price || 0) * (it.quantity || it.qty || 1)}</span>
                     </div>
                   ))}
                 </div>

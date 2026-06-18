@@ -19,7 +19,7 @@ function StatCard({ icon: Icon, label, value, sub, color, delay }) {
       initial="hidden"
       animate="show"
       transition={{ duration: 0.4, delay }}
-      className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+      className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100"
     >
       <div className="flex items-center justify-between mb-3">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
@@ -31,9 +31,36 @@ function StatCard({ icon: Icon, label, value, sub, color, delay }) {
           </span>
         )}
       </div>
-      <p className="font-display text-2xl text-gray-900 tracking-wide">{value}</p>
+      <p className="font-display text-xl sm:text-2xl text-gray-900 tracking-wide truncate">{value}</p>
       <p className="font-body text-xs text-gray-400 mt-0.5">{label}</p>
     </motion.div>
+  );
+}
+
+// ── PendingOrderCard ──────────────────────────────────────────────────────────
+// Mobile-only stand-in for a table row: same data, stacked into a card so
+// nothing gets clipped on a narrow screen.
+function PendingOrderCard({ order }) {
+  const itemsLabel = order.items?.map((it) => `${it.qty || it.quantity || 1}x ${it.name}`).join(", ") || "—";
+  return (
+    <div className="border border-gray-100 rounded-xl p-3.5 space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-body text-sm font-600 text-gray-900">{order.orderNumber}</span>
+        <span
+          className="inline-flex items-center gap-1 font-body text-[11px] font-600 px-2.5 py-0.5 rounded-full shrink-0"
+          style={{
+            backgroundColor: STATUS_CONFIG[order.status]?.bg || "#f3f4f6",
+            color: STATUS_CONFIG[order.status]?.color || "#374151",
+          }}
+        >
+          {order.status}
+        </span>
+      </div>
+      <div className="font-body text-sm text-gray-800">{order.customer?.name}</div>
+      <div className="font-body text-xs text-gray-400">{order.customer?.phone}</div>
+      <p className="font-body text-xs text-gray-500 line-clamp-2">{itemsLabel}</p>
+      <p className="font-display text-sm text-gray-900">₹{order.total}</p>
+    </div>
   );
 }
 
@@ -82,34 +109,34 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* stat grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard icon={IndianRupee}  label="Revenue Today"   value={`₹${today?.revenue ?? 0}`}  color="bg-[#E8284B]" delay={0}    />
         <StatCard icon={ShoppingBag}  label="Orders Today"    value={today?.orders ?? 0}          color="bg-[#F5A623]" delay={0.05} />
         <StatCard icon={TrendingUp}   label="Revenue This Week" value={`₹${week?.revenue ?? 0}`}  color="bg-emerald-500" delay={0.1} />
         <StatCard icon={Package}      label="Revenue This Month" value={`₹${month?.revenue ?? 0}`} color="bg-indigo-500" delay={0.15} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 
         {/* weekly revenue chart */}
         <motion.div
           variants={fadeUp} initial="hidden" animate="show" transition={{ duration: 0.4, delay: 0.2 }}
-          className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+          className="lg:col-span-2 bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100"
         >
           <h3 className="font-display text-base text-gray-900 mb-5 tracking-wide">WEEKLY REVENUE</h3>
           {weeklyRevenue.length === 0 ? (
             <p className="font-body text-sm text-gray-400">No revenue data yet.</p>
           ) : (
-            <div className="flex items-end justify-between gap-2 h-44">
+            <div className="flex items-end justify-between gap-1.5 sm:gap-2 h-40 sm:h-44">
               {weeklyRevenue.map((d, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                <div key={i} className="flex-1 flex flex-col items-center gap-2 min-w-0">
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${Math.max((d.revenue / maxRev) * 100, 4)}%` }}
                     transition={{ duration: 0.5, delay: 0.3 + i * 0.05 }}
                     className="w-full bg-gradient-to-t from-[#E8284B] to-[#F5A623] rounded-t-lg min-h-[4px]"
                   />
-                  <span className="font-body text-[10px] text-gray-400">{d.day || d.label}</span>
+                  <span className="font-body text-[9px] sm:text-[10px] text-gray-400">{d.day || d.label}</span>
                 </div>
               ))}
             </div>
@@ -119,7 +146,7 @@ export default function AdminDashboard() {
         {/* top items */}
         <motion.div
           variants={fadeUp} initial="hidden" animate="show" transition={{ duration: 0.4, delay: 0.25 }}
-          className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+          className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100"
         >
           <h3 className="font-display text-base text-gray-900 mb-4 tracking-wide">TOP ITEMS</h3>
           {topItems.length === 0 ? (
@@ -146,12 +173,12 @@ export default function AdminDashboard() {
       {/* pending orders */}
       <motion.div
         variants={fadeUp} initial="hidden" animate="show" transition={{ duration: 0.4, delay: 0.3 }}
-        className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+        className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100"
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 gap-3">
           <h3 className="font-display text-base text-gray-900 tracking-wide">PENDING ORDERS</h3>
           <span className="flex items-center gap-1.5 bg-amber-50 text-amber-600 font-body
-                           text-xs font-600 px-3 py-1 rounded-full">
+                           text-xs font-600 px-3 py-1 rounded-full shrink-0">
             <Clock size={12} /> {pendingOrders.length} waiting
           </span>
         </div>
@@ -161,45 +188,55 @@ export default function AdminDashboard() {
             No pending orders right now 🎉
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left font-body text-xs text-gray-400 border-b border-gray-100">
-                  <th className="pb-2.5 font-500">Order ID</th>
-                  <th className="pb-2.5 font-500">Customer</th>
-                  <th className="pb-2.5 font-500">Items</th>
-                  <th className="pb-2.5 font-500">Amount</th>
-                  <th className="pb-2.5 font-500">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingOrders.map((order) => (
-                  <tr key={order._id || order.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="py-3 font-body text-sm font-600 text-gray-900">{order.orderNumber}</td>
-                    <td className="py-3">
-                      <div className="font-body text-sm text-gray-800">{order.customer?.name}</div>
-                      <div className="font-body text-xs text-gray-400">{order.customer?.phone}</div>
-                    </td>
-                    <td className="py-3 font-body text-xs text-gray-500 max-w-[200px] truncate">
-                      {order.items?.map((it) => `${it.qty || it.quantity || 1}x ${it.name}`).join(", ") || "—"}
-                    </td>
-                    <td className="py-3 font-display text-sm text-gray-900">₹{order.total}</td>
-                    <td className="py-3">
-                      <span
-                        className="inline-flex items-center gap-1 font-body text-[11px] font-600 px-2.5 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: STATUS_CONFIG[order.status]?.bg || "#f3f4f6",
-                          color: STATUS_CONFIG[order.status]?.color || "#374151",
-                        }}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
+          <>
+            {/* Mobile: stacked cards (table below is hidden under sm) */}
+            <div className="sm:hidden space-y-2.5">
+              {pendingOrders.map((order) => (
+                <PendingOrderCard key={order._id || order.id} order={order} />
+              ))}
+            </div>
+
+            {/* Desktop/tablet: table, scrollable if it ever gets tight */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left font-body text-xs text-gray-400 border-b border-gray-100">
+                    <th className="pb-2.5 font-500">Order ID</th>
+                    <th className="pb-2.5 font-500">Customer</th>
+                    <th className="pb-2.5 font-500">Items</th>
+                    <th className="pb-2.5 font-500">Amount</th>
+                    <th className="pb-2.5 font-500">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {pendingOrders.map((order) => (
+                    <tr key={order._id || order.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                      <td className="py-3 font-body text-sm font-600 text-gray-900">{order.orderNumber}</td>
+                      <td className="py-3">
+                        <div className="font-body text-sm text-gray-800">{order.customer?.name}</div>
+                        <div className="font-body text-xs text-gray-400">{order.customer?.phone}</div>
+                      </td>
+                      <td className="py-3 font-body text-xs text-gray-500 max-w-[200px] truncate">
+                        {order.items?.map((it) => `${it.qty || it.quantity || 1}x ${it.name}`).join(", ") || "—"}
+                      </td>
+                      <td className="py-3 font-display text-sm text-gray-900">₹{order.total}</td>
+                      <td className="py-3">
+                        <span
+                          className="inline-flex items-center gap-1 font-body text-[11px] font-600 px-2.5 py-0.5 rounded-full"
+                          style={{
+                            backgroundColor: STATUS_CONFIG[order.status]?.bg || "#f3f4f6",
+                            color: STATUS_CONFIG[order.status]?.color || "#374151",
+                          }}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </motion.div>
     </div>

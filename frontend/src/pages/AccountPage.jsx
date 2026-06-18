@@ -445,7 +445,7 @@ export default function AccountPage() {
       <Header />
 
       {/* page hero */}
-      <section className="relative bg-mm-card2 border-b border-mm-border overflow-hidden pt-32 pb-8">
+      <section className="relative bg-mm-card2 border-b border-mm-border overflow-hidden pt-24 sm:pt-32 pb-6 sm:pb-8">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-20 -right-20 w-[380px] h-[380px] rounded-full opacity-40"
             style={{ background: "radial-gradient(circle, rgba(232,40,75,0.08) 0%, transparent 65%)" }} />
@@ -460,7 +460,7 @@ export default function AccountPage() {
               {user?.name?.[0]?.toUpperCase() ?? "👤"}
             </div>
             <div>
-              <h1 className="font-display text-3xl sm:text-4xl text-mm-cream leading-none tracking-tight">
+              <h1 className="font-display text-2xl sm:text-4xl text-mm-cream leading-none tracking-tight">
                 {user?.name}
               </h1>
               <p className="font-body text-sm text-mm-muted mt-0.5">{user?.email}</p>
@@ -469,24 +469,24 @@ export default function AccountPage() {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-5 sm:px-8 py-10">
-        <div className="grid lg:grid-cols-[220px_1fr] gap-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+          <div className="grid lg:grid-cols-[220px_1fr] gap-6 sm:gap-8">
 
-          {/* sidebar tabs */}
-          <nav className="flex flex-wrap gap-2 lg:flex-col">
+          {/* sidebar tabs — horizontal scroll on mobile, vertical column on desktop */}
+          <nav className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-x-visible scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
             {TABS.map(({ id, label, icon: Icon }) => (
               <motion.button
                 key={id}
                 onClick={() => setActiveTab(id)}
                 whileHover={{ x: activeTab === id ? 0 : 3 }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-body font-700 text-sm
-                            text-left transition-all duration-200 w-full
+                className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl font-body font-700 text-sm
+                            text-left transition-all duration-200 shrink-0 lg:w-full
                             ${activeTab === id
-                    ? "bg-mm-red text-white shadow-[0_4px_14px_rgba(232,40,75,0.30)]"
-                    : "text-mm-muted hover:text-mm-cream hover:bg-mm-card"
-                  }`}
+                  ? "bg-mm-red text-white shadow-[0_4px_14px_rgba(232,40,75,0.30)]"
+                  : "text-mm-muted hover:text-mm-cream hover:bg-mm-card bg-mm-card2 border border-mm-border lg:bg-transparent lg:border-0"
+                }`}
               >
-                <Icon size={16} />
+                <Icon size={15} />
                 {label}
               </motion.button>
             ))}

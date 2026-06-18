@@ -22,7 +22,7 @@ export default function MenuItemCard({ item, cartQty = 0, onAdd, onInc, onDec })
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -4 }}
       className={`
-        group relative flex flex-col gap-4 p-5 rounded-2xl bg-white
+        group relative flex flex-col gap-2 sm:gap-4 p-3 sm:p-5 rounded-2xl bg-white
         border transition-all duration-300 cursor-default
         ${inCart
           ? "border-mm-red/30 shadow-[0_6px_28px_rgba(232,40,75,0.10)]"
@@ -80,7 +80,7 @@ export default function MenuItemCard({ item, cartQty = 0, onAdd, onInc, onDec })
       <motion.div
         animate={{ scale: inCart ? [1, 1.03, 1] : 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full h-44 rounded-2xl overflow-hidden select-none relative bg-gradient-to-br from-amber-50 to-orange-50
+        className="w-full h-32 sm:h-44 rounded-xl sm:rounded-2xl overflow-hidden select-none relative bg-gradient-to-br from-amber-50 to-orange-50
                    border border-gray-100 group-hover:scale-[1.02] transition-transform duration-300"
       >
         {item.imageUrl ? (
@@ -98,7 +98,7 @@ export default function MenuItemCard({ item, cartQty = 0, onAdd, onInc, onDec })
 
       {/* ── text ── */}
       <div className="flex-1 flex flex-col gap-1">
-        <h3 className="font-display text-[1.45rem] text-mm-cream leading-tight tracking-wide">
+        <h3 className="font-display text-base sm:text-[1.45rem] text-mm-cream leading-tight tracking-wide">
           {item.name}
         </h3>
         <p className="font-body text-[13px] text-mm-muted leading-relaxed line-clamp-2">
@@ -107,7 +107,7 @@ export default function MenuItemCard({ item, cartQty = 0, onAdd, onInc, onDec })
       </div>
 
       {/* ── rating ── */}
-      <div className="flex items-center gap-1.5">
+      <div className="hidden sm:flex items-center gap-1.5">
         <div className="flex items-center gap-0.5">
           {Array.from({ length: 5 }).map((_, i) => (
             <Star
@@ -127,10 +127,10 @@ export default function MenuItemCard({ item, cartQty = 0, onAdd, onInc, onDec })
       {/* ── footer: price + cart control ── */}
       <div className="flex items-center justify-between pt-3 border-t border-mm-border">
         <div>
-          <span className="font-display text-[1.5rem] text-mm-cream leading-none">
+          <span className="font-display text-xl sm:text-[1.5rem] text-mm-cream leading-none">
             ₹{item.price}
           </span>
-          <span className="font-body text-[11px] text-mm-muted ml-1">per plate</span>
+          <span className="font-body text-[11px] text-mm-muted ml-1 hidden sm:inline">per plate</span>
         </div>
 
         {/* cart control — toggles between Add button and qty stepper */}

@@ -17,7 +17,7 @@ function PickCard({ pick, index }) {
       transition={{ duration: 0.6, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -8, scale: 1.02 }}
       className="relative group rounded-3xl bg-mm-card border border-mm-border
-                 overflow-hidden p-7 flex flex-col gap-5 cursor-pointer shadow-card
+                 overflow-hidden p-5 sm:p-7 flex flex-col gap-4 sm:gap-5 cursor-pointer shadow-card
                  hover:border-mm-red/30 transition-all duration-350"
     >
       {/* colored top strip */}
@@ -44,7 +44,7 @@ function PickCard({ pick, index }) {
       <motion.div
         animate={{ y: [0, -6, 0] }}
         transition={{ duration: 3.5 + index * 0.5, repeat: Infinity, ease: "easeInOut" }}
-        className="w-24 h-24 rounded-2xl overflow-hidden shadow-sm select-none border border-mm-border/30 bg-mm-card2 shrink-0"
+        className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shadow-sm select-none border border-mm-border/30 bg-mm-card2 shrink-0"
       >
         {pick.imageUrl ? (
           <img src={pick.imageUrl} alt={pick.name} className="w-full h-full object-cover" />
@@ -57,7 +57,7 @@ function PickCard({ pick, index }) {
 
       {/* text */}
       <div className="flex-1">
-        <h3 className="font-display text-3xl text-mm-cream mb-1.5 tracking-wide">{pick.name}</h3>
+        <h3 className="font-display text-2xl sm:text-3xl text-mm-cream mb-1.5 tracking-wide">{pick.name}</h3>
         <p className="font-body text-sm text-mm-muted leading-relaxed">{pick.subtitle}</p>
       </div>
 
@@ -167,7 +167,7 @@ export default function BestSellers() {
   const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
-    <section id="bestsellers" className="relative py-24 sm:py-32 bg-mm-black overflow-hidden">
+    <section id="bestsellers" className="relative py-16 sm:py-32 bg-mm-black overflow-hidden">
       {/* ambient blobs */}
       <div className="pointer-events-none absolute -left-40 top-1/2 -translate-y-1/2
                       w-[500px] h-[500px] bg-mm-red/[0.07] rounded-full blur-[100px]" />
@@ -192,7 +192,7 @@ export default function BestSellers() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, delay: 0.1 }}
-              className="font-display text-5xl sm:text-6xl lg:text-7xl text-mm-cream leading-none"
+              className="font-display text-4xl sm:text-6xl lg:text-7xl text-mm-cream leading-none"
             >
               BESTSELLERS
             </motion.h2>
@@ -215,7 +215,7 @@ export default function BestSellers() {
         </div>
 
         {/* cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
           {PICKS.map((pick, i) => (
             <PickCard key={pick.id} pick={pick} index={i} />
           ))}

@@ -33,7 +33,7 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center overflow-hidden bg-mm-black pt-20"
+      className="relative min-h-screen flex items-center overflow-hidden bg-mm-black pt-16 sm:pt-20"
     >
       {/* ── ambient blobs ── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -56,7 +56,7 @@ export default function HeroSection() {
 
       {/* ── main grid ── */}
       <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 w-full
-                      grid md:grid-cols-2 gap-12 lg:gap-20 items-center py-16">
+                      grid md:grid-cols-2 gap-8 lg:gap-20 items-center py-10 sm:py-16">
 
         {/* ── LEFT: text ── */}
         <motion.div
@@ -81,12 +81,12 @@ export default function HeroSection() {
           {/* headline */}
           <motion.div variants={fadeUp} className="leading-none">
             <h1>
-              <span className="block font-display text-[4.5rem] sm:text-[5.5rem] lg:text-[6.5rem]
+              <span className="block font-display text-[2.8rem] xs:text-[3.5rem] sm:text-[5rem] lg:text-[6.5rem]
                                text-mm-cream tracking-tight">
                 TASTE
               </span>
               <span
-                className="block font-display text-[4.5rem] sm:text-[5.5rem] lg:text-[6.5rem] tracking-tight"
+                className="block font-display text-[2.8rem] xs:text-[3.5rem] sm:text-[5rem] lg:text-[6.5rem] tracking-tight"
                 style={{
                   background: "linear-gradient(100deg,#F5A623 0%,#FFD166 45%,#F5A623 100%)",
                   WebkitBackgroundClip: "text",
@@ -97,7 +97,7 @@ export default function HeroSection() {
                 THE MAGIC
               </span>
             </h1>
-            <p className="font-body font-600 text-mm-red/80 text-xl sm:text-2xl mt-1 tracking-widest uppercase">
+            <p className="font-body font-600 text-mm-red/80 text-base sm:text-2xl mt-1 tracking-widest uppercase">
               — Magic Momos —
             </p>
           </motion.div>
@@ -112,7 +112,7 @@ export default function HeroSection() {
           </motion.p>
 
           {/* CTA row */}
-          <motion.div variants={fadeUp} className="flex flex-wrap gap-3 pt-2">
+          <motion.div variants={fadeUp} className="flex flex-wrap gap-3 pt-1 sm:pt-2">
             <motion.button
               onClick={() => navigate("menu")}
               whileHover={{ scale: 1.06, boxShadow: "0 0 34px rgba(232,40,75,0.6)" }}
@@ -164,20 +164,20 @@ export default function HeroSection() {
           initial={{ opacity: 0, scale: 0.75 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="relative flex items-center justify-center min-h-[360px] md:min-h-0"
+          className="relative flex items-center justify-center min-h-[260px] sm:min-h-[360px] md:min-h-0"
         >
           {/* outer rotating dashed ring */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-            className="absolute w-[300px] h-[300px] sm:w-[360px] sm:h-[360px] lg:w-[420px] lg:h-[420px]
+            className="absolute w-[220px] h-[220px] sm:w-[300px] sm:h-[300px] lg:w-[420px] lg:h-[420px]
                        rounded-full border-2 border-dashed border-mm-gold/25"
           />
           {/* inner counter-rotating ring */}
           <motion.div
             animate={{ rotate: -360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute w-[240px] h-[240px] sm:w-[290px] sm:h-[290px] lg:w-[340px] lg:h-[340px]
+            className="absolute w-[170px] h-[170px] sm:w-[240px] sm:h-[240px] lg:w-[340px] lg:h-[340px]
                        rounded-full border border-mm-red/20"
           />
 
@@ -189,12 +189,12 @@ export default function HeroSection() {
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="relative z-10 w-52 h-52 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full
+            className="relative z-10 w-36 h-36 sm:w-52 sm:h-52 lg:w-72 lg:h-72 rounded-full
                        bg-gradient-to-br from-mm-card2 to-mm-black
                        border border-mm-border shadow-[0_0_60px_rgba(232,40,75,0.2)]
                        flex items-center justify-center"
           >
-            <span className="text-[6rem] sm:text-[7rem] lg:text-[8rem] select-none drop-shadow-2xl">
+            <span className="text-[4rem] sm:text-[6rem] lg:text-[8rem] select-none drop-shadow-2xl">
               🥟
             </span>
 
@@ -220,7 +220,7 @@ export default function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* floating food badges */}
+          {/* floating food badges — hidden on small screens to avoid overflow */}
           {BADGES.map(({ emoji, label, cls, delay }) => (
             <motion.div
               key={label}
@@ -231,8 +231,8 @@ export default function HeroSection() {
                 scale:   { delay: delay + 0.6, duration: 0.4 },
                 y: { delay: delay + 1, duration: 3.5 + delay * 0.3, repeat: Infinity, ease: "easeInOut" },
               }}
-              className={`absolute ${cls} glass px-3 py-2 rounded-2xl
-                          flex items-center gap-2 shadow-card z-20`}
+              className={`hidden sm:flex absolute ${cls} glass px-3 py-2 rounded-2xl
+                          items-center gap-2 shadow-card z-20`}
             >
               <span className="text-2xl">{emoji}</span>
               <span className="font-body text-mm-cream text-xs font-600">{label}</span>

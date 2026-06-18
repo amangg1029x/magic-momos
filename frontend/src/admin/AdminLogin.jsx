@@ -27,7 +27,7 @@ export default function AdminLogin({ onSuccess }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a0d00] flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#1a0d00] flex items-center justify-center px-3 sm:px-4 relative overflow-hidden">
       {/* ambient glow */}
       <div className="absolute top-1/4 -left-20 w-72 h-72 bg-[#E8284B]/20 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 -right-20 w-72 h-72 bg-[#F5A623]/20 rounded-full blur-3xl" />
@@ -36,7 +36,7 @@ export default function AdminLogin({ onSuccess }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative z-10 w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 md:p-10"
+        className="relative z-10 w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10"
       >
         <div className="text-center mb-8">
           <span className="text-4xl">🥟</span>

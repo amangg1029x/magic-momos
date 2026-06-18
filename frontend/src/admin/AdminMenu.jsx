@@ -109,8 +109,8 @@ export default function AdminMenu() {
   return (
     <div className="space-y-5">
       {/* toolbar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="relative flex-1 min-w-0">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             value={search}
@@ -122,8 +122,9 @@ export default function AdminMenu() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-[#E8284B] hover:bg-[#d11f40] text-white
-                     font-body font-600 text-sm px-4 py-2.5 rounded-xl transition-colors shrink-0"
+          className="flex items-center justify-center gap-2 bg-[#E8284B] hover:bg-[#d11f40] text-white
+                     font-body font-600 text-sm px-4 py-2.5 rounded-xl transition-colors shrink-0
+                     w-full sm:w-auto"
         >
           <Plus size={16} /> Add Item
         </button>
@@ -192,7 +193,7 @@ export default function AdminMenu() {
         {modalOpen && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
             onClick={() => setModalOpen(false)}
           >
             <motion.form
@@ -201,13 +202,14 @@ export default function AdminMenu() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl max-w-md w-full max-h-[85vh] overflow-y-auto p-6 md:p-7"
+              className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[90vh] sm:max-h-[85vh]
+                         overflow-y-auto p-5 sm:p-6 md:p-7"
             >
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-display text-lg text-gray-900 tracking-wide">
                   {editing ? "EDIT ITEM" : "NEW ITEM"}
                 </h3>
-                <button type="button" onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-700">
+                <button type="button" onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-700 shrink-0">
                   <X size={20} />
                 </button>
               </div>
@@ -219,12 +221,12 @@ export default function AdminMenu() {
               )}
 
               <div className="space-y-3.5">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field label="Item ID" value={form.itemId} onChange={(v) => setForm((f) => ({ ...f, itemId: v }))} type="number" required />
                   <Field label="Image URL" value={form.imageUrl} onChange={(v) => setForm((f) => ({ ...f, imageUrl: v }))} placeholder="e.g. /images/momo.jpg" />
                 </div>
                 <Field label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} required />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="font-body text-xs font-600 text-gray-500 mb-1.5 block">Category</label>
                     <select
@@ -254,7 +256,7 @@ export default function AdminMenu() {
                     type="checkbox"
                     checked={form.available}
                     onChange={(e) => setForm((f) => ({ ...f, available: e.target.checked }))}
-                    className="w-4 h-4 rounded accent-[#E8284B]"
+                    className="w-4 h-4 rounded accent-[#E8284B] shrink-0"
                   />
                   Available on menu
                 </label>

@@ -32,8 +32,14 @@ export default function OrderItemsBreakdown({
             className="flex items-center justify-between py-1.5"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              {item.emoji && (
+              {item.imageUrl ? (
+                <img src={item.imageUrl} alt={item.name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+              ) : item.emoji ? (
                 <span className="text-xl shrink-0">{item.emoji}</span>
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-mm-red/10 flex items-center justify-center text-xs text-mm-red font-bold shrink-0">
+                  {item.name ? item.name.substring(0, 2).toUpperCase() : "MM"}
+                </div>
               )}
               <div className="min-w-0">
                 <p className="font-body text-sm text-mm-cream font-700 truncate">{item.name}</p>

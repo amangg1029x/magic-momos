@@ -131,7 +131,7 @@ export default function CheckoutPage({ cart }) {
     // Defense in depth: goToReview() already blocks step 2 from being
     // reached while out of zone, but never let an order through this
     // function regardless of how it's called.
-    if (inDeliveryZone === false) {
+    if (confirmedAddr?.inRange === false) {
       setPlaceError("This location is outside our delivery area — please adjust the pin and try again.");
       setStep(1);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -215,18 +215,12 @@ export default function CheckoutPage({ cart }) {
         } catch (cancelErr) {
           console.error('Failed to cancel order after payment abort:', cancelErr);
         }
-        // Navigate to a failure page (or success with failed status) so the user knows.
-        clearCart();
-        navigate('menu', {
-          ...order,
-          delivery: order.deliveryCharge,
-          grandTotal: order.total,
-          paymentStatus: 'Failed',
-          paymentMethod: 'online',
-          paymentNote: rpErr.cancelled
-            ? 'Payment was not completed. You can retry from your order.'
-            : (rpErr.message || 'Payment failed. You can retry from your order.'),
-        });
+        // Do not clear the cart or navigate away; show error message on checkout page.
+        setPlaceError(
+          rpErr.cancelled
+            ? 'Payment was not completed. Please try again or choose another payment method.'
+            : (rpErr.message || 'Payment failed. Please try again.')
+        );
         return;
       }
 
@@ -715,9 +709,13 @@ export default function CheckoutPage({ cart }) {
               <div className="space-y-3 mb-5 max-h-[280px] overflow-y-auto pr-1">
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-mm-card2 flex items-center justify-center text-lg shrink-0">
-                      {item.emoji}
-                    </div>
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-lg bg-mm-red/10 flex items-center justify-center text-[10px] text-mm-red font-bold shrink-0">
+                        {item.name ? item.name.substring(0, 2).toUpperCase() : "MM"}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="font-body text-sm text-mm-cream font-600 truncate">{item.name}</p>
                       <p className="font-body text-xs text-mm-muted">Qty {item.qty}</p>

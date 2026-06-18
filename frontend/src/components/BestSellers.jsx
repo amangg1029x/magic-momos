@@ -40,13 +40,19 @@ function PickCard({ pick, index }) {
         </span>
       </div>
 
-      {/* emoji */}
+      {/* image */}
       <motion.div
-        animate={{ y: [0, -8, 0] }}
+        animate={{ y: [0, -6, 0] }}
         transition={{ duration: 3.5 + index * 0.5, repeat: Infinity, ease: "easeInOut" }}
-        className="text-[5rem] leading-none w-fit"
+        className="w-24 h-24 rounded-2xl overflow-hidden shadow-sm select-none border border-mm-border/30 bg-mm-card2 shrink-0"
       >
-        {pick.emoji}
+        {pick.imageUrl ? (
+          <img src={pick.imageUrl} alt={pick.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center font-display text-2xl font-bold" style={{ color: pick.accent }}>
+            {pick.name ? pick.name.substring(0, 2).toUpperCase() : "MM"}
+          </div>
+        )}
       </motion.div>
 
       {/* text */}
@@ -141,13 +147,13 @@ export default function BestSellers() {
     price: `₹${item.price}`,
     name: item.name,
     emoji: item.emoji,
+    imageUrl: item.imageUrl,
     rating: item.rating || 0,
     reviews: item.reviews || 0,
-    // Preserve any extra fields needed by PickCard (none currently)
   }));
 
   // Validate required fields for each mapped pick; throw if missing
-  const REQUIRED_FIELDS = ["accent", "badge", "orders", "subtitle", "price", "name", "emoji"];
+  const REQUIRED_FIELDS = ["accent", "badge", "orders", "subtitle", "price", "name"];
   PICKS.forEach(pick => {
     REQUIRED_FIELDS.forEach(field => {
       if (!pick[field]) {

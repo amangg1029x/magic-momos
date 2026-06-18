@@ -53,14 +53,24 @@ function MenuCard({ item, index }) {
                     </div>
                 </div>
 
-                {/* emoji */}
-                <motion.div
-                    animate={{ scale: hovered ? 1.15 : 1, rotate: hovered ? 8 : 0 }}
-                    transition={{ duration: 0.35, ease: "backOut" }}
-                    className="text-[4rem] leading-none w-fit"
-                >
-                    {item.emoji}
-                </motion.div>
+                {/* image */}
+                {item.imageUrl ? (
+                    <motion.img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        animate={{ scale: hovered ? 1.1 : 1, rotate: hovered ? 3 : 0 }}
+                        transition={{ duration: 0.35, ease: "backOut" }}
+                        className="w-24 h-24 rounded-2xl object-cover shrink-0 select-none shadow-sm"
+                    />
+                ) : (
+                    <motion.div
+                        animate={{ scale: hovered ? 1.1 : 1, rotate: hovered ? 3 : 0 }}
+                        transition={{ duration: 0.35, ease: "backOut" }}
+                        className="w-24 h-24 rounded-2xl bg-mm-red/10 flex items-center justify-center font-display font-bold text-mm-red text-2xl shrink-0 select-none"
+                    >
+                        {item.name ? item.name.substring(0, 2).toUpperCase() : "MM"}
+                    </motion.div>
+                )}
 
                 {/* text */}
                 <div className="flex-1">
@@ -140,6 +150,7 @@ export default function MenuHighlights() {
         name: item.name,
         desc: item.desc,
         emoji: item.emoji,
+        imageUrl: item.imageUrl,
     }));
     if (loading) {
         return (

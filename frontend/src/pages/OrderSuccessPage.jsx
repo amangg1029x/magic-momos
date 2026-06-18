@@ -8,7 +8,7 @@ import { useNav } from "../context/NavigationContext";
 import { useRazorpay } from "../hooks/useRazorpay";
 import api from "../services/api";
 
-const CONFETTI = ["🎉","✨","🎊","⭐","💫","🥟","🌯","🫕","🍟","🌶️"];
+const CONFETTI = ["🎉","✨","🎊","⭐","💫","💖","🔥","⚡","🎈","💥"];
 
 function Confetti({ active }) {
   const [pieces] = useState(() =>
@@ -303,7 +303,13 @@ export default function OrderSuccessPage() {
                       <div key={item.itemId ?? item.id ?? i} className="flex items-center justify-between
                                                      py-2.5 border-b border-mm-border last:border-0">
                         <div className="flex items-center gap-3">
-                          <span className="text-xl">{item.emoji}</span>
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-mm-red/10 flex items-center justify-center text-xs text-mm-red font-bold shrink-0">
+                              {item.name ? item.name.substring(0, 2).toUpperCase() : "MM"}
+                            </div>
+                          )}
                           <span className="font-body text-sm text-mm-cream font-600">
                             {item.name}
                           </span>

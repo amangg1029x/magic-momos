@@ -35,6 +35,7 @@ const placeOrder = async (req, res, next) => {
         menuItem: menuItem._id,
         itemId:   menuItem.itemId,
         emoji:    menuItem.emoji,
+        imageUrl: menuItem.imageUrl,
         name:     menuItem.name,
         price:    menuItem.price,   // snapshot — won't change if price updates later
         qty:      reqItem.qty,
@@ -510,6 +511,7 @@ const getDashboard = async (req, res, next) => {
             _id:     "$items.itemId",
             name:    { $first: "$items.name" },
             emoji:   { $first: "$items.emoji" },
+            imageUrl:{ $first: "$items.imageUrl" },
             sold:    { $sum: "$items.qty" },
             revenue: { $sum: { $multiply: ["$items.price", "$items.qty"] } },
           },

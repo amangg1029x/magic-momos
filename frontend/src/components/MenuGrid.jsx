@@ -74,10 +74,11 @@ export default function MenuGrid({ items: allItems, category, search, cartItems,
 
   // Normalise an API menu item into the shape useCart expects (id = itemId)
   const toCartItem = (item) => ({
-    id:    item.itemId ?? item.id,
-    name:  item.name,
-    emoji: item.emoji,
-    price: item.price,
+    id:       item.itemId ?? item.id,
+    name:     item.name,
+    emoji:    item.emoji,
+    imageUrl: item.imageUrl,
+    price:    item.price,
   });
 
   return (

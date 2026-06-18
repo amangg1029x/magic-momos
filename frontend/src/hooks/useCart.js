@@ -66,11 +66,12 @@ export function useCart() {
       return [
         ...prev,
         {
-          id:    item.id,
-          name:  item.name,
-          emoji: item.emoji,
-          price: item.price,
-          qty:   1,
+          id:       item.id,
+          name:     item.name,
+          emoji:    item.emoji,
+          imageUrl: item.imageUrl,
+          price:    item.price,
+          qty:      1,
         },
       ];
     });

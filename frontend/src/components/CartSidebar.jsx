@@ -200,11 +200,14 @@ export default function CartSidebar({
                                  bg-white border border-mm-border
                                  shadow-[0_2px_12px_rgba(42,30,27,0.06)]"
                     >
-                      {/* emoji */}
-                      <div className="w-11 h-11 rounded-xl bg-mm-card2 flex items-center
-                                      justify-center text-2xl shrink-0">
-                        {item.emoji}
-                      </div>
+                      {/* image */}
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} className="w-11 h-11 rounded-xl object-cover shrink-0" />
+                      ) : (
+                        <div className="w-11 h-11 rounded-xl bg-mm-red/10 flex items-center justify-center text-xs text-mm-red font-bold shrink-0">
+                          {item.name ? item.name.substring(0, 2).toUpperCase() : "MM"}
+                        </div>
+                      )}
 
                       {/* name + price */}
                       <div className="flex-1 min-w-0">

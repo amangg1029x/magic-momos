@@ -9,6 +9,7 @@ const orderItemSchema = new mongoose.Schema(
     },
     itemId:  Number,   // snapshot of itemId for display even if item is deleted
     emoji:   String,
+    imageUrl:String,
     name:    { type: String, required: true },
     price:   { type: Number, required: true }, // price at time of order (snapshot)
     qty:     { type: Number, required: true, min: 1 },

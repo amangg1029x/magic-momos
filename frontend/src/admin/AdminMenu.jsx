@@ -7,7 +7,7 @@ const CATEGORIES = ["momos", "rolls", "snacks", "sides", "drinks"];
 
 const emptyForm = {
   itemId: "", name: "", category: "momos", price: "",
-  description: "", emoji: "🥟", isAvailable: true, tag: "",
+  desc: "", imageUrl: "", available: true, tag: "",
 };
 
 export default function AdminMenu() {
@@ -48,9 +48,9 @@ export default function AdminMenu() {
       name: item.name ?? "",
       category: item.category ?? "momos",
       price: item.price ?? "",
-      description: item.description ?? "",
-      emoji: item.emoji ?? "🥟",
-      isAvailable: item.isAvailable ?? true,
+      desc: item.desc ?? item.description ?? "",
+      imageUrl: item.imageUrl ?? "",
+      available: item.available ?? item.isAvailable ?? true,
       tag: item.tag ?? "",
     });
     setError("");
@@ -93,7 +93,7 @@ export default function AdminMenu() {
       setItems((prev) =>
         prev.map((i) =>
           (i._id || i.id) === (item._id || item.id)
-            ? { ...i, isAvailable: !i.isAvailable }
+            ? { ...i, available: !i.available }
             : i
         )
       );
@@ -146,15 +146,21 @@ export default function AdminMenu() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 relative
-                          ${!item.isAvailable ? "opacity-60" : ""}`}
+                          ${!item.available ? "opacity-60" : ""}`}
             >
               <div className="flex items-start justify-between mb-2">
-                <span className="text-3xl">{item.emoji || "🥟"}</span>
+                {item.imageUrl ? (
+                  <img src={item.imageUrl} alt={item.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 rounded-xl bg-[#E8284B]/10 flex items-center justify-center font-bold text-[#E8284B] text-lg shrink-0">
+                    {item.name ? item.name.substring(0, 2).toUpperCase() : "MM"}
+                  </div>
+                )}
                 <div className="flex gap-1">
                   <button
                     onClick={() => handleToggle(item)}
-                    title={item.isAvailable ? "Mark unavailable" : "Mark available"}
-                    className={`p-1.5 rounded-lg ${item.isAvailable ? "text-green-500 hover:bg-green-50" : "text-gray-400 hover:bg-gray-50"}`}
+                    title={item.available ? "Mark unavailable" : "Mark available"}
+                    className={`p-1.5 rounded-lg ${item.available ? "text-green-500 hover:bg-green-50" : "text-gray-400 hover:bg-gray-50"}`}
                   >
                     <Power size={14} />
                   </button>
@@ -166,11 +172,11 @@ export default function AdminMenu() {
                   </button>
                 </div>
               </div>
-              <p className="font-display text-base text-gray-900 tracking-wide">{item.name}</p>
+              <p className="font-display text-base text-gray-900 tracking-wide mt-1">{item.name}</p>
               <p className="font-body text-xs text-gray-400 capitalize mb-2">{item.category}</p>
               <div className="flex items-center justify-between">
                 <span className="font-body font-700 text-[#E8284B]">₹{item.price}</span>
-                {!item.isAvailable && (
+                {!item.available && (
                   <span className="font-body text-[10px] font-600 text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
                     UNAVAILABLE
                   </span>
@@ -215,7 +221,7 @@ export default function AdminMenu() {
               <div className="space-y-3.5">
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Item ID" value={form.itemId} onChange={(v) => setForm((f) => ({ ...f, itemId: v }))} type="number" required />
-                  <Field label="Emoji" value={form.emoji} onChange={(v) => setForm((f) => ({ ...f, emoji: v }))} />
+                  <Field label="Image URL" value={form.imageUrl} onChange={(v) => setForm((f) => ({ ...f, imageUrl: v }))} placeholder="e.g. /images/momo.jpg" />
                 </div>
                 <Field label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} required />
                 <div className="grid grid-cols-2 gap-3">
@@ -236,8 +242,8 @@ export default function AdminMenu() {
                 <div>
                   <label className="font-body text-xs font-600 text-gray-500 mb-1.5 block">Description</label>
                   <textarea
-                    value={form.description}
-                    onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                    value={form.desc}
+                    onChange={(e) => setForm((f) => ({ ...f, desc: e.target.value }))}
                     rows={3}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 font-body text-sm resize-none
                                focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30"
@@ -246,8 +252,8 @@ export default function AdminMenu() {
                 <label className="flex items-center gap-2 font-body text-sm text-gray-600">
                   <input
                     type="checkbox"
-                    checked={form.isAvailable}
-                    onChange={(e) => setForm((f) => ({ ...f, isAvailable: e.target.checked }))}
+                    checked={form.available}
+                    onChange={(e) => setForm((f) => ({ ...f, available: e.target.checked }))}
                     className="w-4 h-4 rounded accent-[#E8284B]"
                   />
                   Available on menu

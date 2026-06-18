@@ -76,14 +76,24 @@ export default function MenuItemCard({ item, cartQty = 0, onAdd, onInc, onDec })
         )}
       </div>
 
-      {/* ── emoji ── */}
+      {/* ── image ── */}
       <motion.div
-        animate={{ rotate: inCart ? [0, -5, 5, 0] : 0 }}
+        animate={{ scale: inCart ? [1, 1.03, 1] : 1 }}
         transition={{ duration: 0.5 }}
-        className="text-[3.8rem] leading-none select-none w-fit
-                   group-hover:scale-110 transition-transform duration-300"
+        className="w-full h-44 rounded-2xl overflow-hidden select-none relative bg-gradient-to-br from-amber-50 to-orange-50
+                   border border-gray-100 group-hover:scale-[1.02] transition-transform duration-300"
       >
-        {item.emoji}
+        {item.imageUrl ? (
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center font-display text-4xl text-[#E8284B] font-bold">
+            {item.name ? item.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : "MM"}
+          </div>
+        )}
       </motion.div>
 
       {/* ── text ── */}

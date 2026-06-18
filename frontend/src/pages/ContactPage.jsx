@@ -3,7 +3,7 @@ import Footer         from "../components/Footer";
 import ContactPageHero from "../components/ContactPageHero";
 import ContactForm    from "../components/ContactForm";
 import FAQAccordion   from "../components/FAQAccordion";
-import MapAndHours    from "../components/MapandHours";
+import MapAndHours    from "../components/MapAndHours";
 
 export default function ContactPage() {
   return (

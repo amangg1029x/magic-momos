@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   IndianRupee, ShoppingBag, TrendingUp, Clock,
@@ -42,18 +42,23 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.admin.dashboard();
-        setData(res.dashboard);
-      } catch (err) {
-        setError(err.message || "Couldn't load dashboard data");
-      } finally {
-        setLoading(false);
-      }
-    })();
+  const fetchDashboard = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const res = await api.admin.dashboard();
+      setData(res.dashboard);
+    } catch (err) {
+      if (!silent) setError(err.message || "Couldn't load dashboard data");
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchDashboard(false);
+    const interval = setInterval(() => fetchDashboard(true), 20000);
+    return () => clearInterval(interval);
+  }, [fetchDashboard]);
 
   if (loading) {
     return (
@@ -168,7 +173,30 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                
+                {pendingOrders.map((order) => (
+                  <tr key={order._id || order.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="py-3 font-body text-sm font-600 text-gray-900">{order.orderNumber}</td>
+                    <td className="py-3">
+                      <div className="font-body text-sm text-gray-800">{order.customer?.name}</div>
+                      <div className="font-body text-xs text-gray-400">{order.customer?.phone}</div>
+                    </td>
+                    <td className="py-3 font-body text-xs text-gray-500 max-w-[200px] truncate">
+                      {order.items?.map((it) => `${it.qty || it.quantity || 1}x ${it.name}`).join(", ") || "—"}
+                    </td>
+                    <td className="py-3 font-display text-sm text-gray-900">₹{order.total}</td>
+                    <td className="py-3">
+                      <span
+                        className="inline-flex items-center gap-1 font-body text-[11px] font-600 px-2.5 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: STATUS_CONFIG[order.status]?.bg || "#f3f4f6",
+                          color: STATUS_CONFIG[order.status]?.color || "#374151",
+                        }}
+                      >
+                        {order.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

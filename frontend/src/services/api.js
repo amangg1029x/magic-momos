@@ -10,16 +10,22 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 // ── Token helpers ─────────────────────────────────────────────────────────────
-export const getToken      = ()        => localStorage.getItem("mm_token");
-export const getAdminToken = ()        => localStorage.getItem("mm_admin_token");
-export const setToken      = (t)       => localStorage.setItem("mm_token", t);
-export const setAdminToken = (t)       => localStorage.setItem("mm_admin_token", t);
-export const clearToken    = ()        => localStorage.removeItem("mm_token");
-export const clearAdminToken = ()      => localStorage.removeItem("mm_admin_token");
+export const getToken          = ()  => localStorage.getItem("mm_token");
+export const getAdminToken     = ()  => localStorage.getItem("mm_admin_token");
+export const getDeliveryToken  = ()  => localStorage.getItem("mm_delivery_token");
+export const setToken          = (t) => localStorage.setItem("mm_token", t);
+export const setAdminToken     = (t) => localStorage.setItem("mm_admin_token", t);
+export const setDeliveryToken  = (t) => localStorage.setItem("mm_delivery_token", t);
+export const clearToken        = ()  => localStorage.removeItem("mm_token");
+export const clearAdminToken   = ()  => localStorage.removeItem("mm_admin_token");
+export const clearDeliveryToken = () => localStorage.removeItem("mm_delivery_token");
 
 // ── Core fetch wrapper ────────────────────────────────────────────────────────
-async function request(path, options = {}, useAdminToken = false) {
-  const token = useAdminToken ? getAdminToken() : getToken();
+async function request(path, options = {}, tokenType = "user") {
+  const token =
+    tokenType === "admin"    ? getAdminToken()    :
+    tokenType === "delivery" ? getDeliveryToken() :
+    getToken();
 
   const headers = {
     "Content-Type": "application/json",
@@ -45,11 +51,11 @@ async function request(path, options = {}, useAdminToken = false) {
 }
 
 // ── Convenience methods ───────────────────────────────────────────────────────
-const get    = (path, admin)        => request(path, { method: "GET" },    admin);
-const post   = (path, body, admin)  => request(path, { method: "POST",   body: JSON.stringify(body) }, admin);
-const put    = (path, body, admin)  => request(path, { method: "PUT",    body: JSON.stringify(body) }, admin);
-const patch  = (path, body, admin)  => request(path, { method: "PATCH",  body: JSON.stringify(body) }, admin);
-const del    = (path, admin)        => request(path, { method: "DELETE" }, admin);
+const get    = (path, tok)       => request(path, { method: "GET" },                          tok);
+const post   = (path, body, tok) => request(path, { method: "POST",   body: JSON.stringify(body) }, tok);
+const put    = (path, body, tok) => request(path, { method: "PUT",    body: JSON.stringify(body) }, tok);
+const patch  = (path, body, tok) => request(path, { method: "PATCH",  body: JSON.stringify(body) }, tok);
+const del    = (path, tok)       => request(path, { method: "DELETE" },                       tok);
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -125,42 +131,59 @@ const api = {
   // ── Admin auth ───────────────────────────────────────────────────────────────
   admin: {
     login: async (data) => {
-      const res = await post("/admin/login", data, true);
+      const res = await post("/admin/login", data, "admin");
       if (res.token) setAdminToken(res.token);
       return res;
     },
-    me:     ()     => get("/admin/me", true),
+    me:     ()     => get("/admin/me", "admin"),
     logout: ()     => { clearAdminToken(); },
 
     // Dashboard
-    dashboard: () => get("/admin/dashboard", true),
+    dashboard: () => get("/admin/dashboard", "admin"),
 
     // Orders
     orders: {
       getAll:       (params = {}) => {
         const qs = new URLSearchParams(params).toString();
-        return get(`/admin/orders${qs ? `?${qs}` : ""}`, true);
+        return get(`/admin/orders${qs ? `?${qs}` : ""}`, "admin");
       },
-      getOne:       (id)          => get(`/admin/orders/${id}`, true),
-      updateStatus: (id, status, note) => patch(`/admin/orders/${id}/status`, { status, note }, true),
+      getOne:       (id)          => get(`/admin/orders/${id}`, "admin"),
+      updateStatus: (id, status, note) => patch(`/admin/orders/${id}/status`, { status, note }, "admin"),
     },
 
     // Menu management (admin)
     menu: {
-      create:         (data) => post("/admin/menu",               data, true),
-      update:         (id, data) => put(`/admin/menu/${id}`,      data, true),
-      delete:         (id, hard = false) => del(`/admin/menu/${id}${hard ? "?hard=true" : ""}`, true),
-      toggleAvailable:(id)   => patch(`/admin/menu/${id}/toggle`, {}, true),
+      create:         (data)         => post("/admin/menu",               data,  "admin"),
+      update:         (id, data)     => put(`/admin/menu/${id}`,           data,  "admin"),
+      delete:         (id, hard = false) => del(`/admin/menu/${id}${hard ? "?hard=true" : ""}`, "admin"),
+      toggleAvailable:(id)           => patch(`/admin/menu/${id}/toggle`,  {},    "admin"),
     },
 
     // Contacts
     contacts: {
       getAll:  (params = {}) => {
         const qs = new URLSearchParams(params).toString();
-        return get(`/admin/contacts${qs ? `?${qs}` : ""}`, true);
+        return get(`/admin/contacts${qs ? `?${qs}` : ""}`, "admin");
       },
-      update:  (id, data) => patch(`/admin/contacts/${id}`, data, true),
+      update:  (id, data) => patch(`/admin/contacts/${id}`, data, "admin"),
     },
+
+    // Delivery partner credentials management
+    getDeliveryCredentials:    () => get("/admin/delivery-credentials", "admin"),
+    updateDeliveryCredentials: (data) => put("/admin/delivery-credentials", data, "admin"),
+  },
+
+  // ── Delivery partner ─────────────────────────────────────────────────────────
+  delivery: {
+    login: async (credentials) => {
+      const res = await post("/delivery/login", credentials);
+      if (res.token) setDeliveryToken(res.token);
+      return res;
+    },
+    logout: () => { clearDeliveryToken(); },
+    getOrders: ()            => get("/delivery/orders", "delivery"),
+    getHistory: ()           => get("/delivery/history", "delivery"),
+    updateStatus: (id, status) => patch(`/delivery/orders/${id}/status`, { status }, "delivery"),
   },
 };
 

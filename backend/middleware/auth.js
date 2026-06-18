@@ -62,6 +62,22 @@ const adminProtect = async (req, res, next) => {
   next();
 };
 
+// ── Delivery partner middleware ────────────────────────────────────────────────
+const deliveryProtect = (req, res, next) => {
+  const token = extractToken(req);
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Delivery access required." });
+  }
+
+  const decoded = verifyToken(token, process.env.JWT_DELIVERY_SECRET);
+  if (!decoded || decoded.role !== "delivery") {
+    return res.status(401).json({ success: false, message: "Delivery token is invalid or expired." });
+  }
+
+  next();
+};
+
 // ── Optional auth: attaches user if token present, doesn't block guests ───────
 const optionalAuth = async (req, res, next) => {
   const token = extractToken(req);
@@ -75,4 +91,4 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
-module.exports = { protect, adminProtect, optionalAuth };
+module.exports = { protect, adminProtect, deliveryProtect, optionalAuth };

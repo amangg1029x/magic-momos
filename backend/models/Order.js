@@ -50,6 +50,8 @@ const orderSchema = new mongoose.Schema(
       street:  { type: String, required: [true, "Delivery address required"] },
       city:    { type: String, default: "New Delhi" },
       pincode: { type: String, required: [true, "Pincode required"] },
+      lat:     { type: Number },
+      lng:     { type: Number },
     },
 
     // Payment

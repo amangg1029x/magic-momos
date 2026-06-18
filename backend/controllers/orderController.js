@@ -476,9 +476,9 @@ const getDashboard = async (req, res, next) => {
       weekOrders,
       monthOrders,
       totalOrders,
-      pendingCount,
+      pendingOrders,
       topItems,
-      weeklyRevenue,
+      weeklyRevenueRaw,
     ] = await Promise.all([
       // Today stats
       Order.aggregate([
@@ -500,8 +500,10 @@ const getDashboard = async (req, res, next) => {
         { $match: { status: { $ne: "Cancelled" } } },
         { $group: { _id: null, revenue: { $sum: "$total" }, count: { $sum: 1 } } },
       ]),
-      // Pending orders count
-      Order.countDocuments({ status: { $in: ["Pending", "Confirmed", "Preparing", "Out for Delivery"] } }),
+      // Pending orders list (limit to last 50)
+      Order.find({ status: { $in: ["Pending", "Confirmed", "Preparing", "Out for Delivery"] } })
+        .sort({ createdAt: -1 })
+        .limit(50),
       // Top 5 items by qty sold
       Order.aggregate([
         { $match: { status: { $ne: "Cancelled" } } },
@@ -535,6 +537,25 @@ const getDashboard = async (req, res, next) => {
       ]),
     ]);
 
+    // Build the weekly revenue data for the past 7 days, filling in 0 for empty days
+    const weeklyRevenueMap = {};
+    weeklyRevenueRaw.forEach(item => {
+      weeklyRevenueMap[item._id] = item.revenue;
+    });
+
+    const weeklyRevenue = [];
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      const dayLabel = daysOfWeek[d.getDay()];
+      weeklyRevenue.push({
+        label: `${dayLabel} (${d.getDate()})`,
+        revenue: weeklyRevenueMap[dateStr] || 0,
+      });
+    }
+
     res.json({
       success: true,
       dashboard: {
@@ -542,7 +563,7 @@ const getDashboard = async (req, res, next) => {
         week:    { revenue: weekOrders[0]?.revenue   || 0, orders: weekOrders[0]?.count   || 0 },
         month:   { revenue: monthOrders[0]?.revenue  || 0, orders: monthOrders[0]?.count  || 0 },
         total:   { revenue: totalOrders[0]?.revenue  || 0, orders: totalOrders[0]?.count  || 0 },
-        pendingOrders: pendingCount,
+        pendingOrders,
         topItems,
         weeklyRevenue,
       },

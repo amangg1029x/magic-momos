@@ -8,15 +8,15 @@ import { useNav } from "../context/NavigationContext";
 import api from "../services/api";
 
 const NAV_ITEMS = [
-  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard"  },
-  { id: "orders",    icon: ShoppingBag,     label: "Orders"     },
-  { id: "menu",      icon: UtensilsCrossed, label: "Menu Items" },
-  { id: "settings",  icon: Settings,        label: "Settings"   },
+  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { id: "orders", icon: ShoppingBag, label: "Orders" },
+  { id: "menu", icon: UtensilsCrossed, label: "Menu Items" },
+  { id: "settings", icon: Settings, label: "Settings" },
 ];
 
 export default function AdminLayout({ children, subPage, onNavigate }) {
   const [open, setOpen] = useState(true);
-  const { navigate }    = useNav();
+  const { navigate } = useNav();
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -69,9 +69,9 @@ export default function AdminLayout({ children, subPage, onNavigate }) {
                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl
                             font-body font-600 text-sm transition-all duration-200
                             ${active
-                              ? "bg-[#E8284B] text-white shadow-[0_4px_14px_rgba(232,40,75,0.4)]"
-                              : "text-white/65 hover:bg-white/10 hover:text-white"
-                            }`}
+                    ? "bg-[#E8284B] text-white shadow-[0_4px_14px_rgba(232,40,75,0.4)]"
+                    : "text-white/65 hover:bg-white/10 hover:text-white"
+                  }`}
               >
                 <Icon size={18} className="shrink-0" />
                 <AnimatePresence initial={false}>

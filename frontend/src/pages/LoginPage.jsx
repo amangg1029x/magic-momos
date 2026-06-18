@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNav } from "../context/NavigationContext";
-import api, { getAdminToken } from "../services/api";
+import api, { getAdminToken, getDeliveryToken } from "../services/api";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -22,6 +22,8 @@ export default function LoginPage() {
   useEffect(() => {
     if (getAdminToken()) {
       navigate("admin");
+    } else if (getDeliveryToken()) {
+      navigate("delivery");
     }
   }, [navigate]);
 
@@ -62,7 +64,12 @@ export default function LoginPage() {
         await api.admin.login(form);
         navigate("admin");
       } catch (adminErr) {
-        setError(err.message || "Invalid email or password.");
+        try {
+          await api.delivery.login(form);
+          navigate("delivery");
+        } catch (deliveryErr) {
+          setError(err.message || "Invalid email or password.");
+        }
       }
     } finally {
       setLoading(false);

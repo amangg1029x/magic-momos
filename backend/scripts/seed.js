@@ -79,6 +79,24 @@ const seed = async () => {
       console.log(`   🔑 Password: ${adminPassword}  ← change this after first login!\n`);
     }
 
+    // ── 3. Seed delivery partner account ──────────────────────────────────────
+    console.log("🛵  Seeding delivery credentials…");
+    const DeliveryCredential = require("../models/DeliveryCredential");
+    const deliveryEmail = "delivery@magicmomos.in";
+    const deliveryPassword = "Delivery@1234";
+
+    const existingDelivery = await DeliveryCredential.findOne({ email: deliveryEmail });
+    if (existingDelivery) {
+      console.log(`   ℹ  Delivery credentials already exist: ${deliveryEmail}`);
+    } else {
+      await DeliveryCredential.create({
+        email:    deliveryEmail,
+        password: deliveryPassword,
+      });
+      console.log(`   ✔ Delivery credentials created: ${deliveryEmail}`);
+      console.log(`   🔑 Password: ${deliveryPassword}\n`);
+    }
+
     console.log("🎉  Seed complete!\n");
     process.exit(0);
   } catch (err) {

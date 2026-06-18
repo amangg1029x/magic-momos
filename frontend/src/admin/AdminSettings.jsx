@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Save, Info } from "lucide-react";
+import { Save, Info, AlertCircle, Loader2 } from "lucide-react";
+import api from "../services/api";
 
 const DEFAULTS = {
   businessName: "Magic Momos",
@@ -16,6 +17,7 @@ const DEFAULTS = {
 };
 
 export default function AdminSettings() {
+  // --- General settings ---
   const [form, setForm] = useState(DEFAULTS);
   const [saved, setSaved] = useState(false);
 
@@ -23,80 +25,177 @@ export default function AdminSettings() {
 
   const handleSave = (e) => {
     e.preventDefault();
-    // NOTE: no backend settings endpoint exists yet — this persists to
-    // local state only for now. Wire this up once a settings model/route
-    // is added on the backend.
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
 
+  // --- Delivery Partner credentials ---
+  const [delEmail, setDelEmail] = useState("");
+  const [delPassword, setDelPassword] = useState("");
+  const [delConfirmPw, setDelConfirmPw] = useState("");
+  const [delLoading, setDelLoading] = useState(false);
+  const [delError, setDelError] = useState("");
+  const [delSaved, setDelSaved] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await api.admin.getDeliveryCredentials();
+        if (res.success && res.email && active) {
+          setDelEmail(res.email);
+        }
+      } catch (err) {
+        console.error("Failed to load delivery credentials:", err);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const handleSaveDeliveryCredentials = async (e) => {
+    e.preventDefault();
+    setDelError("");
+    setDelSaved(false);
+
+    if (delPassword && delPassword !== delConfirmPw) {
+      setDelError("Passwords do not match");
+      return;
+    }
+
+    setDelLoading(true);
+    try {
+      const payload = { email: delEmail };
+      if (delPassword) payload.password = delPassword;
+
+      await api.admin.updateDeliveryCredentials(payload);
+      setDelSaved(true);
+      setDelPassword("");
+      setDelConfirmPw("");
+      setTimeout(() => setDelSaved(false), 2500);
+    } catch (err) {
+      setDelError(err.message || "Failed to update credentials");
+    } finally {
+      setDelLoading(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSave} className="space-y-6 max-w-2xl">
+    <div className="space-y-8 pb-12">
+      {/* General Settings Form */}
+      <form onSubmit={handleSave} className="space-y-6 max-w-2xl">
+        <div className="flex items-start gap-2.5 bg-amber-50 text-amber-700 font-body text-xs
+                        px-4 py-3 rounded-xl">
+          <Info size={15} className="shrink-0 mt-0.5" />
+          These settings aren't connected to the backend yet — changes apply
+          only to this session. Ask your developer to add a settings endpoint
+          to persist them.
+        </div>
 
-      <div className="flex items-start gap-2.5 bg-amber-50 text-amber-700 font-body text-xs
-                      px-4 py-3 rounded-xl">
-        <Info size={15} className="shrink-0 mt-0.5" />
-        These settings aren't connected to the backend yet — changes apply
-        only to this session. Ask your developer to add a settings endpoint
-        to persist them.
-      </div>
+        <Section title="Business Info">
+          <Row label="Business Name">
+            <Input value={form.businessName} onChange={(v) => update("businessName", v)} />
+          </Row>
+          <Row label="Phone">
+            <Input value={form.phone} onChange={(v) => update("phone", v)} />
+          </Row>
+          <Row label="Email">
+            <Input value={form.email} onChange={(v) => update("email", v)} type="email" />
+          </Row>
+          <Row label="Address">
+            <Input value={form.address} onChange={(v) => update("address", v)} />
+          </Row>
+        </Section>
 
-      <Section title="Business Info">
-        <Row label="Business Name">
-          <Input value={form.businessName} onChange={(v) => update("businessName", v)} />
-        </Row>
-        <Row label="Phone">
-          <Input value={form.phone} onChange={(v) => update("phone", v)} />
-        </Row>
-        <Row label="Email">
-          <Input value={form.email} onChange={(v) => update("email", v)} type="email" />
-        </Row>
-        <Row label="Address">
-          <Input value={form.address} onChange={(v) => update("address", v)} />
-        </Row>
-      </Section>
+        <Section title="Delivery">
+          <Row label="Delivery Fee (₹)">
+            <Input value={form.deliveryFee} onChange={(v) => update("deliveryFee", v)} type="number" />
+          </Row>
+          <Row label="Free Delivery Above (₹)">
+            <Input value={form.freeDeliveryThreshold} onChange={(v) => update("freeDeliveryThreshold", v)} type="number" />
+          </Row>
+        </Section>
 
-      <Section title="Delivery">
-        <Row label="Delivery Fee (₹)">
-          <Input value={form.deliveryFee} onChange={(v) => update("deliveryFee", v)} type="number" />
-        </Row>
-        <Row label="Free Delivery Above (₹)">
-          <Input value={form.freeDeliveryThreshold} onChange={(v) => update("freeDeliveryThreshold", v)} type="number" />
-        </Row>
-      </Section>
+        <Section title="Hours">
+          <Row label="Opens At">
+            <Input value={form.openTime} onChange={(v) => update("openTime", v)} type="time" />
+          </Row>
+          <Row label="Closes At">
+            <Input value={form.closeTime} onChange={(v) => update("closeTime", v)} type="time" />
+          </Row>
+        </Section>
 
-      <Section title="Hours">
-        <Row label="Opens At">
-          <Input value={form.openTime} onChange={(v) => update("openTime", v)} type="time" />
-        </Row>
-        <Row label="Closes At">
-          <Input value={form.closeTime} onChange={(v) => update("closeTime", v)} type="time" />
-        </Row>
-      </Section>
+        <Section title="Payment Methods">
+          <Toggle label="Cash on Delivery" checked={form.codEnabled} onChange={(v) => update("codEnabled", v)} />
+          <Toggle label="Online Payment" checked={form.onlinePaymentEnabled} onChange={(v) => update("onlinePaymentEnabled", v)} />
+        </Section>
 
-      <Section title="Payment Methods">
-        <Toggle label="Cash on Delivery" checked={form.codEnabled} onChange={(v) => update("codEnabled", v)} />
-        <Toggle label="Online Payment" checked={form.onlinePaymentEnabled} onChange={(v) => update("onlinePaymentEnabled", v)} />
-      </Section>
-
-      <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          className="flex items-center gap-2 bg-[#E8284B] hover:bg-[#d11f40] text-white
-                     font-body font-700 text-sm px-5 py-3 rounded-xl transition-colors"
-        >
-          <Save size={16} /> Save Changes
-        </button>
-        {saved && (
-          <motion.span
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="font-body text-sm text-green-600"
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            className="flex items-center gap-2 bg-[#E8284B] hover:bg-[#d11f40] text-white
+                       font-body font-700 text-sm px-5 py-3 rounded-xl transition-colors cursor-pointer"
           >
-            Saved for this session ✓
-          </motion.span>
+            <Save size={16} /> Save Changes
+          </button>
+          {saved && (
+            <motion.span
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="font-body text-sm text-green-600"
+            >
+              Saved for this session ✓
+            </motion.span>
+          )}
+        </div>
+      </form>
+
+      {/* Delivery Partner Credentials Form */}
+      <form onSubmit={handleSaveDeliveryCredentials} className="space-y-6 max-w-2xl bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div>
+          <h3 className="font-display text-base text-gray-900 mb-2 tracking-wide">DELIVERY PARTNER CREDENTIALS</h3>
+          <p className="font-body text-xs text-gray-400">Configure credentials for the delivery partner login portal.</p>
+        </div>
+
+        {delError && (
+          <div className="flex items-center gap-2 bg-red-50 text-red-600 text-sm font-body px-4 py-3 rounded-xl">
+            <AlertCircle size={15} className="shrink-0" />
+            {delError}
+          </div>
         )}
-      </div>
-    </form>
+
+        <div className="space-y-4">
+          <Row label="Login Email">
+            <Input value={delEmail} onChange={setDelEmail} type="email" />
+          </Row>
+          <Row label="New Password">
+            <Input value={delPassword} onChange={setDelPassword} type="password" placeholder="•••••••• (Leave blank to keep current)" />
+          </Row>
+          {delPassword && (
+            <Row label="Confirm Password">
+              <Input value={delConfirmPw} onChange={setDelConfirmPw} type="password" placeholder="Confirm new password" />
+            </Row>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            type="submit"
+            disabled={delLoading || !delEmail}
+            className="flex items-center gap-2 bg-[#E8284B] hover:bg-[#d11f40] text-white
+                       font-body font-700 text-sm px-5 py-3 rounded-xl transition-colors disabled:opacity-60 cursor-pointer"
+          >
+            {delLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Update Credentials
+          </button>
+          {delSaved && (
+            <motion.span
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="font-body text-sm text-green-600"
+            >
+              Credentials updated successfully! ✓
+            </motion.span>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -118,12 +217,13 @@ function Row({ label, children }) {
   );
 }
 
-function Input({ value, onChange, type = "text" }) {
+function Input({ value, onChange, type = "text", placeholder = "" }) {
   return (
     <input
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
       className="w-full px-3.5 py-2 rounded-xl border border-gray-200 font-body text-sm
                  focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30 focus:border-[#E8284B]"
     />

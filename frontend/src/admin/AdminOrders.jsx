@@ -28,8 +28,8 @@ export default function AdminOrders() {
   const [selected, setSelected] = useState(null);
   const [updating, setUpdating] = useState(false);
 
-  const fetchOrders = useCallback(async (page = 1) => {
-    setLoading(true);
+  const fetchOrders = useCallback(async (page = 1, silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await api.admin.orders.getAll({
         page,
@@ -42,14 +42,21 @@ export default function AdminOrders() {
     } catch {
       setOrders([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [statusFilter, search]);
 
   useEffect(() => {
-    const t = setTimeout(() => fetchOrders(1), 300);
+    const t = setTimeout(() => fetchOrders(1, false), 300);
     return () => clearTimeout(t);
   }, [fetchOrders]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders(pagination.page, true);
+    }, 20000);
+    return () => clearInterval(interval);
+  }, [fetchOrders, pagination.page]);
 
   const handleUpdateStatus = async (id, status) => {
     setUpdating(true);
@@ -207,9 +214,23 @@ export default function AdminOrders() {
                   <Phone size={15} className="text-gray-400" />
                   {selected.customer?.name || selected.customerName} · {selected.customer?.phone || selected.phone}
                 </div>
-                <div className="flex items-start gap-2.5 font-body text-sm text-gray-600">
-                  <MapPin size={15} className="text-gray-400 mt-0.5" />
-                  {formatAddress(selected.deliveryAddress || selected.address)}
+                <div className="flex flex-col gap-1 w-full">
+                  <div className="flex items-start gap-2.5 font-body text-sm text-gray-600">
+                    <MapPin size={15} className="text-gray-400 mt-0.5 shrink-0" />
+                    <div>
+                      {formatAddress(selected.deliveryAddress || selected.address)}
+                    </div>
+                  </div>
+                  {(selected.deliveryAddress?.lat || selected.address?.lat) && (
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${selected.deliveryAddress?.lat || selected.address?.lat},${selected.deliveryAddress?.lng || selected.address?.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#E8284B] font-body text-xs font-600 hover:underline ml-7 flex items-center gap-1 w-fit"
+                    >
+                      📍 Open Location in Google Maps
+                    </a>
+                  )}
                 </div>
                 <div className="flex items-center gap-2.5 font-body text-sm text-gray-600">
                   <CreditCard size={15} className="text-gray-400" />

@@ -11,11 +11,12 @@ const connectDB                   = require("./config/db");
 const { errorHandler, notFound }  = require("./middleware/errorHandler");
 
 // ── Route modules ─────────────────────────────────────────────────────────────
-const authRoutes    = require("./routes/auth");
-const adminRoutes   = require("./routes/admin");
-const menuRoutes    = require("./routes/menu");
-const orderRoutes   = require("./routes/orders");
-const contactRoutes = require("./routes/contact");
+const authRoutes     = require("./routes/auth");
+const adminRoutes    = require("./routes/admin");
+const menuRoutes     = require("./routes/menu");
+const orderRoutes    = require("./routes/orders");
+const contactRoutes  = require("./routes/contact");
+const deliveryRoutes = require("./routes/delivery");
 
 // ── Connect to MongoDB ────────────────────────────────────────────────────────
 connectDB();
@@ -85,12 +86,13 @@ app.get("/api/health", (req, res) => {
 });
 
 // ── Route mounts ──────────────────────────────────────────────────────────────
-app.use("/api/auth",    authRoutes);
-app.use("/api/admin",   adminRoutes);
-app.use("/api/menu",    menuRoutes);
-app.use("/api/orders",  orderRoutes);
-app.use("/api/contact", contactRoutes);
-app.use("/api/geocode", geocodeRouter);
+app.use("/api/auth",     authRoutes);
+app.use("/api/admin",    adminRoutes);
+app.use("/api/menu",     menuRoutes);
+app.use("/api/orders",   orderRoutes);
+app.use("/api/contact",  contactRoutes);
+app.use("/api/geocode",  geocodeRouter);
+app.use("/api/delivery", deliveryRoutes);
 
 // ── 404 + global error handler ────────────────────────────────────────────────
 app.use(notFound);

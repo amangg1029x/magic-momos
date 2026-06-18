@@ -3,7 +3,7 @@ import { NavigationProvider, useNav } from "./context/NavigationContext";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useCart } from "./hooks/useCart";
-import { getAdminToken } from "./services/api";
+import { getAdminToken, getDeliveryToken } from "./services/api";
 
 // Pages
 import HomePage         from "./pages/HomePage";
@@ -16,14 +16,23 @@ import LoginPage        from "./pages/LoginPage";
 import RegisterPage     from "./pages/RegisterPage";
 import AccountPage      from "./pages/AccountPage";
 import AdminPage        from "./pages/AdminPage";
-import OutOfRangePage from "./pages/OutOfRangePage";
+import DeliveryPage     from "./pages/DeliveryPage";
+import OutOfRangePage   from "./pages/OutOfRangePage";
 
 function AppInner() {
   const { page, navigate } = useNav();
 
+  // ── Deep-link via URL hash ────────────────────────────────────────────────
+  // Delivery partners can bookmark  https://yourapp.com/#delivery
+  // Admins automatically land on    https://yourapp.com/#admin  (or via stored token)
   useEffect(() => {
-    if (getAdminToken()) {
-      navigate("admin");
+    const hash = window.location.hash.replace("#", "").toLowerCase().trim();
+    if (hash === "delivery" || getDeliveryToken()) {
+      navigate("delivery", null, { noScroll: true });
+      return;
+    }
+    if (hash === "admin" || getAdminToken()) {
+      navigate("admin", null, { noScroll: true });
     }
   }, [navigate]);
 
@@ -37,14 +46,15 @@ function AppInner() {
   const cart = useCart();
 
   switch (page) {
-    case "menu":     return <MenuPage cart={cart} />;
-    case "about":    return <AboutPage />;
-    case "contact":  return <ContactPage />;
-    case "checkout": return <CheckoutPage cart={cart} />;
-    case "success":  return <OrderSuccessPage />;
-    case "login":    return <LoginPage />;
-    case "register": return <RegisterPage />;
-    case "out-of-range": return <OutOfRangePage />
+    case "menu":        return <MenuPage cart={cart} />;
+    case "about":       return <AboutPage />;
+    case "contact":     return <ContactPage />;
+    case "checkout":    return <CheckoutPage cart={cart} />;
+    case "success":     return <OrderSuccessPage />;
+    case "login":       return <LoginPage />;
+    case "register":    return <RegisterPage />;
+    case "out-of-range":return <OutOfRangePage />;
+    case "delivery":    return <DeliveryPage />;
     case "account":
       return (
         <ProtectedRoute>
@@ -53,7 +63,7 @@ function AppInner() {
       );
     case "admin":
       return <AdminPage />;
-    default:         return <HomePage />;
+    default:            return <HomePage />;
   }
 }
 

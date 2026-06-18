@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, X, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
-import { useDeliveryZone } from "../hooks/useDeliveryzone";
+import { useDeliveryZone } from "../hooks/useDeliveryZone";
 
 const DISMISS_KEY = "mm_zone_banner_dismissed";
 

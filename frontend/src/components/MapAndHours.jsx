@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { MapPin, Clock, Navigation } from "lucide-react";
 
 const HOURS = [
-  { days: "Monday – Friday", time: "10:00 AM – 11:00 PM", note: ""         },
-  { days: "Saturday",        time: "09:00 AM – 11:30 PM", note: "Extended" },
-  { days: "Sunday",          time: "10:00 AM – 10:30 PM", note: ""         },
-  { days: "Public Holidays", time: "10:00 AM – 11:00 PM", note: "Open!"   },
+  { days: "Monday – Friday", time: "06:00 PM – 12:00 PM", note: ""         },
+  { days: "Saturday",        time: "05:00 PM – 12:00 PM", note: "Extended" },
+  { days: "Sunday",          time: "05:00 PM – 12:00 PM", note: "Extended"         },
+  { days: "Public Holidays", time: "06:00 PM – 12:00 PM", note: "Open!"   },
 ];
 
 export default function MapAndHours() {

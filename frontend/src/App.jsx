@@ -8,7 +8,7 @@ import { getAdminToken, getDeliveryToken } from "./services/api";
 // Pages
 import HomePage         from "./pages/HomePage";
 import MenuPage         from "./pages/MenuPage";
-import AboutPage        from "./pages/AboutPage";
+//import AboutPage        from "./pages/AboutPage";
 import ContactPage      from "./pages/ContactPage";
 import CheckoutPage     from "./pages/CheckoutPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
@@ -47,7 +47,7 @@ function AppInner() {
 
   switch (page) {
     case "menu":        return <MenuPage cart={cart} />;
-    case "about":       return <AboutPage />;
+//    case "about":       return <AboutPage />;
     case "contact":     return <ContactPage />;
     case "checkout":    return <CheckoutPage cart={cart} />;
     case "success":     return <OrderSuccessPage />;

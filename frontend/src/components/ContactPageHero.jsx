@@ -6,8 +6,8 @@ const INFO_CARDS = [
   {
     icon:   Phone,
     title:  "Call Us",
-    line1:  "+91 98765 43210",
-    line2:  "Mon – Sun, 10 AM – 11 PM",
+    line1:  "+91 70422 89004",
+    line2:  "Mon – Sun, 6 PM – 12 PM",
     accent: "#E8284B",
     bg:     "bg-red-50",
     border: "border-red-100",
@@ -131,7 +131,7 @@ export default function ContactPageHero() {
             </p>
             <div className="flex items-center gap-3">
               <motion.a
-                href="tel:+919876543210"
+                href="tel:+917042289004"
                 whileHover={{ scale: 1.04, boxShadow: "0 0 20px rgba(232,40,75,0.25)" }}
                 whileTap={{ scale: 0.96 }}
                 className="inline-flex items-center gap-2 bg-mm-red text-white

@@ -3,18 +3,18 @@ import { MapPin, Phone, Clock, Instagram, Facebook, Twitter, ArrowUp } from "luc
 import { useNav } from "../context/NavigationContext";
 
 const QUICK_LINKS = [
-  { label: "Home",        href: "#home"       },
-  { label: "Menu",        href: "#menu"        },
-  { label: "Why Us",      href: "#why-us"      },
-  { label: "Bestsellers", href: "#bestsellers" },
-  { label: "Reviews",     href: "#reviews"     },
-  { label: "Contact",     href: "#contact"     },
+  { label: "Home",        href: "home"       },
+  { label: "Menu",        href: "menu"        },
+  { label: "Why Us",      href: "why-us"      },
+  { label: "Bestsellers", href: "bestsellers" },
+  { label: "Reviews",     href: "reviews"     },
+  { label: "Contact",     href: "contact"     },
 ];
 
 const HOURS = [
-  { day: "Mon – Fri",   time: "10:00 AM – 11:00 PM" },
-  { day: "Saturday",    time: "09:00 AM – 11:30 PM" },
-  { day: "Sunday",      time: "10:00 AM – 10:00 PM" },
+  { day: "Mon – Fri",   time: "06:00 PM – 12:00 PM" },
+  { day: "Saturday",    time: "05:00 PM – 12:00 PM" },
+  { day: "Sunday",      time: "05:00 PM – 12:00 PM" },
 ];
 
 const SOCIALS = [
@@ -59,7 +59,7 @@ export default function Footer() {
             </a>
 
             <p className="font-body text-sm text-mm-muted leading-relaxed max-w-[220px]">
-              Delhi's favourite street food spot — serving steaming magic since 2020.
+              Delhi's favourite street food spot — serving steaming magic since 2024.
             </p>
 
             {/* socials */}
@@ -89,7 +89,7 @@ export default function Footer() {
               {QUICK_LINKS.map(({ label, href }) => (
                 <li key={label}>
                   <a
-                    href={href}
+                    onClick={() => navigate(href)}
                     className="font-body text-sm text-mm-muted hover:text-mm-gold
                                transition-colors flex items-center gap-1.5 group"
                   >
@@ -128,17 +128,17 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin size={14} className="text-mm-red mt-0.5 shrink-0" />
                 <p className="font-body text-sm text-mm-muted leading-relaxed">
-                  42, Food Street, Near Metro Gate 3,<br />
-                  Lajpat Nagar, New Delhi – 110024
+                  Magic Momos, Gyan Mandir Chowk<br />
+                  Ekta Vihar, New Delhi – 110084
                 </p>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone size={14} className="text-mm-red shrink-0" />
                 <a
-                  href="tel:+911234567890"
+                  href="tel:+917042289004"
                   className="font-body text-sm text-mm-muted hover:text-mm-gold transition-colors"
                 >
-                  +91 98765 43210
+                  +91 70422 89004
                 </a>
               </li>
             </ul>
@@ -177,13 +177,6 @@ export default function Footer() {
             © {new Date().getFullYear()} Magic Momos. All rights reserved.
             <span className="mx-2 text-mm-border">|</span>
             Made with ❤️ in Delhi
-            <span className="mx-2 text-mm-border">|</span>
-            <button
-              onClick={() => navigate("admin")}
-              className="hover:text-mm-gold transition-colors underline-offset-2 hover:underline"
-            >
-              Admin
-            </button>
           </p>
 
           <motion.button

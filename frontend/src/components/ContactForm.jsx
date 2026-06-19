@@ -175,7 +175,7 @@ export default function ContactForm() {
                           ${focused === "phone" ? "text-mm-red" : "text-mm-muted"}`} />
                         <input
                           type="tel" name="phone" value={form.phone}
-                          placeholder="+91 98765 43210"
+                          placeholder="9876543210"
                           className={inputClass("phone") + " pl-10"}
                           onFocus={() => setFocused("phone")}
                           onBlur={() => setFocused(null)}
@@ -205,7 +205,7 @@ export default function ContactForm() {
                   {/* message */}
                   <div>
                     <label className="block font-body text-xs font-700 text-mm-cream uppercase tracking-wider mb-1.5">
-                      Message *
+                      Message * (Min 10 characters)
                     </label>
                     <div className="relative">
                       <MessageSquare size={15} className={`absolute left-4 top-4 pointer-events-none

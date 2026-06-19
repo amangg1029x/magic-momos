@@ -57,7 +57,7 @@ export default function OutOfRangePage() {
 
           <div className="flex flex-col gap-2.5 pt-1">
             <motion.a
-              href="tel:+919876543210"
+              href="tel:+917042289004"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               className="flex items-center justify-center gap-2 bg-mm-red hover:bg-red-600

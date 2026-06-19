@@ -18,7 +18,7 @@ const TIMELINE = [
     color: "#F5A623",
   },
   {
-    year: "2022",
+    year: "2024",
     emoji: "🚀",
     title: "Magic Momos is Born",
     desc: "The name became official. Menu grew to 15 items. First Google review: ⭐⭐⭐⭐⭐. A local food blogger called us 'Delhi's best kept secret'.",
@@ -37,7 +37,7 @@ const TIMELINE = [
     year: "2024",
     emoji: "🏆",
     title: "Delhi's Favourite",
-    desc: "500+ regulars, 4.8 rating across platforms. Featured in Delhi Food Chronicles as one of the city's top street food spots.",
+    desc: "500+ regulars, 4.6 rating across platforms. Featured in Delhi Food Chronicles as one of the city's top street food spots.",
     highlight: "Featured in media",
     color: "#FF9800",
   },
@@ -115,7 +115,7 @@ export default function OurStory() {
               <p>
                 Five years later, Magic Momos serves over{" "}
                 <strong className="text-mm-cream font-700">500 regular customers</strong>,
-                has a 4.8-star rating, and is still run by the same family with the same
+                has a 4.6-star rating, and is still run by the same family with the same
                 values — fresh ingredients, fair prices, and a little magic in every bite.
               </p>
             </div>

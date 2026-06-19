@@ -5,7 +5,7 @@ export const DASHBOARD_STATS = {
   week:   { revenue: 18540, orders: 198 },
   month:  { revenue: 74200, orders: 812 },
   total:  { revenue: 386000, customers: 512 },
-  avgRating: 4.8,
+  avgRating: 4.6,
   pendingOrders:   7,
   completedOrders: 487,
   cancelledOrders: 18,

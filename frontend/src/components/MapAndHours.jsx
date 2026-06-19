@@ -85,7 +85,7 @@ export default function MapAndHours() {
                 </div>
                 <div className="bg-white border border-mm-border rounded-2xl px-4 py-2 shadow-card text-center">
                   <p className="font-body font-700 text-mm-cream text-sm">Magic Momos</p>
-                  <p className="font-body text-mm-muted text-xs">Lajpat Nagar, New Delhi</p>
+                  <p className="font-body text-mm-muted text-xs">Gyan Mandir Chowk, Ekta Vihar, New Delhi</p>
                 </div>
               </motion.div>
             </div>
@@ -95,14 +95,14 @@ export default function MapAndHours() {
               <MapPin size={16} className="text-mm-red mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="font-body font-700 text-mm-cream text-sm">
-                  42 Food Street, Near Metro Gate 3
+                  Magic Momos
                 </p>
                 <p className="font-body text-mm-muted text-xs mt-0.5">
-                  Lajpat Nagar, New Delhi – 110024
+                  Gyan Mandir Chowk, Ekta Vihar, New Delhi - 110044
                 </p>
               </div>
               <motion.a
-                href="https://maps.google.com"
+                href="https://maps.app.goo.gl/9aG2kQ6yRAPVxo437"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.06 }}
@@ -173,26 +173,6 @@ export default function MapAndHours() {
                   Closes at 11 PM
                 </span>
               </div>
-            </div>
-
-            {/* landmark card */}
-            <div className="bg-mm-card border border-mm-border rounded-3xl p-6 shadow-card">
-              <p className="font-body text-xs text-mm-muted uppercase tracking-wider mb-3 font-600">
-                How to reach us
-              </p>
-              <ul className="space-y-2.5">
-                {[
-                  { icon: "🚇", text: "2 min walk from Lajpat Nagar Metro (Gate 3)"   },
-                  { icon: "🚌", text: "DTC bus stop right outside (Routes 419, 421)"   },
-                  { icon: "🅿️", text: "Paid parking available in the lane behind"      },
-                  { icon: "🛵", text: "Two-wheeler parking free in front of the stall" },
-                ].map(({ icon, text }) => (
-                  <li key={text} className="flex items-start gap-3 font-body text-sm text-mm-muted">
-                    <span className="text-lg leading-none shrink-0">{icon}</span>
-                    {text}
-                  </li>
-                ))}
-              </ul>
             </div>
           </motion.div>
         </div>

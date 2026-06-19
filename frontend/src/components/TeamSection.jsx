@@ -26,7 +26,7 @@ const TEAM = [
     emoji:  "👨‍💼",
     name:   "Arjun Mehta",
     role:   "Operations & Delivery Head",
-    since:  "2022",
+    since:  "2024",
     bio:    "Former logistics professional who joined after becoming a regular customer. Arjun built our delivery system from scratch.",
     quote:  "Hot food, on time, every time. That's the only KPI that matters.",
     accent: "#3B82F6",

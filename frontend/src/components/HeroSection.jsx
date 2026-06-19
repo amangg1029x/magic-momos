@@ -22,9 +22,9 @@ const BADGES = [
 
 /* ── mini stat pills ── */
 const STATS = [
-  { icon: Star,   value: "4.8",    label: "Avg Rating"         },
-  { icon: Clock,  value: "20 min", label: "Avg Delivery"       },
-  { icon: MapPin, value: "Delhi",  label: "Serving Since 2020" },
+  { icon: Star,   value: "4.6",    label: "Avg Rating"         },
+  { icon: Clock,  value: "30 min", label: "Avg Delivery"       },
+  { icon: MapPin, value: "Delhi",  label: "Serving Since 2024" },
 ];
 
 export default function HeroSection() {
@@ -195,7 +195,7 @@ export default function HeroSection() {
                        flex items-center justify-center"
           >
             <span className="text-[4rem] sm:text-[6rem] lg:text-[8rem] select-none drop-shadow-2xl">
-              🥟
+              <img src="../public/favicon.png" alt="" />
             </span>
 
             <motion.div

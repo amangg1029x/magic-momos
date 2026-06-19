@@ -40,7 +40,7 @@ export default function DeliveryZoneBanner() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.35 }}
-        className={`relative z-30 px-5 py-3 flex items-center justify-center gap-2.5 text-center
+        className={`relative z-30 mt-20 px-5 py-3 flex items-center justify-center gap-2.5 text-center
                     ${outOfRange ? "bg-amber-50 border-b border-amber-200" : "bg-green-50 border-b border-green-200"}`}
       >
         {outOfRange ? (

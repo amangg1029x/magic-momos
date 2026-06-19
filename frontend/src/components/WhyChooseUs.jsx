@@ -37,7 +37,7 @@ const FEATURES = [
     {
         icon: Zap,
         title: "Lightning Fast",
-        desc: "Your order is hot and on its way in under 20 minutes. Because hunger doesn't like to wait.",
+        desc: "Your order is hot and on its way in under 30 minutes. Because hunger doesn't like to wait.",
         color: "text-mm-gold",
         border: "group-hover:border-mm-gold/40",
         glow: "group-hover:shadow-[0_0_30px_rgba(245,166,35,0.15)]",
@@ -62,9 +62,9 @@ const FEATURES = [
 
 const STATS = [
     { target: 500, suffix: "+", label: "Happy Customers" },
-    { target: 15, suffix: "+", label: "Menu Items" },
-    { target: 5, suffix: " ★", label: "Years Serving" },
-    { target: 4.8, suffix: "", label: "Avg Rating" },
+    { target: 20, suffix: "+", label: "Menu Items" },
+    { target: 2, suffix: " ★", label: "Years Serving" },
+    { target: 4.6, suffix: "", label: "Avg Rating" },
 ];
 
 /* ── CounterCell component ── */

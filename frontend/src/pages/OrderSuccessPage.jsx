@@ -380,7 +380,7 @@ export default function OrderSuccessPage() {
               {/* support line */}
               <p className="text-center font-body text-xs text-mm-muted">
                 Issue with your order?{" "}
-                <a href="tel:+919876543210"
+                <a href="tel:+917042289004"
                    className="text-mm-red font-700 inline-flex items-center gap-1 hover:underline">
                   <Phone size={11} /> Call us
                 </a>

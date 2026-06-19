@@ -231,7 +231,7 @@ export default function GalleryStrip() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="text-center font-body text-mm-muted text-sm mt-8"
         >
-          Hover any item and click to order · Full menu has 22 items across 5 categories
+          Hover any item and click to order · Full menu has 20+ items across 5 categories
         </motion.p>
       </div>
     </section>

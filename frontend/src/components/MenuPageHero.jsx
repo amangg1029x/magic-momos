@@ -77,7 +77,7 @@ export default function MenuPageHero({ search, onSearch }) {
               </span>
             </h1>
             <p className="font-body text-mm-muted text-base mt-2 max-w-xs">
-              22 items across 5 categories — something for every craving.
+              20+ items across 5 categories — something for every craving.
             </p>
           </motion.div>
 

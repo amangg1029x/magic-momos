@@ -48,7 +48,7 @@ const MILESTONES = [
   },
   {
     icon:    Star,
-    rawValue: 4.8,
+    rawValue: 4.6,
     suffix:  "★",
     label:   "Avg Rating",
     sub:     "Across Google & Zomato",

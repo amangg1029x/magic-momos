@@ -73,7 +73,7 @@ export default function CTASection() {
                     className="font-body text-mm-cream/60 text-base sm:text-lg max-w-lg mx-auto leading-relaxed mb-10"
                 >
                     Don't let that craving wait. Order your Magic Momos fix right now and
-                    have it at your door in under 20 minutes — hot, fresh, magical.
+                    have it at your door in under 30 minutes — hot, fresh, magical.
                 </motion.p>
 
                 {/* CTA buttons */}
@@ -118,7 +118,7 @@ export default function CTASection() {
                     className="flex flex-wrap items-center justify-center gap-6 mt-12 text-mm-muted"
                 >
                     {[
-                        "🕐 Open 10 AM – 11 PM",
+                        "🕐 Open 6 PM – 12 PM",
                         "🛵 Free delivery on ₹199+",
                         "❄️ No preservatives",
                         "♻️ Eco packaging",

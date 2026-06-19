@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 const NAV_LINKS = [
   { label: "Home",        page: "home",    section: "home"        },
   { label: "Menu",        page: "menu"                            },
-  { label: "About",       page: "about"                           },
+//  { label: "About",       page: "about"                           },
   { label: "Contact Us",  page: "contact"                         },
   { label: "Why Us",      page: "home",    section: "why-us"      },
   { label: "Bestsellers", page: "home",    section: "bestsellers"  },
@@ -112,10 +112,10 @@ export default function Header({ cartCount = 0, onCartOpen }) {
 
           {/* desktop right CTAs */}
           <div className="hidden md:flex items-center gap-3">
-            <a href="tel:+919876543210"
+            <a href="tel:+917042289004"
               className="flex items-center gap-1.5 text-mm-cream/50 hover:text-mm-gold text-sm font-body transition-colors">
               <Phone size={14} />
-              <span>+91 98765 43210</span>
+              <span>+91 70422 89004</span>
             </a>
 
             {/* cart button */}
@@ -309,9 +309,9 @@ export default function Header({ cartCount = 0, onCartOpen }) {
                   </button>
                 </>
               ) : (
-                <a href="tel:+919876543210"
+                <a href="tel:+917042289004"
                   className="text-mm-cream/50 text-sm font-body flex items-center gap-2">
-                  <Phone size={14} /> +91 98765 43210
+                  <Phone size={14} /> +91 70422 89004
                 </a>
               )}
               <button

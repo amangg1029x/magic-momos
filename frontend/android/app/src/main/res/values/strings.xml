@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Magic Momos</string>
+    <string name="title_activity_main">Magic Momos</string>
+    <string name="package_name">com.magicmomos.app</string>
+    <string name="custom_url_scheme">com.magicmomos.app</string>
+</resources>

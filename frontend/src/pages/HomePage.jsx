@@ -7,8 +7,10 @@ import BestSellers   from "../components/BestSellers";
 //import Testimonials  from "../components/Testimonials";
 import CTASection    from "../components/CTASection";
 import Footer        from "../components/Footer";
+import { useNav } from "../context/NavigationContext";
 
 export default function HomePage() {
+  const { isNative } = useNav();
   return (
     <div className="relative overflow-x-hidden">
       <Header />
@@ -20,7 +22,7 @@ export default function HomePage() {
         <BestSellers />
         <CTASection />
       </main>
-      <Footer />
+      {!isNative && <Footer />}
     </div>
   );
 }

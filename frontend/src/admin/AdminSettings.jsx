@@ -19,14 +19,58 @@ const DEFAULTS = {
 export default function AdminSettings() {
   // --- General settings ---
   const [form, setForm] = useState(DEFAULTS);
+  const [generalLoading, setGeneralLoading] = useState(false);
+  const [generalError, setGeneralError] = useState("");
   const [saved, setSaved] = useState(false);
 
   const update = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const handleSave = (e) => {
+  // Load general settings on mount
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setGeneralLoading(true);
+      setGeneralError("");
+      try {
+        const res = await api.admin.getSettings();
+        if (res.success && res.settings && active) {
+          // Merge with defaults to ensure all expected properties are present
+          setForm({
+            ...DEFAULTS,
+            ...res.settings,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+        if (active) setGeneralError(err.message || "Failed to load store configurations");
+      } finally {
+        if (active) setGeneralLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    setGeneralError("");
+    setSaved(false);
+    setGeneralLoading(true);
+
+    try {
+      const res = await api.admin.updateSettings(form);
+      if (res.success && res.settings) {
+        setForm({
+          ...DEFAULTS,
+          ...res.settings,
+        });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      }
+    } catch (err) {
+      setGeneralError(err.message || "Failed to save settings");
+    } finally {
+      setGeneralLoading(false);
+    }
   };
 
   // --- Delivery Partner credentials ---
@@ -83,13 +127,12 @@ export default function AdminSettings() {
     <div className="space-y-8 pb-12">
       {/* General Settings Form */}
       <form onSubmit={handleSave} className="space-y-6 max-w-2xl">
-        <div className="flex items-start gap-2.5 bg-amber-50 text-amber-700 font-body text-xs
-                        px-4 py-3 rounded-xl">
-          <Info size={15} className="shrink-0 mt-0.5" />
-          These settings aren't connected to the backend yet — changes apply
-          only to this session. Ask your developer to add a settings endpoint
-          to persist them.
-        </div>
+        {generalError && (
+          <div className="flex items-center gap-2 bg-red-50 text-red-600 text-sm font-body px-4 py-3 rounded-xl">
+            <AlertCircle size={15} className="shrink-0" />
+            {generalError}
+          </div>
+        )}
 
         <Section title="Business Info">
           <Row label="Business Name">
@@ -132,18 +175,19 @@ export default function AdminSettings() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
+            disabled={generalLoading}
             className="flex items-center gap-2 bg-[#E8284B] hover:bg-[#d11f40] text-white
                        font-body font-700 text-sm px-5 py-3 rounded-xl transition-colors cursor-pointer
-                       w-full sm:w-auto justify-center"
+                       w-full sm:w-auto justify-center disabled:opacity-60"
           >
-            <Save size={16} /> Save Changes
+            {generalLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save Changes
           </button>
           {saved && (
             <motion.span
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="font-body text-sm text-green-600"
             >
-              Saved for this session ✓
+              Settings saved successfully! ✓
             </motion.span>
           )}
         </div>

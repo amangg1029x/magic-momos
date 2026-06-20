@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone, ShoppingBag, User, LogOut, ChevronDown } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 import { useAuth } from "../context/AuthContext";
+import logo from "../assets/logo.png";
 
 const NAV_LINKS = [
   { label: "Home",        page: "home",    section: "home"        },
@@ -14,7 +15,7 @@ const NAV_LINKS = [
 ];
 
 export default function Header({ cartCount = 0, onCartOpen }) {
-  const { page, navigate }       = useNav();
+  const { page, navigate, isNative }       = useNav();
   const { user, isAuthenticated, logout } = useAuth();
 
   const [scrolled,      setScrolled]      = useState(false);
@@ -59,6 +60,10 @@ export default function Header({ cartCount = 0, onCartOpen }) {
     navigate("home");
   };
 
+  const filteredNavLinks = isNative
+    ? NAV_LINKS.filter(link => link.page !== "home")
+    : NAV_LINKS;
+
   return (
     <>
       <motion.header
@@ -73,7 +78,7 @@ export default function Header({ cartCount = 0, onCartOpen }) {
 
           {/* logo */}
           <motion.button
-            onClick={() => navigate("home")}
+            onClick={() => navigate(isNative ? "menu" : "home")}
             whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
             className="flex items-center gap-2.5 select-none"
           >
@@ -81,7 +86,9 @@ export default function Header({ cartCount = 0, onCartOpen }) {
               animate={{ rotate: [0, -8, 8, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               className="text-3xl leading-none"
-            >🥟</motion.span>
+            >
+              <img src={logo} width="40" alt="logo" />
+            </motion.span>
             <div className="leading-none">
               <span className="block font-brand text-[1.4rem] text-mm-gold leading-tight">Magic</span>
               <span className="block font-display text-[1.05rem] tracking-[0.2em] text-mm-cream leading-tight">MOMOS</span>
@@ -90,7 +97,7 @@ export default function Header({ cartCount = 0, onCartOpen }) {
 
           {/* desktop nav */}
           <nav className="hidden md:flex items-center gap-7">
-            {NAV_LINKS.map(({ label, href, page: linkPage, section }) => {
+            {filteredNavLinks.map(({ label, href, page: linkPage, section }) => {
               const isActive = page === "home"
                 ? section === activeSection
                 : linkPage === page;
@@ -238,22 +245,24 @@ export default function Header({ cartCount = 0, onCartOpen }) {
                 </div>
               </button>
             )}
-            <button onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle menu" className="text-mm-cream p-1">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span key={mobileOpen ? "x" : "menu"}
-                  initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }} className="block">
-                  {mobileOpen ? <X size={26} /> : <Menu size={26} />}
-                </motion.span>
-              </AnimatePresence>
-            </button>
+            {!isNative && (
+              <button onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle menu" className="text-mm-cream p-1">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span key={mobileOpen ? "x" : "menu"}
+                    initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }} className="block">
+                    {mobileOpen ? <X size={26} /> : <Menu size={26} />}
+                  </motion.span>
+                </AnimatePresence>
+              </button>
+            )}
           </div>
         </div>
       </motion.header>
 
       {/* mobile drawer */}
       <AnimatePresence>
-        {mobileOpen && (
+        {!isNative && mobileOpen && (
           <motion.div key="mobile-menu"
             initial={{ x: "100%", opacity: 0 }} animate={{ x: "0%", opacity: 1 }}
             exit={{ x: "100%", opacity: 0 }}

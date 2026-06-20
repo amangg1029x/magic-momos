@@ -7,8 +7,10 @@ import MilestonesSection from "../components/MilestonesSection";
 import TeamSection     from "../components/TeamSection";
 import ValuesSection   from "../components/ValuesSection";
 import GalleryStrip    from "../components/GalleryStrip";
+import { useNav } from "../context/NavigationContext";
 
 export default function AboutPage() {
+  const { isNative } = useNav();
   return (
     <div className="relative min-h-screen bg-mm-black overflow-x-hidden">
       {/* ✅ Reused: Header (no cart on this page) */}
@@ -38,7 +40,7 @@ export default function AboutPage() {
       </main>
 
       {/* ✅ Reused: Footer */}
-      <Footer />
+      {!isNative && <Footer />}
     </div>
   );
 }

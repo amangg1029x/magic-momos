@@ -1,19 +1,22 @@
 const Order    = require("../models/Order");
 const MenuItem = require("../models/MenuItem");
+const Setting  = require("../models/Setting");
 const {
   createRazorpayOrder,
   verifyPaymentSignature,
   verifyWebhookSignature,
 } = require("../config/razorpay");
 
-const FREE_DELIVERY_THRESHOLD = 199;
-const DELIVERY_FEE            = 30;
-
 // ── POST /api/orders ──────────────────────────────────────────────────────────
 // Guests & logged-in customers can place orders
 const placeOrder = async (req, res, next) => {
   try {
     const { customer, items: reqItems, address, paymentMethod, specialInstructions } = req.body;
+
+    // Fetch store settings dynamically
+    const settings = (await Setting.findOne()) || { deliveryFee: 30, freeDeliveryThreshold: 199 };
+    const deliveryFeeSetting = settings.deliveryFee ?? 30;
+    const freeDeliveryThresholdSetting = settings.freeDeliveryThreshold ?? 199;
 
     // ── 1. Validate all menu items exist and are available ───────────────────
     const itemIds = reqItems.map((i) => Number(i.itemId));
@@ -44,7 +47,7 @@ const placeOrder = async (req, res, next) => {
 
     // ── 3. Calculate totals ───────────────────────────────────────────────────
     const subtotal       = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const deliveryCharge = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE;
+    const deliveryCharge = subtotal >= freeDeliveryThresholdSetting ? 0 : deliveryFeeSetting;
     const total          = subtotal + deliveryCharge;
 
     // ── 4. Build and save the order ───────────────────────────────────────────

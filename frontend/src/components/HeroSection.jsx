@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Star, Clock, MapPin } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
+import logo from "../assets/logo.png"
 
 /* ── animation variants ── */
 const container = {
@@ -195,7 +196,7 @@ export default function HeroSection() {
                        flex items-center justify-center"
           >
             <span className="text-[4rem] sm:text-[6rem] lg:text-[8rem] select-none drop-shadow-2xl">
-              <img src="../public/favicon.png" alt="" />
+              <img src={logo} alt="nana" />
             </span>
 
             <motion.div

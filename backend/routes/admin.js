@@ -2,6 +2,7 @@ const router = require("express").Router();
 
 const { adminLogin, getAdminMe }    = require("../controllers/adminAuthController");
 const { getDeliveryCredentials, updateDeliveryCredentials } = require("../controllers/deliveryController");
+const { getSettings, updateSettings } = require("../controllers/settingController");
 const {
   adminGetOrders,
   adminGetOrder,
@@ -57,5 +58,9 @@ router.patch("/contacts/:id",   adminUpdateContact);
 // Delivery credentials management
 router.get("/delivery-credentials", getDeliveryCredentials);
 router.put("/delivery-credentials", updateDeliveryCredentials);
+
+// Settings management
+router.get("/settings", getSettings);
+router.put("/settings", updateSettings);
 
 module.exports = router;

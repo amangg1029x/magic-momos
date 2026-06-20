@@ -3,7 +3,7 @@ import { Search, ChevronRight } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 
 export default function MenuPageHero({ search, onSearch }) {
-  const { navigate } = useNav();
+  const { navigate, isNative } = useNav();
 
   return (
     <section className="relative overflow-hidden bg-mm-card2 border-b border-mm-border">
@@ -37,21 +37,23 @@ export default function MenuPageHero({ search, onSearch }) {
 
       <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pt-32 pb-14">
         {/* breadcrumb */}
-        <motion.nav
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex items-center gap-1.5 text-xs font-body text-mm-muted mb-6"
-        >
-          <button
-            onClick={() => navigate("home")}
-            className="hover:text-mm-red transition-colors font-600"
+        {!isNative && (
+          <motion.nav
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex items-center gap-1.5 text-xs font-body text-mm-muted mb-6"
           >
-            Home
-          </button>
-          <ChevronRight size={12} className="opacity-50" />
-          <span className="text-mm-cream font-600">Full Menu</span>
-        </motion.nav>
+            <button
+              onClick={() => navigate("home")}
+              className="hover:text-mm-red transition-colors font-600"
+            >
+              Home
+            </button>
+            <ChevronRight size={12} className="opacity-50" />
+            <span className="text-mm-cream font-600">Full Menu</span>
+          </motion.nav>
+        )}
 
         {/* title row */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">

@@ -129,7 +129,7 @@ export default function Footer() {
                 <MapPin size={14} className="text-mm-red mt-0.5 shrink-0" />
                 <p className="font-body text-sm text-mm-muted leading-relaxed">
                   Magic Momos, Gyan Mandir Chowk<br />
-                  Ekta Vihar, New Delhi – 110084
+                  Ekta Vihar, New Delhi – 110044
                 </p>
               </li>
               <li className="flex items-center gap-2.5">

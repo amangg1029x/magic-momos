@@ -5,40 +5,21 @@ import {
 } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 
-const FREE_DELIVERY = 199;
-const DELIVERY_FEE  = 30;
-
-/**
- * CartSidebar
- * Props:
- *   open        – boolean
- *   onClose     – () => void
- *   items       – [{ id, name, emoji, price, qty }]
- *   subtotal    – number
- *   discount    – number
- *   deliveryFee – number
- *   total       – number
- *   coupon      – { code, label } | null
- *   couponError – string
- *   onUpdate    – (id, delta) => void
- *   onRemove    – (id) => void
- *   onClear     – () => void
- *   onApplyCoupon  – (code) => bool
- *   onRemoveCoupon – () => void
- */
 export default function CartSidebar({
   open, onClose,
   items, subtotal, discount, deliveryFee, total,
   coupon, couponError,
   onUpdate, onRemove, onClear,
   onApplyCoupon, onRemoveCoupon,
+  freeDeliveryThreshold = 199,
+  deliveryFeeSetting = 30,
 }) {
-  const { navigate } = useNav();
+  const { navigate, isNative } = useNav();
 
   const [couponInput, setCouponInput] = useState("");
   const [couponApplying, setCouponApplying] = useState(false);
 
-  const toFreeDelivery = Math.max(FREE_DELIVERY - (subtotal - discount), 0);
+  const toFreeDelivery = Math.max(freeDeliveryThreshold - (subtotal - discount), 0);
   const freeDelivery   = deliveryFee === 0 && items.length > 0;
 
   const handleApplyCoupon = async () => {
@@ -72,11 +53,11 @@ export default function CartSidebar({
             key="cart-drawer"
             initial={{ x: "100%" }} animate={{ x: "0%" }} exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 280 }}
-            className="fixed right-0 top-0 bottom-0 z-50
+            className={`fixed right-0 top-0 bottom-0 z-50
                        w-full sm:w-[420px] bg-mm-card
                        border-l border-mm-border
                        shadow-[-12px_0_40px_rgba(42,30,27,0.12)]
-                       flex flex-col overflow-hidden"
+                       flex flex-col overflow-hidden ${isNative ? "pb-24" : ""}`}
           >
             {/* ── header ── */}
             <div className="flex items-center justify-between px-6 py-5
@@ -137,7 +118,7 @@ export default function CartSidebar({
                   <div className="w-full h-1.5 rounded-full bg-amber-200 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(((subtotal - discount) / FREE_DELIVERY) * 100, 100)}%` }}
+                      animate={{ width: `${Math.min(((subtotal - discount) / freeDeliveryThreshold) * 100, 100)}%` }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
                       className="h-full rounded-full bg-amber-500"
                     />

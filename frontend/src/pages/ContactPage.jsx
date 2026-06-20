@@ -4,8 +4,10 @@ import ContactPageHero from "../components/ContactPageHero";
 import ContactForm    from "../components/ContactForm";
 import FAQAccordion   from "../components/FAQAccordion";
 import MapAndHours    from "../components/MapAndHours";
+import { useNav } from "../context/NavigationContext";
 
 export default function ContactPage() {
+  const { isNative } = useNav();
   return (
     <div className="relative min-h-screen bg-mm-black overflow-x-hidden">
       {/* ✅ Reused */}
@@ -26,7 +28,7 @@ export default function ContactPage() {
       </main>
 
       {/* ✅ Reused */}
-      <Footer />
+      {!isNative && <Footer />}
     </div>
   );
 }

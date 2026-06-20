@@ -439,6 +439,7 @@ function SettingsTab({ user }) {
 export default function AccountPage() {
   const { user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
+  const { isNative } = useNav();
 
   return (
     <div className="min-h-screen bg-mm-black">
@@ -512,7 +513,7 @@ export default function AccountPage() {
         </div>
       </div>
 
-      <Footer />
+      {!isNative && <Footer />}
     </div>
   );
 }

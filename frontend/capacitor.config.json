@@ -1,0 +1,10 @@
+{
+  "appId": "com.magicmomos.app",
+  "appName": "Magic Momos",
+  "webDir": "dist",
+  "server": {
+    "allowNavigation": [
+      "checkout.razorpay.com"
+    ]
+  }
+}

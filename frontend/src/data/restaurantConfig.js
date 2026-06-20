@@ -8,8 +8,8 @@
 export const RESTAURANT_LOCATION = {
   name: "Magic Momos",
   // 28°29'59.924"N, 77°20'0.628"E
-  latitude: 28.499979,
-  longitude: 77.333508,
+  latitude: 28.502812,
+  longitude: 77.329165,
 };
 
 // Maximum distance (in km) we currently deliver to.

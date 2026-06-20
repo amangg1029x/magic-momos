@@ -128,6 +128,11 @@ const api = {
     submit: (data) => post("/contact", data),
   },
 
+  // ── Settings ────────────────────────────────────────────────────────────────
+  settings: {
+    get: () => get("/settings"),
+  },
+
   // ── Admin auth ───────────────────────────────────────────────────────────────
   admin: {
     login: async (data) => {
@@ -171,6 +176,10 @@ const api = {
     // Delivery partner credentials management
     getDeliveryCredentials:    () => get("/admin/delivery-credentials", "admin"),
     updateDeliveryCredentials: (data) => put("/admin/delivery-credentials", data, "admin"),
+
+    // General store settings
+    getSettings:               () => get("/admin/settings", "admin"),
+    updateSettings:            (data) => put("/admin/settings", data, "admin"),
   },
 
   // ── Delivery partner ─────────────────────────────────────────────────────────

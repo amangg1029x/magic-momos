@@ -7,6 +7,7 @@ import MenuPageHero from "../components/MenuPageHero";
 import MenuCategoryFilter from "../components/MenuCategoryFilter";
 import MenuGrid from "../components/MenuGrid";
 import CartSidebar from "../components/CartSidebar";
+import { useNav } from "../context/NavigationContext"
 
 /**
  * MenuPage
@@ -22,6 +23,8 @@ export default function MenuPage({ cart }) {
     const [menuItems,   setMenuItems]   = useState([]);
     const [menuLoading, setMenuLoading] = useState(true);
     const [menuError,   setMenuError]   = useState("");
+
+    const { isNative } = useNav();
 
     useEffect(() => {
         api.menu.getAll()
@@ -92,7 +95,7 @@ export default function MenuPage({ cart }) {
                 )}
             </main>
 
-            <Footer />
+            {!isNative && <Footer />}
 
             {/* cart drawer */}
             <CartSidebar
@@ -110,6 +113,8 @@ export default function MenuPage({ cart }) {
                 onClear={cart.clearCart}
                 onApplyCoupon={cart.applyCoupon}
                 onRemoveCoupon={cart.removeCoupon}
+                freeDeliveryThreshold={cart.FREE_DELIVERY_MIN}
+                deliveryFeeSetting={cart.DELIVERY_FEE}
             />
         </div>
     );

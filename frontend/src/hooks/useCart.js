@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
+import api from "../services/api";
 
 const CART_KEY          = "mm_cart";
-const FREE_DELIVERY_MIN = 199;
-const DELIVERY_FEE      = 30;
 
 // Valid coupons (in real app these would come from the backend)
 const COUPONS = {
@@ -41,6 +40,23 @@ export function useCart() {
       return [];
     }
   });
+
+  const [freeDeliveryMinSetting, setFreeDeliveryMinSetting] = useState(199);
+  const [deliveryFeeSetting, setDeliveryFeeSetting] = useState(30);
+
+  // Fetch settings dynamically on mount
+  useEffect(() => {
+    let active = true;
+    api.settings.get()
+      .then((res) => {
+        if (res.success && res.settings && active) {
+          setFreeDeliveryMinSetting(res.settings.freeDeliveryThreshold ?? 199);
+          setDeliveryFeeSetting(res.settings.deliveryFee ?? 30);
+        }
+      })
+      .catch((err) => console.error("Error fetching settings in useCart:", err));
+    return () => { active = false; };
+  }, []);
 
   const [coupon,      setCoupon]      = useState(null);   // { code, type, value, label }
   const [couponError, setCouponError] = useState("");
@@ -123,8 +139,8 @@ export function useCart() {
     : 0;
 
   const discountedSubtotal = subtotal - discount;
-  const deliveryFee = discountedSubtotal >= FREE_DELIVERY_MIN ? 0 : DELIVERY_FEE;
-  const total       = discountedSubtotal + deliveryFee;
+  const deliveryFeeVal = discountedSubtotal >= freeDeliveryMinSetting ? 0 : deliveryFeeSetting;
+  const total       = discountedSubtotal + deliveryFeeVal;
   const count       = items.reduce((sum, i) => sum + i.qty, 0);
 
   return {
@@ -135,14 +151,14 @@ export function useCart() {
     clearCart,
     subtotal,
     discount,
-    deliveryFee,
+    deliveryFee: deliveryFeeVal,
     total,
     count,
     coupon,
     couponError,
     applyCoupon,
     removeCoupon,
-    FREE_DELIVERY_MIN,
-    DELIVERY_FEE,
+    FREE_DELIVERY_MIN: freeDeliveryMinSetting,
+    DELIVERY_FEE: deliveryFeeSetting,
   };
 }

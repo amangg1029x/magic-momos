@@ -18,9 +18,10 @@ import AccountPage      from "./pages/AccountPage";
 import AdminPage        from "./pages/AdminPage";
 import DeliveryPage     from "./pages/DeliveryPage";
 import OutOfRangePage   from "./pages/OutOfRangePage";
+import BottomNavigation from "./components/BottomNavigation";
 
 function AppInner() {
-  const { page, navigate } = useNav();
+  const { page, navigate, isNative } = useNav();
 
   // ── Deep-link via URL hash ────────────────────────────────────────────────
   // Delivery partners can bookmark  https://yourapp.com/#delivery
@@ -45,26 +46,39 @@ function AppInner() {
    */
   const cart = useCart();
 
-  switch (page) {
-    case "menu":        return <MenuPage cart={cart} />;
+  const renderPage = () => {
+    switch (page) {
+      case "menu":        return <MenuPage cart={cart} />;
 //    case "about":       return <AboutPage />;
-    case "contact":     return <ContactPage />;
-    case "checkout":    return <CheckoutPage cart={cart} />;
-    case "success":     return <OrderSuccessPage />;
-    case "login":       return <LoginPage />;
-    case "register":    return <RegisterPage />;
-    case "out-of-range":return <OutOfRangePage />;
-    case "delivery":    return <DeliveryPage />;
-    case "account":
-      return (
+      case "contact":     return <ContactPage />;
+      case "checkout":    return (
         <ProtectedRoute>
-          <AccountPage />
+          <CheckoutPage cart={cart} />
         </ProtectedRoute>
       );
-    case "admin":
-      return <AdminPage />;
-    default:            return <HomePage />;
-  }
+      case "success":     return <OrderSuccessPage />;
+      case "login":       return <LoginPage />;
+      case "register":    return <RegisterPage />;
+      case "out-of-range":return <OutOfRangePage />;
+      case "delivery":    return <DeliveryPage />;
+      case "account":
+        return (
+          <ProtectedRoute>
+            <AccountPage />
+          </ProtectedRoute>
+        );
+      case "admin":
+        return <AdminPage />;
+      default:            return <HomePage />;
+    }
+  };
+
+  return (
+    <div className={isNative ? "pb-24" : ""}>
+      {renderPage()}
+      <BottomNavigation />
+    </div>
+  );
 }
 
 export default function App() {

@@ -7,6 +7,9 @@ export default function BottomNavigation() {
 
   if (!isNative) return null;
 
+  // Hide on admin and delivery pages
+  if (page === "admin" || page === "delivery") return null;
+
   const tabs = [
     { label: "Menu",       page: "menu",    icon: UtensilsCrossed },
     { label: "Contact Us", page: "contact", icon: Phone           },

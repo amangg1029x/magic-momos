@@ -39,7 +39,7 @@ const PAYMENT_METHODS = [
  *   cart — the full useCart() return object, passed down from MenuPage
  */
 export default function CheckoutPage({ cart }) {
-  const { navigate }  = useNav();
+  const { navigate, isNative }  = useNav();
   const { user, isAuthenticated } = useAuth();
 
   const {
@@ -258,7 +258,7 @@ export default function CheckoutPage({ cart }) {
   `;
 
   return (
-    <div className="min-h-screen bg-mm-black">
+    <div className={`min-h-screen bg-mm-black ${isNative ? "pb-24" : ""}`}>
       <Header />
 
       {/* ── page hero ── */}

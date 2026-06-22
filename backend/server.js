@@ -18,6 +18,7 @@ const orderRoutes    = require("./routes/orders");
 const contactRoutes  = require("./routes/contact");
 const deliveryRoutes = require("./routes/delivery");
 const settingsRoutes = require("./routes/settings");
+const couponRoutes   = require("./routes/coupons");
 
 // ── Connect to MongoDB ────────────────────────────────────────────────────────
 connectDB();
@@ -95,6 +96,7 @@ app.use("/api/contact",  contactRoutes);
 app.use("/api/geocode",  geocodeRouter);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/coupons",  couponRoutes);
 
 // ── 404 + global error handler ────────────────────────────────────────────────
 app.use(notFound);

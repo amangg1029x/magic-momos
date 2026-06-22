@@ -1,22 +1,63 @@
 const Order    = require("../models/Order");
 const MenuItem = require("../models/MenuItem");
 const Setting  = require("../models/Setting");
+const Coupon   = require("../models/Coupon");
+const { calculateCouponDiscount } = require("./couponController");
 const {
   createRazorpayOrder,
   verifyPaymentSignature,
   verifyWebhookSignature,
 } = require("../config/razorpay");
 
+const getStoreStatus = (settings) => {
+  if (settings.storeStatusOverride === "open") return "open";
+  if (settings.storeStatusOverride === "closed") return "closed";
+  if (settings.storeStatusOverride === "busy") return "busy";
+
+  const openTime = settings.openTime || "11:00";
+  const closeTime = settings.closeTime || "23:00";
+
+  // Get current time in India timezone
+  const now = new Date();
+  const options = { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false };
+  const formatter = new Intl.DateTimeFormat([], options);
+  const istTimeStr = formatter.format(now); // e.g. "14:30"
+  
+  const [currentHour, currentMin] = istTimeStr.split(":").map(Number);
+  const currentMinutes = currentHour * 60 + currentMin;
+
+  const [openHour, openMin] = openTime.split(":").map(Number);
+  const [closeHour, closeMin] = closeTime.split(":").map(Number);
+  const openMinutes = openHour * 60 + openMin;
+  const closeMinutes = closeHour * 60 + closeMin;
+
+  if (closeMinutes > openMinutes) {
+    return (currentMinutes >= openMinutes && currentMinutes <= closeMinutes) ? "open" : "closed";
+  } else {
+    // Overnight operation
+    return (currentMinutes >= openMinutes || currentMinutes <= closeMinutes) ? "open" : "closed";
+  }
+};
+
 // ── POST /api/orders ──────────────────────────────────────────────────────────
 // Guests & logged-in customers can place orders
 const placeOrder = async (req, res, next) => {
   try {
-    const { customer, items: reqItems, address, paymentMethod, specialInstructions } = req.body;
+    const { customer, items: reqItems, address, paymentMethod, specialInstructions, couponCode } = req.body;
 
     // Fetch store settings dynamically
-    const settings = (await Setting.findOne()) || { deliveryFee: 30, freeDeliveryThreshold: 199 };
+    const settings = (await Setting.findOne()) || { deliveryFee: 30, freeDeliveryThreshold: 199, openTime: "11:00", closeTime: "23:00" };
     const deliveryFeeSetting = settings.deliveryFee ?? 30;
     const freeDeliveryThresholdSetting = settings.freeDeliveryThreshold ?? 199;
+
+    // Check store opening hours
+    const storeStatus = getStoreStatus(settings);
+    if (storeStatus === "closed") {
+      return res.status(400).json({
+        success: false,
+        message: `We are currently closed. Our operations are active from ${settings.openTime} to ${settings.closeTime}.`,
+      });
+    }
 
     // ── 1. Validate all menu items exist and are available ───────────────────
     const itemIds = reqItems.map((i) => Number(i.itemId));
@@ -47,8 +88,61 @@ const placeOrder = async (req, res, next) => {
 
     // ── 3. Calculate totals ───────────────────────────────────────────────────
     const subtotal       = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const deliveryCharge = subtotal >= freeDeliveryThresholdSetting ? 0 : deliveryFeeSetting;
-    const total          = subtotal + deliveryCharge;
+
+    let discount = 0;
+    let validCouponCode = null;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+      if (coupon) {
+        try {
+          // Check if coupon is already used by this user
+          const query = {
+            couponCode: coupon.code,
+            status: { $ne: "Cancelled" },
+          };
+          if (req.user) {
+            query["customer.userId"] = req.user._id;
+          } else {
+            const conditions = [];
+            if (customer?.phone) {
+              conditions.push({ "customer.phone": customer.phone });
+            }
+            if (customer?.email) {
+              conditions.push({ "customer.email": customer.email });
+            }
+            if (conditions.length > 0) {
+              query.$or = conditions;
+            }
+          }
+
+          if (query["customer.userId"] || query.$or) {
+            const alreadyUsed = await Order.findOne(query);
+            if (alreadyUsed) {
+              return res.status(400).json({
+                success: false,
+                message: "You have already used this coupon code.",
+              });
+            }
+          }
+
+          discount = calculateCouponDiscount(coupon, subtotal);
+          validCouponCode = coupon.code;
+        } catch (err) {
+          return res.status(400).json({
+            success: false,
+            message: `Coupon error: ${err.message}`,
+          });
+        }
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid coupon code.",
+        });
+      }
+    }
+
+    const deliveryCharge = (subtotal - discount) >= freeDeliveryThresholdSetting ? 0 : deliveryFeeSetting;
+    const total          = subtotal - discount + deliveryCharge;
 
     // ── 4. Build and save the order ───────────────────────────────────────────
     const orderData = {
@@ -59,6 +153,8 @@ const placeOrder = async (req, res, next) => {
       items:       orderItems,
       subtotal,
       deliveryCharge,
+      discount,
+      couponCode:  validCouponCode || undefined,
       total,
       address,
       paymentMethod: paymentMethod || "cod",

@@ -170,7 +170,7 @@ export default function MapAndHours() {
                   We're open right now!
                 </p>
                 <span className="ml-auto font-body text-xs text-green-600">
-                  Closes at 11 PM
+                  Closes at 12 PM
                 </span>
               </div>
             </div>

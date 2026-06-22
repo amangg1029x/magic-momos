@@ -33,6 +33,8 @@ const updateSettings = async (req, res, next) => {
       closeTime,
       codEnabled,
       onlinePaymentEnabled,
+      storeStatusOverride,
+      announcementText,
     } = req.body;
 
     const updateData = {
@@ -46,6 +48,8 @@ const updateSettings = async (req, res, next) => {
       closeTime,
       codEnabled: Boolean(codEnabled),
       onlinePaymentEnabled: Boolean(onlinePaymentEnabled),
+      storeStatusOverride,
+      announcementText,
     };
 
     // Filter out undefined values to only update what was provided

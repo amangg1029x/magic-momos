@@ -14,6 +14,8 @@ const DEFAULTS = {
   closeTime: "23:00",
   codEnabled: true,
   onlinePaymentEnabled: false,
+  storeStatusOverride: "auto",
+  announcementText: "",
 };
 
 export default function AdminSettings() {
@@ -164,6 +166,30 @@ export default function AdminSettings() {
           </Row>
           <Row label="Closes At">
             <Input value={form.closeTime} onChange={(v) => update("closeTime", v)} type="time" />
+          </Row>
+        </Section>
+
+        <Section title="Store Operations">
+          <Row label="Status Override">
+            <select
+              value={form.storeStatusOverride}
+              onChange={(e) => update("storeStatusOverride", e.target.value)}
+              className="w-full px-3.5 py-2 rounded-xl border border-gray-200 font-body text-sm focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30 focus:border-[#E8284B]"
+            >
+              <option value="auto">Auto (Follow Operational Hours)</option>
+              <option value="open">Force Open</option>
+              <option value="busy">Force Busy</option>
+              <option value="closed">Force Closed</option>
+            </select>
+          </Row>
+          <Row label="Announcement Text">
+            <textarea
+              value={form.announcementText}
+              onChange={(e) => update("announcementText", e.target.value)}
+              placeholder="E.g., Free delivery on all orders above ₹199 today! 🎉"
+              rows={2}
+              className="w-full px-3.5 py-2 rounded-xl border border-gray-200 font-body text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30 focus:border-[#E8284B]"
+            />
           </Row>
         </Section>
 

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Trash2, ShoppingBag, Plus, Minus, ChevronRight, Tag, Check, AlertCircle,
 } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
+import api from "../services/api";
 
 export default function CartSidebar({
   open, onClose,
@@ -18,14 +19,28 @@ export default function CartSidebar({
 
   const [couponInput, setCouponInput] = useState("");
   const [couponApplying, setCouponApplying] = useState(false);
+  const [activeCoupons, setActiveCoupons] = useState([]);
 
   const toFreeDelivery = Math.max(freeDeliveryThreshold - (subtotal - discount), 0);
   const freeDelivery   = deliveryFee === 0 && items.length > 0;
 
-  const handleApplyCoupon = async () => {
-    if (!couponInput.trim()) return;
+  useEffect(() => {
+    if (open) {
+      api.coupons.getActive()
+        .then((res) => {
+          if (res.success) {
+            setActiveCoupons(res.coupons || []);
+          }
+        })
+        .catch((err) => console.error("Error fetching active coupons:", err));
+    }
+  }, [open]);
+
+  const handleApplyCoupon = async (code) => {
+    const val = code || couponInput;
+    if (!val.trim()) return;
     setCouponApplying(true);
-    const ok = onApplyCoupon(couponInput);
+    const ok = await onApplyCoupon(val);
     if (ok) setCouponInput("");
     setTimeout(() => setCouponApplying(false), 300);
   };
@@ -321,13 +336,26 @@ export default function CartSidebar({
                             </motion.div>
                           )}
                         </AnimatePresence>
-                        <p className="font-body text-[11px] text-mm-muted">
-                          Try: <button onClick={() => setCouponInput("MAGIC10")}
-                            className="text-mm-red hover:underline font-600">MAGIC10</button>
-                          {" · "}
-                          <button onClick={() => setCouponInput("FIRST50")}
-                            className="text-mm-red hover:underline font-600">FIRST50</button>
-                        </p>
+                        {activeCoupons.length > 0 && (
+                          <div className="space-y-1">
+                            <p className="font-body text-[11px] text-mm-muted">Available Coupons:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {activeCoupons.map((c) => (
+                                <button
+                                  key={c.code}
+                                  onClick={() => {
+                                    setCouponInput(c.code);
+                                    handleApplyCoupon(c.code);
+                                  }}
+                                  className="font-body text-[10px] font-700 px-2 py-1 rounded-lg border border-mm-red/20 bg-mm-red/5 text-mm-red hover:bg-mm-red hover:text-white transition-colors cursor-pointer"
+                                  title={`${c.discountType === "percentage" ? `${c.discountValue}%` : `₹${c.discountValue}`} off${c.minOrderValue > 0 ? ` (Min order: ₹${c.minOrderValue})` : ""}`}
+                                >
+                                  {c.code}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

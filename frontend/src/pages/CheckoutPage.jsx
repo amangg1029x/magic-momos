@@ -39,8 +39,9 @@ const PAYMENT_METHODS = [
  *   cart — the full useCart() return object, passed down from MenuPage
  */
 export default function CheckoutPage({ cart }) {
-  const { navigate, isNative }  = useNav();
+  const { navigate, isNative, storeStatus, settings }  = useNav();
   const { user, isAuthenticated } = useAuth();
+  const isClosed = storeStatus && !storeStatus.open;
 
   const {
     items, subtotal, discount, deliveryFee, total,
@@ -157,6 +158,7 @@ export default function CheckoutPage({ cart }) {
       },
       paymentMethod,
       specialInstructions: form.instructions || undefined,
+      couponCode: coupon?.code || undefined,
     };
 
     console.log('Placing order payload:', JSON.stringify(payload));
@@ -536,11 +538,21 @@ export default function CheckoutPage({ cart }) {
                     </div>
                   )}
 
+                  {isClosed && (
+                    <div className="flex items-center gap-2.5 bg-red-50 border border-red-200
+                                    rounded-xl px-4 py-3">
+                      <AlertCircle size={15} className="text-red-500 shrink-0" />
+                      <p className="font-body text-sm text-red-700">
+                        We are currently closed. Operational hours: {settings?.openTime || "11:00"} to {settings?.closeTime || "23:00"}.
+                      </p>
+                    </div>
+                  )}
+
                   <motion.button
                     onClick={goToReview}
-                    disabled={confirmedAddr?.inRange === false}
-                    whileHover={confirmedAddr?.inRange === false ? {} : { scale: 1.02, boxShadow: "0 0 28px rgba(232,40,75,0.35)" }}
-                    whileTap={confirmedAddr?.inRange === false ? {} : { scale: 0.97 }}
+                    disabled={confirmedAddr?.inRange === false || isClosed}
+                    whileHover={confirmedAddr?.inRange === false || isClosed ? {} : { scale: 1.02, boxShadow: "0 0 28px rgba(232,40,75,0.35)" }}
+                    whileTap={confirmedAddr?.inRange === false || isClosed ? {} : { scale: 0.97 }}
                     className="w-full flex items-center justify-center gap-2
                                bg-mm-red hover:bg-red-600 text-white
                                py-4 rounded-xl font-body font-800 text-sm tracking-wide
@@ -666,9 +678,9 @@ export default function CheckoutPage({ cart }) {
 
                     <motion.button
                       onClick={handlePlaceOrder}
-                      disabled={placing}
-                      whileHover={{ scale: placing ? 1 : 1.02, boxShadow: placing ? "none" : "0 0 28px rgba(232,40,75,0.45)" }}
-                      whileTap={{ scale: 0.97 }}
+                      disabled={placing || isClosed}
+                      whileHover={placing || isClosed ? {} : { scale: 1.02, boxShadow: "0 0 28px rgba(232, 40, 75, 0.45)" }}
+                      whileTap={placing || isClosed ? {} : { scale: 0.97 }}
                       className="flex-1 flex items-center justify-center gap-2.5
                                  bg-mm-red hover:bg-red-600 text-white
                                  py-4 rounded-xl font-body font-800 text-sm tracking-wide

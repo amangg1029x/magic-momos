@@ -6,6 +6,8 @@ import AdminLayout from "../admin/AdminLayout";
 import AdminDashboard from "../admin/AdminDashboard";
 import AdminOrders from "../admin/AdminOrders";
 import AdminMenu from "../admin/AdminMenu";
+import AdminCoupons from "../admin/AdminCoupons";
+import AdminUsers from "../admin/AdminUsers";
 import AdminSettings from "../admin/AdminSettings";
 
 export default function AdminPage() {
@@ -46,6 +48,8 @@ export default function AdminPage() {
     dashboard: AdminDashboard,
     orders:    AdminOrders,
     menu:      AdminMenu,
+    coupons:   AdminCoupons,
+    users:     AdminUsers,
     settings:  AdminSettings,
   };
   const ActiveView = SUB_VIEWS[subPage] || AdminDashboard;

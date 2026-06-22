@@ -3,6 +3,8 @@ const router = require("express").Router();
 const { adminLogin, getAdminMe }    = require("../controllers/adminAuthController");
 const { getDeliveryCredentials, updateDeliveryCredentials } = require("../controllers/deliveryController");
 const { getSettings, updateSettings } = require("../controllers/settingController");
+const { getCoupons, createCoupon, deleteCoupon } = require("../controllers/couponController");
+const { getUsers, toggleUserStatus } = require("../controllers/adminUserController");
 const {
   adminGetOrders,
   adminGetOrder,
@@ -62,5 +64,14 @@ router.put("/delivery-credentials", updateDeliveryCredentials);
 // Settings management
 router.get("/settings", getSettings);
 router.put("/settings", updateSettings);
+
+// Coupons management
+router.get("/coupons", getCoupons);
+router.post("/coupons", createCoupon);
+router.delete("/coupons/:id", deleteCoupon);
+
+// Customer management
+router.get("/users", getUsers);
+router.patch("/users/:id/toggle-status", toggleUserStatus);
 
 module.exports = router;

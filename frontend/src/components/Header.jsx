@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Phone, ShoppingBag, User, LogOut, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, ShoppingBag, User, LogOut, ChevronDown, ChevronLeft } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
@@ -15,7 +15,7 @@ const NAV_LINKS = [
 ];
 
 export default function Header({ cartCount = 0, onCartOpen }) {
-  const { page, navigate, isNative }       = useNav();
+  const { page, navigate, isNative, goBack }       = useNav();
   const { user, isAuthenticated, logout } = useAuth();
 
   const [scrolled,      setScrolled]      = useState(false);
@@ -76,24 +76,37 @@ export default function Header({ cartCount = 0, onCartOpen }) {
       >
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-6">
 
-          {/* logo */}
-          <motion.button
-            onClick={() => navigate(isNative ? "menu" : "home")}
-            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-2.5 select-none"
-          >
-            <motion.span
-              animate={{ rotate: [0, -8, 8, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="text-3xl leading-none"
+          {/* back button and logo */}
+          <div className="flex items-center gap-3">
+            {isNative && page !== "menu" && (
+              <motion.button
+                onClick={goBack}
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                className="flex items-center justify-center p-2 rounded-xl bg-mm-card2 border border-mm-border text-mm-cream mr-1"
+                aria-label="Go Back"
+              >
+                <ChevronLeft size={20} />
+              </motion.button>
+            )}
+
+            <motion.button
+              onClick={() => navigate(isNative ? "menu" : "home")}
+              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+              className="flex items-center gap-2.5 select-none"
             >
-              <img src={logo} width="40" alt="logo" />
-            </motion.span>
-            <div className="leading-none">
-              <span className="block font-brand text-[1.4rem] text-mm-gold leading-tight">Magic</span>
-              <span className="block font-display text-[1.05rem] tracking-[0.2em] text-mm-cream leading-tight">MOMOS</span>
-            </div>
-          </motion.button>
+              <motion.span
+                animate={{ rotate: [0, -8, 8, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="text-3xl leading-none"
+              >
+                <img src={logo} width="40" alt="logo" />
+              </motion.span>
+              <div className="leading-none">
+                <span className="block font-brand text-[1.4rem] text-mm-gold leading-tight">Magic</span>
+                <span className="block font-display text-[1.05rem] tracking-[0.2em] text-mm-cream leading-tight">MOMOS</span>
+              </div>
+            </motion.button>
+          </div>
 
           {/* desktop nav */}
           <nav className="hidden md:flex items-center gap-7">

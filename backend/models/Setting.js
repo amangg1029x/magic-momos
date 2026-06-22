@@ -48,6 +48,15 @@ const settingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    storeStatusOverride: {
+      type: String,
+      enum: ["auto", "open", "busy", "closed"],
+      default: "auto",
+    },
+    announcementText: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

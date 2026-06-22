@@ -129,14 +129,16 @@ export default function AdminDashboard() {
           ) : (
             <div className="flex items-end justify-between gap-1.5 sm:gap-2 h-40 sm:h-44">
               {weeklyRevenue.map((d, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2 min-w-0">
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${Math.max((d.revenue / maxRev) * 100, 4)}%` }}
-                    transition={{ duration: 0.5, delay: 0.3 + i * 0.05 }}
-                    className="w-full bg-gradient-to-t from-[#E8284B] to-[#F5A623] rounded-t-lg min-h-[4px]"
-                  />
-                  <span className="font-body text-[9px] sm:text-[10px] text-gray-400">{d.day || d.label}</span>
+                <div key={i} className="flex-1 h-full flex flex-col justify-end items-center gap-2 min-w-0">
+                  <div className="w-full flex-1 relative flex items-end">
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${Math.max((d.revenue / maxRev) * 100, 4)}%` }}
+                      transition={{ duration: 0.5, delay: 0.3 + i * 0.05 }}
+                      className="w-full bg-gradient-to-t from-[#E8284B] to-[#F5A623] rounded-t-lg min-h-[4px]"
+                    />
+                  </div>
+                  <span className="font-body text-[9px] sm:text-[10px] text-gray-400 shrink-0">{d.day || d.label}</span>
                 </div>
               ))}
             </div>

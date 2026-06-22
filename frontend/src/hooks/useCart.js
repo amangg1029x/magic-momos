@@ -3,13 +3,6 @@ import api from "../services/api";
 
 const CART_KEY          = "mm_cart";
 
-// Valid coupons (in real app these would come from the backend)
-const COUPONS = {
-  MAGIC10:  { type: "percent", value: 10, label: "10% off" },
-  FIRST50:  { type: "flat",    value: 50, label: "₹50 off" },
-  NEWUSER:  { type: "percent", value: 15, label: "15% off" },
-};
-
 /**
  * useCart — manages cart state with localStorage persistence.
  *
@@ -105,6 +98,16 @@ export function useCart() {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
+  const subtotal   = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+  // Auto-remove coupon if subtotal drops below minOrderValue
+  useEffect(() => {
+    if (coupon && coupon.minOrderValue && subtotal < coupon.minOrderValue) {
+      setCoupon(null);
+      setCouponError(`Coupon removed: minimum order of ₹${coupon.minOrderValue} required.`);
+    }
+  }, [subtotal, coupon]);
+
   const clearCart = useCallback(() => {
     setItems([]);
     setCoupon(null);
@@ -112,17 +115,32 @@ export function useCart() {
   }, []);
 
   // ── Coupon logic ──────────────────────────────────────────────────────────
-  const applyCoupon = useCallback((code) => {
+  const applyCoupon = useCallback(async (code) => {
     setCouponError("");
-    const key    = code.trim().toUpperCase();
-    const found  = COUPONS[key];
-    if (!found) {
-      setCouponError("Invalid coupon code.");
+    const key = code.trim().toUpperCase();
+    try {
+      const res = await api.coupons.validate(key, subtotal);
+      if (res.success && res.coupon) {
+        setCoupon({
+          code: res.coupon.code,
+          type: res.coupon.discountType === "percentage" ? "percent" : "flat",
+          value: res.coupon.discountValue,
+          label: res.coupon.discountType === "percentage" 
+            ? `${res.coupon.discountValue}% off` 
+            : `₹${res.coupon.discountValue} off`,
+          minOrderValue: res.coupon.minOrderValue,
+          maxDiscount: res.coupon.maxDiscount,
+        });
+        return true;
+      } else {
+        setCouponError(res.message || "Invalid coupon code.");
+        return false;
+      }
+    } catch (err) {
+      setCouponError(err.message || "Invalid coupon code.");
       return false;
     }
-    setCoupon({ code: key, ...found });
-    return true;
-  }, []);
+  }, [subtotal]);
 
   const removeCoupon = useCallback(() => {
     setCoupon(null);
@@ -130,12 +148,14 @@ export function useCart() {
   }, []);
 
   // ── Derived values ────────────────────────────────────────────────────────
-  const subtotal   = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-
-  const discount   = coupon
+  const discount = coupon
     ? coupon.type === "percent"
-      ? Math.round(subtotal * coupon.value / 100)
-      : Math.min(coupon.value, subtotal)          // flat — can't exceed subtotal
+      ? Math.min(
+          Math.round((subtotal * coupon.value) / 100),
+          coupon.maxDiscount > 0 ? coupon.maxDiscount : Infinity,
+          subtotal
+        )
+      : Math.min(coupon.value, subtotal)
     : 0;
 
   const discountedSubtotal = subtotal - discount;

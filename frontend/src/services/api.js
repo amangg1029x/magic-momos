@@ -133,6 +133,12 @@ const api = {
     get: () => get("/settings"),
   },
 
+  // ── Coupons ─────────────────────────────────────────────────────────────────
+  coupons: {
+    getActive: () => get("/coupons"),
+    validate: (code, subtotal) => post("/coupons/validate", { code, subtotal }),
+  },
+
   // ── Admin auth ───────────────────────────────────────────────────────────────
   admin: {
     login: async (data) => {
@@ -180,6 +186,22 @@ const api = {
     // General store settings
     getSettings:               () => get("/admin/settings", "admin"),
     updateSettings:            (data) => put("/admin/settings", data, "admin"),
+
+    // Coupons
+    coupons: {
+      getAll: () => get("/admin/coupons", "admin"),
+      create: (data) => post("/admin/coupons", data, "admin"),
+      delete: (id) => del(`/admin/coupons/${id}`, "admin"),
+    },
+
+    // Users
+    users: {
+      getAll: (params = {}) => {
+        const qs = new URLSearchParams(params).toString();
+        return get(`/admin/users${qs ? `?${qs}` : ""}`, "admin");
+      },
+      toggleStatus: (id) => patch(`/admin/users/${id}/toggle-status`, {}, "admin"),
+    },
   },
 
   // ── Delivery partner ─────────────────────────────────────────────────────────

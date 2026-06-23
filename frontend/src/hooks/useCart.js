@@ -28,7 +28,14 @@ export function useCart() {
   const [items, setItems] = useState(() => {
     try {
       const saved = localStorage.getItem(CART_KEY);
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return parsed.map((item) => {
+        if (!item.cartKey) {
+          item.cartKey = String(item.id);
+        }
+        return item;
+      });
     } catch {
       return [];
     }
@@ -64,38 +71,48 @@ export function useCart() {
   }, [items]);
 
   // ── Cart mutations ────────────────────────────────────────────────────────
-  const addItem = useCallback((item) => {
+  const addItem = useCallback((item, size = "full") => {
     setItems((prev) => {
-      const exists = prev.find((i) => i.id === item.id);
+      const hasHalfFull = item.halfPrice != null && item.halfPrice > 0;
+      const cartKey = hasHalfFull ? `${item.id}-${size}` : String(item.id);
+      const exists = prev.find((i) => i.cartKey === cartKey);
       if (exists) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, qty: i.qty + 1 } : i
+          i.cartKey === cartKey ? { ...i, qty: i.qty + 1 } : i
         );
       }
+      
+      const price = (hasHalfFull && size === "half") ? item.halfPrice : item.price;
+      const displayName = hasHalfFull 
+        ? `${item.name} (${size === "half" ? "Half" : "Full"})` 
+        : item.name;
+
       return [
         ...prev,
         {
+          cartKey,
           id:       item.id,
-          name:     item.name,
+          name:     displayName,
           emoji:    item.emoji,
           imageUrl: item.imageUrl,
-          price:    item.price,
+          price:    price,
           qty:      1,
+          size:     hasHalfFull ? size : null,
         },
       ];
     });
   }, []);
 
-  const updateQty = useCallback((id, delta) => {
+  const updateQty = useCallback((cartKey, delta) => {
     setItems((prev) =>
       prev
-        .map((i) => (i.id === id ? { ...i, qty: i.qty + delta } : i))
+        .map((i) => (i.cartKey === cartKey ? { ...i, qty: i.qty + delta } : i))
         .filter((i) => i.qty > 0)
     );
   }, []);
 
-  const removeItem = useCallback((id) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  const removeItem = useCallback((cartKey) => {
+    setItems((prev) => prev.filter((i) => i.cartKey !== cartKey));
   }, []);
 
   const subtotal   = items.reduce((sum, i) => sum + i.price * i.qty, 0);

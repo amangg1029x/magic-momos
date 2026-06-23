@@ -33,6 +33,10 @@ const menuItemSchema = new mongoose.Schema(
       required:[true, "Price is required"],
       min:     [1, "Price must be positive"],
     },
+    halfPrice: {
+      type:    Number,
+      min:     [1, "Half price must be positive"],
+    },
     rating: {
       type:    Number,
       default: 0,

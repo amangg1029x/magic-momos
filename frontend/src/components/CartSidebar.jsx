@@ -186,7 +186,7 @@ export default function CartSidebar({
                 ) : (
                   items.map((item) => (
                     <motion.div
-                      key={item.id}
+                      key={item.cartKey || item.id}
                       layout
                       initial={{ opacity: 0, x: 30 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -219,7 +219,7 @@ export default function CartSidebar({
                       <div className="flex items-center gap-1.5 shrink-0">
                         <motion.button
                           whileTap={{ scale: 0.85 }}
-                          onClick={() => onUpdate(item.id, -1)}
+                          onClick={() => onUpdate(item.cartKey || item.id, -1)}
                           className="w-7 h-7 rounded-lg bg-mm-card2 border border-mm-border
                                      flex items-center justify-center text-mm-muted
                                      hover:bg-mm-red hover:text-white hover:border-mm-red
@@ -239,7 +239,7 @@ export default function CartSidebar({
 
                         <motion.button
                           whileTap={{ scale: 0.85 }}
-                          onClick={() => onUpdate(item.id, 1)}
+                          onClick={() => onUpdate(item.cartKey || item.id, 1)}
                           className="w-7 h-7 rounded-lg bg-mm-red text-white
                                      flex items-center justify-center
                                      hover:bg-red-600 transition-colors duration-150"

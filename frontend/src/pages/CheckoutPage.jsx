@@ -150,7 +150,11 @@ export default function CheckoutPage({ cart }) {
         email: form.email || undefined,
       },
       // Use the stored id (numeric) directly
-      items: items.filter(i => i.id && Number(i.id) > 0).map(i => ({ itemId: Number(i.id), qty: i.qty })),
+      items: items.filter(i => i.id && Number(i.id) > 0).map(i => ({
+        itemId: Number(i.id),
+        qty: i.qty,
+        size: i.size || undefined
+      })),
       address: {
         street:  form.street,
         pincode: form.pincode,
@@ -720,7 +724,7 @@ export default function CheckoutPage({ cart }) {
 
               <div className="space-y-3 mb-5 max-h-[280px] overflow-y-auto pr-1">
                 {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3">
+                  <div key={item.cartKey || item.id} className="flex items-center gap-3">
                     {item.imageUrl ? (
                       <img src={item.imageUrl} alt={item.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
                     ) : (

@@ -76,14 +76,22 @@ const placeOrder = async (req, res, next) => {
     // ── 2. Build order line items with snapshotted prices ────────────────────
     const orderItems = reqItems.map((reqItem) => {
       const menuItem = menuItems.find((m) => m.itemId === Number(reqItem.itemId));
+      const hasHalfFull = menuItem.halfPrice != null && menuItem.halfPrice > 0;
+      const size = reqItem.size || (hasHalfFull ? "full" : undefined);
+      const price = (hasHalfFull && size === "half") ? menuItem.halfPrice : menuItem.price;
+      const name = hasHalfFull 
+        ? `${menuItem.name} (${size === "half" ? "Half" : "Full"})` 
+        : menuItem.name;
+
       return {
         menuItem: menuItem._id,
         itemId:   menuItem.itemId,
         emoji:    menuItem.emoji,
         imageUrl: menuItem.imageUrl,
-        name:     menuItem.name,
-        price:    menuItem.price,   // snapshot — won't change if price updates later
+        name:     name,
+        price:    price,
         qty:      reqItem.qty,
+        size:     size,
       };
     });
 

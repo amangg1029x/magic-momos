@@ -63,15 +63,6 @@ export default function MenuGrid({ items: allItems, category, search, cartItems,
     return sortItems(items, sort);
   }, [allItems, category, search, vegOnly, sort]);
 
-  /* ── cart qty helper ──────────────────────────────────────────────────────
-     Cart items use the numeric itemId (item.id from frontend / item.itemId
-     from the API), while menu items from the API carry _id + itemId. We match
-     on itemId so the cart stays consistent regardless of source. */
-  const getQty = (item) => {
-    const key = item.itemId ?? item.id;
-    return cartItems.find((i) => i.id === key)?.qty ?? 0;
-  };
-
   // Normalise an API menu item into the shape useCart expects (id = itemId)
   const toCartItem = (item) => ({
     id:       item.itemId ?? item.id,
@@ -79,6 +70,7 @@ export default function MenuGrid({ items: allItems, category, search, cartItems,
     emoji:    item.emoji,
     imageUrl: item.imageUrl,
     price:    item.price,
+    halfPrice: item.halfPrice,
   });
 
   return (
@@ -179,10 +171,10 @@ export default function MenuGrid({ items: allItems, category, search, cartItems,
               >
                 <MenuItemCard
                   item={item}
-                  cartQty={getQty(item)}
-                  onAdd={() => onAdd(toCartItem(item))}
-                  onInc={() => onUpdate(item.itemId ?? item.id,  1)}
-                  onDec={() => onUpdate(item.itemId ?? item.id, -1)}
+                  cartItems={cartItems}
+                  onAdd={(itemObj, size) => onAdd(toCartItem(itemObj), size)}
+                  onInc={(cartKey) => onUpdate(cartKey, 1)}
+                  onDec={(cartKey) => onUpdate(cartKey, -1)}
                 />
               </motion.div>
             ))}

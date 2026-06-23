@@ -55,6 +55,7 @@ const placeOrderRules = [
   body("items").isArray({ min: 1 }).withMessage("Order must contain at least one item"),
   body("items.*.itemId").isNumeric().withMessage("Each item must have a valid itemId"),
   body("items.*.qty").isInt({ min: 1 }).withMessage("Quantity must be at least 1"),
+  body("items.*.size").optional().isIn(["half", "full"]).withMessage("Invalid item size"),
   body("address.street").trim().notEmpty().withMessage("Delivery address is required"),
   body("address.pincode")
     .matches(/^\d{6}$/)

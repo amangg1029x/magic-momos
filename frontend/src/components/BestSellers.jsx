@@ -153,7 +153,7 @@ export default function BestSellers() {
   }));
 
   // Validate required fields for each mapped pick; throw if missing
-  const REQUIRED_FIELDS = ["accent", "badge", "orders", "subtitle", "price", "name"];
+  const REQUIRED_FIELDS = ["accent", "badge", "subtitle", "price", "name"];
   PICKS.forEach(pick => {
     REQUIRED_FIELDS.forEach(field => {
       if (!pick[field]) {

@@ -243,6 +243,7 @@ export default function Header({ cartCount = 0, onCartOpen }) {
 
           {/* mobile right */}
           <div className="flex items-center gap-3 md:hidden">
+            {isAuthenticated && <NotificationBell theme="customer" />}
             {onCartOpen && (
               <button onClick={onCartOpen} className="relative text-mm-cream p-1">
                 <ShoppingBag size={22} />

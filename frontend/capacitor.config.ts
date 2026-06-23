@@ -43,7 +43,11 @@ const config: CapacitorConfig = {
     CapacitorHttp: {
       enabled: false,
     },
+    CapacitorUpdater: {
+      autoUpdate: true,
+    },
   },
+
 
   // REMOVED: overrideUserAgent spoofing a desktop-flavoured mobile Chrome UA.
   // This was almost certainly added because some bank/UPI pages serve broken

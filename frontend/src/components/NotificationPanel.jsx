@@ -102,7 +102,7 @@ export default function NotificationPanel({ onClose, theme = "customer" }) {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97, y: -8 }}
       transition={{ type: "spring", damping: 24, stiffness: 300 }}
-      className={`absolute right-0 top-full mt-2 w-[340px] max-w-[calc(100vw-1rem)]
+      className={`absolute -right-15 top-full mt-2 w-[340px] max-w-[calc(100vw-1rem)]
         rounded-2xl border shadow-2xl overflow-hidden z-50 ${panelBg}`}
     >
       {/* header */}

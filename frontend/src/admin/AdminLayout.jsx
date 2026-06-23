@@ -181,7 +181,7 @@ export default function AdminLayout({ children, subPage, onNavigate }) {
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 <span className="font-body text-xs text-green-700 font-600">Online</span>
               </div>
-              <NotificationBell theme="admin" />
+              <NotificationBell theme="customer" />
               <button
                 onClick={() => navigate("home")}
                 className="font-body text-xs text-gray-500 hover:text-red-600

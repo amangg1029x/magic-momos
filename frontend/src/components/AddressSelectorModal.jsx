@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { getCurrentGPSPosition } from "../services/geolocationService";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Search, LocateFixed, MapPin, Home, Briefcase, Star,
@@ -140,22 +141,23 @@ export default function AddressSelectorModal({ isOpen, onClose, onConfirm, saved
     setSuggestions([]);
     setShowSuggestions(false);
     setGpsStatus("idle");
-    if ("geolocation" in navigator) {
+
+    const autoGPS = async () => {
       setGpsStatus("locating");
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setPosition({ lat: latitude, lng: longitude });
-          setHasPositioned(true);
-          setGpsStatus("done");
-          runReverseGeocode(latitude, longitude);
-        },
-        () => setGpsStatus("denied"),
-        { enableHighAccuracy: true, timeout: 8000 }
-      );
-    }
+      try {
+        const coords = await getCurrentGPSPosition();
+        setPosition({ lat: coords.latitude, lng: coords.longitude });
+        setHasPositioned(true);
+        setGpsStatus("done");
+        runReverseGeocode(coords.latitude, coords.longitude);
+      } catch (err) {
+        setGpsStatus("denied");
+      }
+    };
+    autoGPS();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
 
   // ── Close on outside click (not inside modal) ─────────────────────────────
   // (handled via backdrop onClick)
@@ -184,21 +186,19 @@ export default function AddressSelectorModal({ isOpen, onClose, onConfirm, saved
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  const handleGPS = () => {
-    if (!("geolocation" in navigator)) return;
+  const handleGPS = async () => {
     setGpsStatus("locating");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setPosition({ lat: latitude, lng: longitude });
-        setHasPositioned(true);
-        setGpsStatus("done");
-        runReverseGeocode(latitude, longitude);
-      },
-      () => setGpsStatus("denied"),
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+    try {
+      const coords = await getCurrentGPSPosition();
+      setPosition({ lat: coords.latitude, lng: coords.longitude });
+      setHasPositioned(true);
+      setGpsStatus("done");
+      runReverseGeocode(coords.latitude, coords.longitude);
+    } catch (err) {
+      setGpsStatus("denied");
+    }
   };
+
 
   const handleMarkerDrag = (lat, lng) => {
     setPosition({ lat, lng });

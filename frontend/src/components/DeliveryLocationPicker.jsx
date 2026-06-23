@@ -33,6 +33,8 @@ function distanceKm(lat1, lon1, lat2, lon2) {
  *   onAddressChange — ({ city, pincode, street, lat, lng }) => void
  *   onZoneChange    — (inRange: boolean, distanceKm: number) => void
  */
+import { getCurrentGPSPosition } from "../services/geolocationService";
+
 export default function DeliveryLocationPicker({ onAddressChange, onZoneChange }) {
   const [position, setPosition] = useState({
     lat: RESTAURANT_LOCATION.latitude,
@@ -60,26 +62,25 @@ export default function DeliveryLocationPicker({ onAddressChange, onZoneChange }
     }
   }, [onAddressChange]);
 
-  const handleUseMyLocation = () => {
-    if (!("geolocation" in navigator)) {
-      setGpsStatus("unsupported");
-      return;
-    }
+  const handleUseMyLocation = async () => {
     setGpsStatus("locating");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setPosition({ lat: latitude, lng: longitude });
-        setHasPositioned(true);
-        setGpsStatus("done");
-        runGeocode(latitude, longitude);
-      },
-      (err) => {
-        setGpsStatus(err.code === err.PERMISSION_DENIED ? "denied" : "error");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5 * 60 * 1000 }
-    );
+    try {
+      const coords = await getCurrentGPSPosition();
+      setPosition({ lat: coords.latitude, lng: coords.longitude });
+      setHasPositioned(true);
+      setGpsStatus("done");
+      runGeocode(coords.latitude, coords.longitude);
+    } catch (err) {
+      if (err.message === "LOCATION_PERMISSION_DENIED") {
+        setGpsStatus("denied");
+      } else if (err.message === "GEOLOCATION_UNSUPPORTED") {
+        setGpsStatus("unsupported");
+      } else {
+        setGpsStatus("error");
+      }
+    }
   };
+
 
   const handleMarkerMove = (lat, lng) => {
     setPosition({ lat, lng });

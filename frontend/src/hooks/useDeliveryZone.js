@@ -27,40 +27,36 @@ function distanceKm(lat1, lon1, lat2, lon2) {
  *   checkLocation — () => void   (triggers a fresh browser geolocation request)
  *   reset       — () => void
  */
+import { getCurrentGPSPosition } from "../services/geolocationService";
+
 export function useDeliveryZone() {
   const [status, setStatus] = useState("idle");
   const [distance, setDistance] = useState(null);
 
-  const checkLocation = useCallback(() => {
-    if (!("geolocation" in navigator)) {
-      setStatus("unsupported");
-      return;
-    }
-
+  const checkLocation = useCallback(async () => {
     setStatus("checking");
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        const d = distanceKm(
-          latitude,
-          longitude,
-          RESTAURANT_LOCATION.latitude,
-          RESTAURANT_LOCATION.longitude
-        );
-        setDistance(Math.round(d * 10) / 10);
-        setStatus(d <= DELIVERY_RADIUS_KM ? "in-range" : "out-of-range");
-      },
-      (err) => {
-        setStatus(err.code === err.PERMISSION_DENIED ? "denied" : "error");
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 5 * 60 * 1000, // accept a cached fix up to 5 min old
+    try {
+      const coords = await getCurrentGPSPosition();
+      const d = distanceKm(
+        coords.latitude,
+        coords.longitude,
+        RESTAURANT_LOCATION.latitude,
+        RESTAURANT_LOCATION.longitude
+      );
+      setDistance(Math.round(d * 10) / 10);
+      setStatus(d <= DELIVERY_RADIUS_KM ? "in-range" : "out-of-range");
+    } catch (err) {
+      if (err.message === "LOCATION_PERMISSION_DENIED") {
+        setStatus("denied");
+      } else if (err.message === "GEOLOCATION_UNSUPPORTED") {
+        setStatus("unsupported");
+      } else {
+        setStatus("error");
       }
-    );
+    }
   }, []);
+
 
   const reset = useCallback(() => {
     setStatus("idle");

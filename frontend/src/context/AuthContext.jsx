@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import api, { setToken, clearToken, getToken } from "../services/api";
 
+import { initPushNotifications } from "../services/pushNotifications";
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -13,7 +15,10 @@ export function AuthProvider({ children }) {
     if (!token) { setLoading(false); return; }
 
     api.auth.me()
-      .then(({ user }) => setUser(user))
+      .then(({ user }) => {
+        setUser(user);
+        initPushNotifications("customer");
+      })
       .catch(() => clearToken())          // stale / invalid token → clear it
       .finally(() => setLoading(false));
   }, []);
@@ -23,6 +28,7 @@ export function AuthProvider({ children }) {
     const res = await api.auth.register(data);
     setToken(res.token);
     setUser(res.user);
+    initPushNotifications("customer");
     return res;
   }, []);
 
@@ -31,6 +37,7 @@ export function AuthProvider({ children }) {
     const res = await api.auth.login(data);
     setToken(res.token);
     setUser(res.user);
+    initPushNotifications("customer");
     return res;
   }, []);
 

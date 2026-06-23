@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import api from "../services/api";
 
+import { initPushNotifications } from "../services/pushNotifications";
+
 export default function AdminLogin({ onSuccess }) {
   const [form, setForm]       = useState({ email: "", password: "" });
   const [showPw, setShowPw]   = useState(false);
@@ -18,6 +20,7 @@ export default function AdminLogin({ onSuccess }) {
     setLoading(true);
     try {
       await api.admin.login(form);
+      initPushNotifications("admin");
       onSuccess();
     } catch (err) {
       setError(err.message || "Invalid email or password");

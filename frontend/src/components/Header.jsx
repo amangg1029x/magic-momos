@@ -4,6 +4,7 @@ import { Menu, X, Phone, ShoppingBag, User, LogOut, ChevronDown, ChevronLeft } f
 import { useNav } from "../context/NavigationContext";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
+import NotificationBell from "./NotificationBell";
 
 const NAV_LINKS = [
   { label: "Home",        page: "home",    section: "home"        },
@@ -156,6 +157,9 @@ export default function Header({ cartCount = 0, onCartOpen }) {
                 )}
               </motion.button>
             )}
+
+            {/* Notification bell — desktop, only for logged-in users */}
+            {isAuthenticated && <NotificationBell theme="customer" />}
 
             {/* ── Auth: user menu or login button ── */}
             {isAuthenticated ? (

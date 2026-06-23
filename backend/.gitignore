@@ -6,3 +6,5 @@ node_modules/
 .DS_Store
 .vercel/
 dist/
+magic-momos-firebase-adminsdk-fbsvc-cbb4c4c543.json
+firebase-service-account.json

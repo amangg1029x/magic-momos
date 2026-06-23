@@ -8,6 +8,11 @@ const {
 } = require("../controllers/deliveryController");
 const { deliveryProtect } = require("../middleware/auth");
 const { loginRules, validate } = require("../middleware/validators");
+const {
+  getDeliveryNotifications,
+  markDeliveryRead,
+  markAllDeliveryRead,
+} = require("../controllers/notificationController");
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -22,5 +27,14 @@ router.post("/login", loginLimiter, loginRules, validate, deliveryLogin);
 router.get("/orders",              deliveryProtect, getDeliveryOrders);
 router.patch("/orders/:id/status", deliveryProtect, deliveryUpdateStatus);
 router.get("/history",             deliveryProtect, getDeliveryHistory);
+
+// Notifications
+router.get("/notifications",                deliveryProtect, getDeliveryNotifications);
+router.patch("/notifications/read-all",     deliveryProtect, markAllDeliveryRead);
+router.patch("/notifications/:id/read",     deliveryProtect, markDeliveryRead);
+
+// Device Token for Push Notifications
+const { registerDeliveryToken } = require("../controllers/pushController");
+router.post("/device-token",                deliveryProtect, registerDeliveryToken);
 
 module.exports = router;

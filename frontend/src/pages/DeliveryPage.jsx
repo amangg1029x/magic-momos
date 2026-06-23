@@ -4,6 +4,8 @@ import api, { getDeliveryToken, clearDeliveryToken } from "../services/api";
 import DeliveryLogin     from "../delivery/DeliveryLogin";
 import DeliveryDashboard from "../delivery/DeliveryDashboard";
 
+import { initPushNotifications } from "../services/pushNotifications";
+
 export default function DeliveryPage() {
   const [checking, setChecking] = useState(true);
   const [authed,   setAuthed]   = useState(false);
@@ -18,6 +20,7 @@ export default function DeliveryPage() {
       try {
         await api.delivery.getOrders();
         setAuthed(true);
+        initPushNotifications("delivery");
       } catch {
         clearDeliveryToken();
       } finally {

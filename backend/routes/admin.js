@@ -6,6 +6,11 @@ const { getSettings, updateSettings } = require("../controllers/settingControlle
 const { getCoupons, createCoupon, deleteCoupon } = require("../controllers/couponController");
 const { getUsers, toggleUserStatus } = require("../controllers/adminUserController");
 const {
+  getAdminNotifications,
+  markAdminRead,
+  markAllAdminRead,
+} = require("../controllers/notificationController");
+const {
   adminGetOrders,
   adminGetOrder,
   updateOrderStatus,
@@ -73,5 +78,14 @@ router.delete("/coupons/:id", deleteCoupon);
 // Customer management
 router.get("/users", getUsers);
 router.patch("/users/:id/toggle-status", toggleUserStatus);
+
+// Notifications
+router.get("/notifications",                 getAdminNotifications);
+router.patch("/notifications/read-all",      markAllAdminRead);
+router.patch("/notifications/:id/read",      markAdminRead);
+
+// Device Token for Push Notifications
+const { registerAdminToken } = require("../controllers/pushController");
+router.post("/device-token",                 registerAdminToken);
 
 module.exports = router;

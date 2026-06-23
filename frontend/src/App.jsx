@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { NavigationProvider, useNav } from "./context/NavigationContext";
 import { AuthProvider } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useCart } from "./hooks/useCart";
 import { getAdminToken, getDeliveryToken } from "./services/api";
+import ToastContainer from "./components/ToastContainer";
 
 // Pages
 import HomePage         from "./pages/HomePage";
@@ -87,9 +89,13 @@ export default function App() {
       {/*
         AuthProvider must sit inside NavigationProvider so AuthContext
         can call navigate() on token expiry in the future.
+        NotificationProvider wraps both so all pages can consume notifications.
       */}
       <AuthProvider>
-        <AppInner />
+        <NotificationProvider>
+          <AppInner />
+          <ToastContainer />
+        </NotificationProvider>
       </AuthProvider>
     </NavigationProvider>
   );

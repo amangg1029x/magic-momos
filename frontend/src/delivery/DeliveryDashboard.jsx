@@ -6,6 +6,7 @@ import {
   Navigation, AlertCircle,
 } from "lucide-react";
 import api from "../services/api";
+import NotificationBell from "../components/NotificationBell";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -340,6 +341,7 @@ export default function DeliveryDashboard({ onLogout }) {
                   title="Refresh">
             <RefreshCw size={15} className={(loading || loadingHistory) ? "animate-spin text-green-400" : "text-white/50"} />
           </button>
+          <NotificationBell theme="delivery" />
           <button onClick={onLogout}
                   className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
                   style={{ background: "rgba(239,68,68,0.15)" }}

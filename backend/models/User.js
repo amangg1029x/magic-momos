@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema(
       type:    Boolean,
       default: true,
     },
+    fcmTokens: [{
+      token:     { type: String, required: true },
+      platform:  { type: String, default: "unknown" },
+      updatedAt: { type: Date, default: Date.now },
+    }],
   },
   { timestamps: true }
 );

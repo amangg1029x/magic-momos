@@ -10,6 +10,8 @@ import AdminCoupons from "../admin/AdminCoupons";
 import AdminUsers from "../admin/AdminUsers";
 import AdminSettings from "../admin/AdminSettings";
 
+import { initPushNotifications } from "../services/pushNotifications";
+
 export default function AdminPage() {
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed]     = useState(false);
@@ -24,6 +26,7 @@ export default function AdminPage() {
       try {
         await api.admin.me();
         setAuthed(true);
+        initPushNotifications("admin");
       } catch {
         api.admin.logout();
       } finally {

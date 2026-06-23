@@ -74,6 +74,14 @@ const api = {
     me:       ()     => get("/auth/me"),
     update:   (data) => put("/auth/me",        data),
     changePassword: (data) => put("/auth/change-password", data),
+
+    // Customer notifications
+    notifications: {
+      getAll:      ()   => get("/auth/notifications"),
+      markRead:    (id) => patch(`/auth/notifications/${id}/read`, {}),
+      markAllRead: ()   => patch("/auth/notifications/read-all", {}),
+    },
+    registerDeviceToken: (token, platform) => post("/auth/device-token", { token, platform }),
   },
 
   // ── Public menu ─────────────────────────────────────────────────────────────
@@ -202,6 +210,14 @@ const api = {
       },
       toggleStatus: (id) => patch(`/admin/users/${id}/toggle-status`, {}, "admin"),
     },
+
+    // Admin notifications
+    notifications: {
+      getAll:      ()   => get("/admin/notifications", "admin"),
+      markRead:    (id) => patch(`/admin/notifications/${id}/read`, {}, "admin"),
+      markAllRead: ()   => patch("/admin/notifications/read-all", {}, "admin"),
+    },
+    registerDeviceToken: (token, platform) => post("/admin/device-token", { token, platform }, "admin"),
   },
 
   // ── Delivery partner ─────────────────────────────────────────────────────────
@@ -215,6 +231,14 @@ const api = {
     getOrders: ()            => get("/delivery/orders", "delivery"),
     getHistory: ()           => get("/delivery/history", "delivery"),
     updateStatus: (id, status) => patch(`/delivery/orders/${id}/status`, { status }, "delivery"),
+
+    // Delivery notifications
+    notifications: {
+      getAll:      ()   => get("/delivery/notifications", "delivery"),
+      markRead:    (id) => patch(`/delivery/notifications/${id}/read`, {}, "delivery"),
+      markAllRead: ()   => patch("/delivery/notifications/read-all", {}, "delivery"),
+    },
+    registerDeviceToken: (token, platform) => post("/delivery/device-token", { token, platform }, "delivery"),
   },
 };
 

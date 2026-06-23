@@ -1,5 +1,6 @@
 const Coupon = require("../models/Coupon");
 const Order = require("../models/Order");
+const { createNotification } = require("./notificationController");
 
 // Helper to calculate coupon discount
 const calculateCouponDiscount = (coupon, subtotal) => {
@@ -105,6 +106,24 @@ const createCoupon = async (req, res, next) => {
       expiryDate: expiryDate || undefined,
       active: active !== undefined ? Boolean(active) : true,
     });
+
+    // Broadcast notification to all logged-in customers
+    if (coupon.active) {
+      const discountLabel = coupon.discountType === "percentage"
+        ? `${coupon.discountValue}% off`
+        : `₹${coupon.discountValue} off`;
+      const minLabel = coupon.minOrderValue > 0
+        ? ` on orders above ₹${coupon.minOrderValue}`
+        : "";
+      createNotification({
+        recipientId:   null, // broadcast
+        recipientRole: "customer",
+        type:          "coupon",
+        title:         `New Offer 🎟️ — Use Code: ${coupon.code}`,
+        body:          `Get ${discountLabel}${minLabel}! Apply code ${coupon.code} at checkout.`,
+        orderId:       null,
+      });
+    }
 
     res.status(201).json({ success: true, message: "Coupon created successfully", coupon });
   } catch (err) {

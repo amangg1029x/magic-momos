@@ -3,6 +3,7 @@ const MenuItem = require("../models/MenuItem");
 const Setting  = require("../models/Setting");
 const Coupon   = require("../models/Coupon");
 const { calculateCouponDiscount } = require("./couponController");
+const { createNotification } = require("./notificationController");
 const {
   createRazorpayOrder,
   verifyPaymentSignature,
@@ -199,6 +200,24 @@ const placeOrder = async (req, res, next) => {
       }
     }
 
+    // ── 6. Fire admin notification (fire-and-forget) ─────────────────────────
+    createNotification({
+      recipientRole: "admin",
+      type: "order_placed",
+      title: `New Order ${order.orderNumber} 🥟`,
+      body: `${order.customer.name} placed an order for ₹${order.total} (${order.paymentMethod.toUpperCase()})`,
+      orderId: order._id,
+    });
+
+    // Fire delivery notification so partners know a new order is coming
+    createNotification({
+      recipientRole: "delivery",
+      type: "order_placed",
+      title: `New Order Incoming 🛵`,
+      body: `Order ${order.orderNumber} — ₹${order.total} — is being prepared`,
+      orderId: order._id,
+    });
+
     res.status(201).json({
       success: true,
       message: "Order placed successfully!",
@@ -272,6 +291,26 @@ const verifyPayment = async (req, res, next) => {
     order.razorpaySignature   = razorpay_signature;
     if (order.status === "Pending") order.status = "Confirmed";
     await order.save();
+
+    // Notify admin of successful payment
+    createNotification({
+      recipientRole: "admin",
+      type: "payment",
+      title: `Payment Received ✅`,
+      body: `Online payment of ₹${order.total} confirmed for order ${order.orderNumber}`,
+      orderId: order._id,
+    });
+    // Notify customer their order is confirmed
+    if (order.customer.userId) {
+      createNotification({
+        recipientId: order.customer.userId,
+        recipientRole: "customer",
+        type: "order_status",
+        title: `Order Confirmed 🎉`,
+        body: `Your order ${order.orderNumber} has been confirmed! Estimated delivery: 20–30 mins.`,
+        orderId: order._id,
+      });
+    }
 
     res.json({
       success: true,
@@ -556,6 +595,37 @@ const updateOrderStatus = async (req, res, next) => {
     }
 
     await order.save();
+
+    // ── Notify customer and delivery partner of status change ────────────────
+    const STATUS_MESSAGES = {
+      Confirmed:         { emoji: "✅", body: `Your order ${order.orderNumber} has been confirmed! We're preparing it now.` },
+      Preparing:         { emoji: "👨‍🍳", body: `Your order ${order.orderNumber} is being freshly prepared. Hang tight!` },
+      "Out for Delivery":{ emoji: "🛵", body: `Your order ${order.orderNumber} is on the way! Get ready for some magic momos.` },
+      Delivered:         { emoji: "🎉", body: `Your order ${order.orderNumber} has been delivered. Enjoy your meal!` },
+      Cancelled:         { emoji: "❌", body: `Your order ${order.orderNumber} has been cancelled. ${note ? `Reason: ${note}` : ""}` },
+    };
+    const msg = STATUS_MESSAGES[status];
+    if (msg && order.customer.userId) {
+      createNotification({
+        recipientId:   order.customer.userId,
+        recipientRole: "customer",
+        type:          "order_status",
+        title:         `Order ${status} ${msg.emoji}`,
+        body:          msg.body,
+        orderId:       order._id,
+      });
+    }
+    // Notify delivery partner when order is ready to pick up
+    if (status === "Preparing") {
+      createNotification({
+        recipientRole: "delivery",
+        type:          "order_status",
+        title:         `Order Ready for Pickup 📦`,
+        body:          `Order ${order.orderNumber} for ${order.customer.name} is being prepared.`,
+        orderId:       order._id,
+      });
+    }
+
     res.json({ success: true, message: `Order status updated to ${status}.`, order });
   } catch (err) {
     next(err);

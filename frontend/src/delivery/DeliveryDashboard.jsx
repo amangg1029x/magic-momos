@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Phone, Package, Clock, CheckCircle2,
   Truck, RefreshCw, LogOut, ChevronDown, ChevronUp,
-  Navigation, AlertCircle,
+  Navigation, AlertCircle, Radio,
 } from "lucide-react";
 import api from "../services/api";
 import NotificationBell from "../components/NotificationBell";
@@ -240,7 +240,12 @@ export default function DeliveryDashboard({ onLogout }) {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [lastSync, setLastSync] = useState(null);
-  const pollRef = useRef(null);
+  const [geoError, setGeoError] = useState("");
+  const [sharingLocation, setSharingLocation] = useState(false);
+  const pollRef  = useRef(null);
+  const watchRef = useRef(null);   // geolocation watchPosition ID
+  const pingRef  = useRef(null);   // setInterval for location ping
+  const lastPosRef = useRef(null); // last known { lat, lng }
 
   const fetchOrders = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -254,6 +259,70 @@ export default function DeliveryDashboard({ onLogout }) {
       if (!silent) setLoading(false);
     }
   }, []);
+
+  // ── GPS location sharing ──────────────────────────────────────────────────
+  // Ping the backend with the delivery boy's current position whenever
+  // there is at least one "Out for Delivery" order.
+  const startLocationSharing = useCallback((outOrders) => {
+    if (!navigator.geolocation) return;
+    if (outOrders.length === 0) {
+      // Stop sharing if no active out-for-delivery orders
+      if (watchRef.current != null) {
+        navigator.geolocation.clearWatch(watchRef.current);
+        watchRef.current = null;
+      }
+      clearInterval(pingRef.current);
+      pingRef.current = null;
+      setSharingLocation(false);
+      return;
+    }
+
+    // Already watching
+    if (watchRef.current != null) return;
+
+    setSharingLocation(true);
+    setGeoError("");
+
+    const pingAll = (lat, lng) => {
+      outOrders.forEach((o) => {
+        api.delivery.updateLocation(o._id, lat, lng).catch(() => {});
+      });
+    };
+
+    watchRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        lastPosRef.current = { lat, lng };
+        pingAll(lat, lng);
+        setGeoError("");
+      },
+      (err) => {
+        setSharingLocation(false);
+        if (err.code === 1) setGeoError("Location permission denied. Enable location to allow delivery tracking.");
+        else setGeoError("Could not get your location. Check GPS/network.");
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+    );
+
+    // Also ping every 10 s in case the position hasn't changed
+    pingRef.current = setInterval(() => {
+      if (lastPosRef.current) {
+        pingAll(lastPosRef.current.lat, lastPosRef.current.lng);
+      }
+    }, 10000);
+  }, []);
+
+  // Re-evaluate GPS sharing whenever orders list changes
+  useEffect(() => {
+    const outForDelivery = orders.filter((o) => o.status === "Out for Delivery");
+    startLocationSharing(outForDelivery);
+
+    // Cleanup on unmount
+    return () => {
+      if (watchRef.current != null) navigator.geolocation.clearWatch(watchRef.current);
+      clearInterval(pingRef.current);
+    };
+  }, [orders, startLocationSharing]);
 
   const fetchHistory = useCallback(async (silent = false) => {
     if (!silent) setLoadingHistory(true);
@@ -335,6 +404,18 @@ export default function DeliveryDashboard({ onLogout }) {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Live location indicator */}
+          {sharingLocation && (
+            <motion.div
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+              style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.3)" }}
+            >
+              <Radio size={11} style={{ color: "#4ade80" }} />
+              <span className="font-body text-[10px] font-700" style={{ color: "#4ade80" }}>Live</span>
+            </motion.div>
+          )}
           <button onClick={handleRefresh}
                   className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
                   style={{ background: "rgba(255,255,255,0.08)" }}
@@ -350,6 +431,15 @@ export default function DeliveryDashboard({ onLogout }) {
           </button>
         </div>
       </header>
+
+      {/* Geo permission error banner */}
+      {geoError && (
+        <div className="mx-4 mt-3 flex items-start gap-2.5 rounded-xl p-3"
+             style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)" }}>
+          <AlertCircle size={14} className="mt-0.5 shrink-0" style={{ color: "#f87171" }} />
+          <p className="font-body text-xs" style={{ color: "#fca5a5" }}>{geoError}</p>
+        </div>
+      )}
 
       <div className="px-4 py-5 max-w-lg mx-auto space-y-6">
 

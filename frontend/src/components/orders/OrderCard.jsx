@@ -137,6 +137,7 @@ export default function OrderCard({ order: initialOrder, onUpdate }) {
                   orderId={order._id}
                   status={order.status}
                   onUpdate={handleTrackerUpdate}
+                  order={order}
                 />
               )}
 

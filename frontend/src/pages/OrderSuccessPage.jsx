@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle, ShoppingBag, Home, Phone, RotateCcw, Clock,
-  AlertTriangle, RefreshCw, ShieldCheck,
+  AlertTriangle, RefreshCw, ShieldCheck, MapPin,
 } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 import { useRazorpay } from "../hooks/useRazorpay";
@@ -289,6 +289,23 @@ export default function OrderSuccessPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Track Live button — only while order is en route */}
+                  {order.status !== "Delivered" && (
+                    <motion.button
+                      onClick={() => navigate("track", { orderId: order._id, address: pageData?.address })}
+                      whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(34,197,94,0.3)" }}
+                      whileTap={{ scale: 0.97 }}
+                      id="success-track-live-btn"
+                      className="mt-5 w-full flex items-center justify-center gap-2.5
+                                 bg-green-500 hover:bg-green-600 text-white
+                                 py-3.5 rounded-xl font-body font-700 text-sm
+                                 transition-all duration-200"
+                    >
+                      <MapPin size={15} />
+                      Track Live 🛵
+                    </motion.button>
+                  )}
                 </div>
               )}
 

@@ -14,6 +14,7 @@ import MenuPage         from "./pages/MenuPage";
 import ContactPage      from "./pages/ContactPage";
 import CheckoutPage     from "./pages/CheckoutPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
+import TrackOrderPage   from "./pages/TrackOrderPage";
 import LoginPage        from "./pages/LoginPage";
 import RegisterPage     from "./pages/RegisterPage";
 import AccountPage      from "./pages/AccountPage";
@@ -59,6 +60,7 @@ function AppInner() {
         </ProtectedRoute>
       );
       case "success":     return <OrderSuccessPage />;
+      case "track":       return <TrackOrderPage />;
       case "login":       return <LoginPage />;
       case "register":    return <RegisterPage />;
       case "out-of-range":return <OutOfRangePage />;

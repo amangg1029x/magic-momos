@@ -93,6 +93,13 @@ const orderSchema = new mongoose.Schema(
     deliveredAt:           Date,
     cancelReason:          String,
 
+    // Live delivery boy location (updated by the delivery partner every ~10s)
+    deliveryLocation: {
+      lat:       { type: Number },
+      lng:       { type: Number },
+      updatedAt: { type: Date },
+    },
+
     specialInstructions: { type: String, maxlength: 300 },
   },
   { timestamps: true }

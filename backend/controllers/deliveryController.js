@@ -178,6 +178,38 @@ const getDeliveryHistory = async (req, res, next) => {
   }
 };
 
+// ── PATCH /api/delivery/orders/:id/location ───────────────────────────────────
+// Delivery partner pings their GPS coordinates every ~10 s while "Out for Delivery".
+const updateDeliveryLocation = async (req, res, next) => {
+  try {
+    const { lat, lng } = req.body;
+
+    if (lat == null || lng == null) {
+      return res.status(400).json({ success: false, message: "lat and lng are required." });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          "deliveryLocation.lat":       lat,
+          "deliveryLocation.lng":       lng,
+          "deliveryLocation.updatedAt": new Date(),
+        },
+      },
+      { new: true, select: "orderNumber status deliveryLocation" }
+    );
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+
+    res.json({ success: true, deliveryLocation: order.deliveryLocation });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   deliveryLogin,
   getDeliveryOrders,
@@ -185,4 +217,5 @@ module.exports = {
   getDeliveryCredentials,
   updateDeliveryCredentials,
   getDeliveryHistory,
+  updateDeliveryLocation,
 };

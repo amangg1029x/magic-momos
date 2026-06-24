@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Clock, CheckCircle, ChefHat, Truck, Package, RefreshCw } from "lucide-react";
+import { Clock, CheckCircle, ChefHat, Truck, Package, RefreshCw, MapPin } from "lucide-react";
 import api from "../../services/api";
+import { useNav } from "../../context/NavigationContext";
 import { ACTIVE_STATUSES } from "./OrderStatusBadge";
 
 // ── Visual steps for the progress stepper ──────────────────────────────────
@@ -36,7 +37,8 @@ const POLL_INTERVAL_MS = 15_000; // poll every 15 s for active orders
  *   status    {string}   – current order status (seed value)
  *   onUpdate  {fn}       – called with the new order object when status changes
  */
-export default function OrderTracker({ orderId, status: seedStatus, onUpdate }) {
+export default function OrderTracker({ orderId, status: seedStatus, onUpdate, order: orderProp }) {
+  const { navigate } = useNav();
   const [liveStatus, setLiveStatus] = useState(seedStatus);
   const [lastPolled, setLastPolled] = useState(null);
   const [polling,    setPolling]    = useState(false);
@@ -218,6 +220,24 @@ export default function OrderTracker({ orderId, status: seedStatus, onUpdate }) 
           )}
         </div>
       </motion.div>
+
+      {/* Track Live button — shown for active orders */}
+      {isActive && (
+        <button
+          id={`order-tracker-track-live-${orderId}`}
+          onClick={() => navigate("track", {
+            orderId,
+            address: orderProp?.address,
+          })}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl
+                     font-body font-700 text-sm text-white transition-all duration-200
+                     hover:opacity-90 active:scale-[0.97]"
+          style={{ background: "linear-gradient(135deg, #22c55e, #16a34a)" }}
+        >
+          <MapPin size={14} />
+          Track Live 🛵
+        </button>
+      )}
     </div>
   );
 }

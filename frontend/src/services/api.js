@@ -231,6 +231,7 @@ const api = {
     getOrders: ()            => get("/delivery/orders", "delivery"),
     getHistory: ()           => get("/delivery/history", "delivery"),
     updateStatus: (id, status) => patch(`/delivery/orders/${id}/status`, { status }, "delivery"),
+    updateLocation: (id, lat, lng) => patch(`/delivery/orders/${id}/location`, { lat, lng }, "delivery"),
 
     // Delivery notifications
     notifications: {

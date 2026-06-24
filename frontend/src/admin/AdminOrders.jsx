@@ -1,11 +1,137 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, X, Loader2, ChevronLeft, ChevronRight,
-  Phone, MapPin, CreditCard, Package,
+  Phone, MapPin, CreditCard, Package, Map, Radio,
 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import api from "../services/api";
 import { STATUS_CONFIG } from "../data/adminData";
+
+// Fix Leaflet default icon
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl:       "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl:     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+const restaurantIcon = L.divIcon({
+  className: "",
+  html: `<div style="width:42px;height:42px;border-radius:50%;
+    background:linear-gradient(135deg,#e8284b,#b91c1c);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;box-shadow:0 4px 14px rgba(232,40,75,0.4);border:3px solid white;">⭐</div>`,
+  iconSize:[42,42],iconAnchor:[21,21],popupAnchor:[0,-22],
+});
+
+const deliveryMapIcon = L.divIcon({
+  className: "",
+  html: `<div style="width:42px;height:42px;border-radius:50%;
+    background:linear-gradient(135deg,#16a34a,#15803d);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;box-shadow:0 4px 16px rgba(22,163,74,0.5);border:3px solid white;
+    animation:gpulse2 2s infinite;">🛵</div>
+  <style>@keyframes gpulse2{
+    0%,100%{box-shadow:0 4px 14px rgba(22,163,74,0.5);}
+    50%{box-shadow:0 4px 28px rgba(22,163,74,0.9);}
+  }</style>`,
+  iconSize:[42,42],iconAnchor:[21,21],popupAnchor:[0,-22],
+});
+
+// RESTAURANT_COORDS — update these to your actual restaurant lat/lng
+const RESTAURANT = { lat: 28.6753, lng: 77.0990, name: "Magic Momos" };
+
+function FitBounds({ positions }) {
+  const map = useMap();
+  useEffect(() => {
+    if (positions.length > 0) {
+      const bounds = L.latLngBounds([[RESTAURANT.lat, RESTAURANT.lng], ...positions.map(p => [p.lat, p.lng])]);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [positions, map]);
+  return null;
+}
+
+function AdminLiveMap() {
+  const [liveOrders, setLiveOrders] = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const pollRef = useRef(null);
+
+  const fetchLive = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
+    try {
+      const res = await api.admin.orders.getAll({ status: "Out for Delivery", limit: 50 });
+      setLiveOrders(res.orders || []);
+    } catch { /* keep stale */ }
+    finally { if (!quiet) setLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    fetchLive();
+    pollRef.current = setInterval(() => fetchLive(true), 15000);
+    return () => clearInterval(pollRef.current);
+  }, [fetchLive]);
+
+  const pins = liveOrders
+    .filter(o => o.deliveryLocation?.lat != null)
+    .map(o => ({ lat: o.deliveryLocation.lat, lng: o.deliveryLocation.lng,
+                 name: o.customer?.name, num: o.orderNumber }));
+
+  return (
+    <div className="rounded-2xl overflow-hidden shadow-md border border-gray-100 mb-5"
+         style={{ height: 380 }}>
+      {loading ? (
+        <div className="h-full flex items-center justify-center bg-gray-50">
+          <Loader2 size={28} className="animate-spin text-[#E8284B]" />
+        </div>
+      ) : (
+        <MapContainer
+          center={[RESTAURANT.lat, RESTAURANT.lng]}
+          zoom={13}
+          style={{ width: "100%", height: "100%" }}
+          zoomControl
+          attributionControl={false}
+        >
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            attribution="&copy; CARTO"
+          />
+          {pins.length > 0 && <FitBounds positions={pins} />}
+
+          {/* Restaurant pin */}
+          <Marker position={[RESTAURANT.lat, RESTAURANT.lng]} icon={restaurantIcon}>
+            <Popup><strong>⭐ {RESTAURANT.name}</strong></Popup>
+          </Marker>
+
+          {/* Delivery pins */}
+          {pins.map((p, i) => (
+            <Marker key={i} position={[p.lat, p.lng]} icon={deliveryMapIcon}>
+              <Popup>
+                <strong>🛵 {p.num}</strong><br />
+                <span style={{ fontSize: 12, color: "#555" }}>{p.name}</span>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      )}
+
+      {/* Overlay: no active deliveries */}
+      {!loading && pins.length === 0 && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2
+                        bg-gray-900/60 text-white rounded-2xl" style={{ zIndex: 999 }}>
+          <div className="text-4xl">🛵</div>
+          <p className="font-body text-sm font-700">No active deliveries right now</p>
+          <p className="font-body text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
+            Map will update when orders are Out for Delivery
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const STATUSES = ["Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
 
@@ -57,6 +183,7 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState("");
   const [selected, setSelected] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [showMap,  setShowMap]  = useState(false);
 
   const fetchOrders = useCallback(async (page = 1, silent = false) => {
     if (!silent) setLoading(true);
@@ -105,6 +232,24 @@ export default function AdminOrders() {
 
   return (
     <div className="space-y-5">
+
+      {/* Live Map panel */}
+      <AnimatePresence>
+        {showMap && (
+          <motion.div
+            key="live-map"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="relative">
+              <AdminLiveMap />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* filters */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3 sm:items-center">
         <div className="relative flex-1 min-w-0">
@@ -128,6 +273,20 @@ export default function AdminOrders() {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
+
+        {/* Live Map toggle */}
+        <button
+          id="admin-live-map-toggle"
+          onClick={() => setShowMap(v => !v)}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-body text-sm font-700
+                      transition-all border shrink-0
+                      ${showMap
+                        ? "bg-green-500 text-white border-green-600 shadow-[0_4px_14px_rgba(34,197,94,0.35)]"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-600"}`}
+        >
+          {showMap ? <Radio size={14} /> : <Map size={14} />}
+          {showMap ? "Hide Map" : "Live Map"}
+        </button>
       </div>
 
       {/* orders list */}

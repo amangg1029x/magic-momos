@@ -170,19 +170,28 @@ export default function MenuItemCard({ item, cartItems = [], onAdd, onInc, onDec
                 <div className="flex flex-col leading-none">
                   <span className="font-body text-[10px] text-mm-muted uppercase tracking-wider">Half</span>
                   <span className="font-display text-base sm:text-lg text-mm-cream">₹{item.halfPrice}</span>
+                  {item.halfPieces && (
+                    <span className="font-body text-[10px] text-mm-muted mt-0.5">{item.halfPieces} pcs</span>
+                  )}
                 </div>
                 <span className="text-mm-border font-body text-sm">·</span>
                 <div className="flex flex-col leading-none">
                   <span className="font-body text-[10px] text-mm-muted uppercase tracking-wider">Full</span>
                   <span className="font-display text-base sm:text-lg text-mm-cream">₹{item.price}</span>
+                  {item.pieces && (
+                    <span className="font-body text-[10px] text-mm-muted mt-0.5">{item.pieces} pcs</span>
+                  )}
                 </div>
               </div>
             ) : (
-              <div>
+              <div className="flex items-baseline gap-1.5">
                 <span className="font-display text-xl sm:text-[1.5rem] text-mm-cream leading-none">
                   ₹{item.price}
                 </span>
-                <span className="font-body text-[11px] text-mm-muted ml-1 hidden sm:inline">per plate</span>
+                {item.pieces
+                  ? <span className="font-body text-[11px] text-mm-muted">· {item.pieces} pcs</span>
+                  : <span className="font-body text-[11px] text-mm-muted hidden sm:inline">per plate</span>
+                }
               </div>
             )}
           </div>

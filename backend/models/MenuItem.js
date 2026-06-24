@@ -37,6 +37,15 @@ const menuItemSchema = new mongoose.Schema(
       type:    Number,
       min:     [1, "Half price must be positive"],
     },
+    // Optional piece counts — leave blank to hide on menu
+    pieces: {
+      type:    Number,
+      min:     [1, "Pieces must be at least 1"],
+    },
+    halfPieces: {
+      type:    Number,
+      min:     [1, "Half pieces must be at least 1"],
+    },
     rating: {
       type:    Number,
       default: 0,

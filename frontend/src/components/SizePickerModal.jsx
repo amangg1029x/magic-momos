@@ -21,14 +21,18 @@ export default function SizePickerModal({ open, item, onSelect, onClose }) {
     {
       size:     "half",
       label:    "Half Plate",
-      sublabel: "Great for light hunger or trying a new item",
+      sublabel: item.halfPieces
+        ? `Great for light hunger or trying a new item · ${item.halfPieces} pcs`
+        : "Great for light hunger or trying a new item",
       price:    item.halfPrice,
       emoji:    "🍽️",
     },
     {
       size:     "full",
       label:    "Full Plate",
-      sublabel: "Full serving — the crowd favourite",
+      sublabel: item.pieces
+        ? `Full serving — the crowd favourite · ${item.pieces} pcs`
+        : "Full serving — the crowd favourite",
       price:    item.price,
       emoji:    "🥣",
     },

@@ -7,7 +7,8 @@ const CATEGORIES = ["momos", "rolls", "snacks", "sides", "drinks"];
 
 const emptyForm = {
   itemId: "", name: "", category: "momos", price: "",
-  halfPrice: "", desc: "", imageUrl: "", available: true, tag: "",
+  halfPrice: "", pieces: "", halfPieces: "",
+  desc: "", imageUrl: "", available: true, tag: "",
 };
 
 export default function AdminMenu() {
@@ -44,15 +45,17 @@ export default function AdminMenu() {
   const openEdit = (item) => {
     setEditing(item);
     setForm({
-      itemId: item.itemId ?? "",
-      name: item.name ?? "",
-      category: item.category ?? "momos",
-      price: item.price ?? "",
-      halfPrice: item.halfPrice ?? "",
-      desc: item.desc ?? item.description ?? "",
-      imageUrl: item.imageUrl ?? "",
-      available: item.available ?? item.isAvailable ?? true,
-      tag: item.tag ?? "",
+      itemId:     item.itemId ?? "",
+      name:       item.name ?? "",
+      category:   item.category ?? "momos",
+      price:      item.price ?? "",
+      halfPrice:  item.halfPrice ?? "",
+      pieces:     item.pieces ?? "",
+      halfPieces: item.halfPieces ?? "",
+      desc:       item.desc ?? item.description ?? "",
+      imageUrl:   item.imageUrl ?? "",
+      available:  item.available ?? item.isAvailable ?? true,
+      tag:        item.tag ?? "",
     });
     setError("");
     setModalOpen(true);
@@ -63,10 +66,12 @@ export default function AdminMenu() {
     setSaving(true);
     setError("");
     try {
-      const payload = { 
-        ...form, 
-        price: Number(form.price), 
-        halfPrice: form.halfPrice ? Number(form.halfPrice) : undefined 
+      const payload = {
+        ...form,
+        price:      Number(form.price),
+        halfPrice:  form.halfPrice  ? Number(form.halfPrice)  : undefined,
+        pieces:     form.pieces     ? Number(form.pieces)     : undefined,
+        halfPieces: form.halfPieces ? Number(form.halfPieces) : undefined,
       };
       if (editing) {
         await api.admin.menu.update(editing._id || editing.id, payload);
@@ -181,9 +186,14 @@ export default function AdminMenu() {
               <p className="font-display text-base text-gray-900 tracking-wide mt-1">{item.name}</p>
               <p className="font-body text-xs text-gray-400 capitalize mb-2">{item.category}</p>
               <div className="flex items-center justify-between">
-                <span className="font-body font-700 text-[#E8284B]">
-                  ₹{item.price} {item.halfPrice ? `(Half: ₹${item.halfPrice})` : ""}
-                </span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-body font-700 text-[#E8284B]">
+                    {item.halfPrice
+                      ? `Half ₹${item.halfPrice}${item.halfPieces ? ` (${item.halfPieces} pcs)` : ""} · Full ₹${item.price}${item.pieces ? ` (${item.pieces} pcs)` : ""}`
+                      : `₹${item.price}${item.pieces ? ` · ${item.pieces} pcs` : ""}`
+                    }
+                  </span>
+                </div>
                 {!item.available && (
                   <span className="font-body text-[10px] font-600 text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
                     UNAVAILABLE
@@ -248,8 +258,27 @@ export default function AdminMenu() {
                   <Field label="Full Price (₹)" value={form.price} onChange={(v) => setForm((f) => ({ ...f, price: v }))} type="number" required />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="Half Price (₹) (optional)" value={form.halfPrice} onChange={(v) => setForm((f) => ({ ...f, halfPrice: v }))} type="number" />
-                  <Field label="Tag (optional)" value={form.tag} onChange={(v) => setForm((f) => ({ ...f, tag: v }))} placeholder="Bestseller, New, Spicy…" />
+                  <Field label="Half Price (₹) — optional" value={form.halfPrice} onChange={(v) => setForm((f) => ({ ...f, halfPrice: v }))} type="number" />
+                  <Field label="Tag — optional" value={form.tag} onChange={(v) => setForm((f) => ({ ...f, tag: v }))} placeholder="Bestseller, New, Spicy…" />
+                </div>
+                {/* Piece counts */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Field
+                    label={form.halfPrice ? "Pieces — full plate (optional)" : "Pieces per serving (optional)"}
+                    value={form.pieces}
+                    onChange={(v) => setForm((f) => ({ ...f, pieces: v }))}
+                    type="number"
+                    placeholder="e.g. 12"
+                  />
+                  {form.halfPrice && (
+                    <Field
+                      label="Pieces — half plate (optional)"
+                      value={form.halfPieces}
+                      onChange={(v) => setForm((f) => ({ ...f, halfPieces: v }))}
+                      type="number"
+                      placeholder="e.g. 6"
+                    />
+                  )}
                 </div>
                 <div>
                   <label className="font-body text-xs font-600 text-gray-500 mb-1.5 block">Description</label>

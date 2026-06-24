@@ -43,6 +43,9 @@ const menuItemRules = [
   body("spicy").optional().isBoolean(),
   body("popular").optional().isBoolean(),
   body("available").optional().isBoolean(),
+  body("halfPrice").optional().isFloat({ min: 1 }).withMessage("Half price must be a positive number"),
+  body("pieces").optional().isInt({ min: 1 }).withMessage("Pieces must be a positive integer"),
+  body("halfPieces").optional().isInt({ min: 1 }).withMessage("Half pieces must be a positive integer"),
 ];
 
 // ── Order validators ──────────────────────────────────────────────────────────

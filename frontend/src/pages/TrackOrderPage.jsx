@@ -132,38 +132,33 @@ export default function TrackOrderPage() {
   const isActive = order?.status && !["Delivered", "Cancelled"].includes(order.status);
 
   return (
-    <div className="min-h-screen" style={{ background: "#0d0f14" }}>
+    <div className="min-h-screen bg-mm-black">
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-50 flex items-center gap-3 px-4 py-3"
-              style={{ background: "rgba(13,15,20,0.85)", backdropFilter: "blur(16px)",
-                       borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-          <button id="track-back-btn" onClick={() => goBack()}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: "rgba(255,255,255,0.08)" }}>
-            <ArrowLeft size={16} className="text-white/70" />
-          </button>
+      <header className="sticky top-0 z-50 flex items-center gap-3 px-4 py-3 bg-white/80 backdrop-blur-md border-b border-mm-border">
+        <button id="track-back-btn" onClick={() => goBack()}
+                className="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-mm-border transition-colors hover:border-mm-red/25">
+          <ArrowLeft size={16} className="text-mm-cream/70" />
+        </button>
         <div className="flex-1 min-w-0">
-          <p className="font-display text-sm text-white leading-none">LIVE TRACKING</p>
+          <p className="font-display text-sm text-mm-cream leading-none">LIVE TRACKING</p>
           {order?.orderNumber && (
-            <p className="font-body text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <p className="font-body text-xs mt-1 text-mm-muted">
               {order.orderNumber}
             </p>
           )}
         </div>
         {isActive && (
-          <motion.div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                      style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)" }}
-                      animate={{ opacity: [1, 0.45, 1] }}
+          <motion.div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-200"
+                      animate={{ opacity: [1, 0.6, 1] }}
                       transition={{ duration: 1.8, repeat: Infinity }}>
-            <Radio size={10} style={{ color: "#4ade80" }} />
-            <span className="font-body text-[10px] font-700" style={{ color: "#4ade80" }}>Live</span>
+            <Radio size={10} className="text-green-600" />
+            <span className="font-body text-[10px] font-700 text-green-700">Live</span>
           </motion.div>
         )}
         <button id="track-refresh-btn" onClick={() => fetchOrder(true)}
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(255,255,255,0.06)" }}>
-          <RefreshCw size={14} className={loading ? "animate-spin text-green-400" : "text-white/35"} />
+                className="w-8 h-8 rounded-xl flex items-center justify-center bg-white border border-mm-border transition-colors hover:border-mm-red/25">
+          <RefreshCw size={14} className={loading ? "animate-spin text-mm-red" : "text-mm-muted"} />
         </button>
       </header>
 
@@ -178,7 +173,7 @@ export default function TrackOrderPage() {
             attributionControl={false}
           >
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
               attribution='&copy; CARTO'
             />
             <MapBounds positions={mapPositions} />
@@ -208,17 +203,16 @@ export default function TrackOrderPage() {
             )}
           </MapContainer>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-4"
-               style={{ background: "rgba(255,255,255,0.02)" }}>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-mm-card border-b border-mm-border">
             {loading ? (
               <>
-                <RefreshCw size={30} className="animate-spin" style={{ color: "#4ade80" }} />
-                <p className="font-body text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Loading map…</p>
+                <RefreshCw size={30} className="animate-spin text-mm-red" />
+                <p className="font-body text-sm text-mm-muted">Loading map…</p>
               </>
             ) : (
               <>
                 <div className="text-5xl">📍</div>
-                <p className="font-body text-sm text-center max-w-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                <p className="font-body text-sm text-center max-w-xs text-mm-muted">
                   {order?.status === "Preparing"
                     ? "Your momos are being prepared. Map will show when the delivery partner picks up your order."
                     : "Waiting for location data…"}
@@ -230,10 +224,9 @@ export default function TrackOrderPage() {
 
         {/* Staleness badge */}
         {hasDeliveryPin && order?.deliveryLocation?.updatedAt && (
-          <div className="absolute bottom-3 right-3 z-[999] flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
-               style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}>
-            <MapPin size={11} style={{ color: "#60a5fa" }} />
-            <span className="font-body text-[11px]" style={{ color: "rgba(255,255,255,0.65)" }}>
+          <div className="absolute bottom-3 right-3 z-[999] flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/90 border border-mm-border backdrop-blur-sm shadow-card">
+            <MapPin size={11} className="text-mm-red" />
+            <span className="font-body text-[11px] text-mm-cream">
               Updated {timeAgo(order.deliveryLocation.updatedAt)}
             </span>
           </div>
@@ -247,50 +240,49 @@ export default function TrackOrderPage() {
         <AnimatePresence>
           {error && (
             <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                        className="flex items-center gap-2.5 rounded-xl px-4 py-3"
-                        style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-              <p className="font-body text-xs" style={{ color: "#fca5a5" }}>{error}</p>
+                        className="flex items-center gap-2.5 rounded-xl px-4 py-3 bg-red-50 border border-red-100">
+              <p className="font-body text-xs text-red-700">{error}</p>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Progress stepper */}
         {order && order.status !== "Cancelled" && (
-          <div className="rounded-2xl p-5"
-               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <p className="font-body text-[10px] uppercase tracking-widest mb-5"
-               style={{ color: "rgba(255,255,255,0.3)" }}>Order Progress</p>
+          <div className="bg-white border border-mm-border rounded-2xl p-5 shadow-card">
+            <p className="font-body text-[10px] uppercase tracking-widest mb-5 text-mm-muted">Order Progress</p>
 
             <div className="relative flex justify-between items-start">
               {/* Track lines */}
-              <div className="absolute top-5 left-5 right-5 h-0.5"
-                   style={{ background: "rgba(255,255,255,0.08)" }} />
+              <div className="absolute top-5 left-5 right-5 h-0.5 bg-mm-border" />
               <div className="absolute top-5 left-5 h-0.5 transition-all duration-700"
                    style={{
                      width: `calc(${(stepIdx / (STEPS.length - 1)) * 100}% * ((100% - 40px) / 100%))`,
-                     background: "linear-gradient(90deg,#22c55e,#16a34a)",
+                     background: "linear-gradient(90deg, #E8284B, #f97316)",
                    }} />
 
               {STEPS.map((step, i) => (
                 <div key={step.key} className="relative z-10 flex flex-col items-center gap-1.5" style={{ flex: 1 }}>
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-base border-2 transition-all duration-500"
                        style={{
-                         background:  i <= stepIdx ? "linear-gradient(135deg,#22c55e,#16a34a)" : "rgba(255,255,255,0.05)",
-                         borderColor: i <= stepIdx ? "#22c55e" : "rgba(255,255,255,0.1)",
-                         boxShadow:   i === stepIdx ? "0 0 0 4px rgba(34,197,94,0.18)" : "none",
+                         background:  i <= stepIdx ? "linear-gradient(135deg, #E8284B, #ff6b6b)" : "#FFFDF6",
+                         borderColor: i <= stepIdx ? "#E8284B" : "rgba(45,34,30,0.08)",
+                         boxShadow:   i === stepIdx ? "0 0 20px rgba(232,40,75,0.25)" : "none",
                        }}>
-                    {step.emoji}
+                    {i <= stepIdx ? (
+                      <span className="text-white text-xs">✓</span>
+                    ) : (
+                      step.emoji
+                    )}
                   </div>
-                  <span className="font-body text-[9px] text-center leading-tight"
-                        style={{ color: i <= stepIdx ? "#4ade80" : "rgba(255,255,255,0.25)", maxWidth: 46 }}>
+                  <span className="font-body text-[9px] text-center leading-tight max-w-[46px]"
+                        style={{ color: i <= stepIdx ? "#E8284B" : "#7A625C", fontWeight: i <= stepIdx ? 700 : 400 }}>
                     {step.label}
                   </span>
                 </div>
               ))}
             </div>
 
-            <p className="mt-5 text-center font-body text-sm"
-               style={{ color: order.status === "Delivered" ? "#4ade80" : "rgba(255,255,255,0.75)" }}>
+            <p className="mt-5 text-center font-body text-sm text-mm-cream font-700">
               {order.status === "Delivered"        ? "🎉 Delivered! Enjoy your momos!"
                : order.status === "Out for Delivery" ? "🛵 Your delivery partner is on the way!"
                : order.status === "Preparing"        ? "👨‍🍳 Your momos are being prepared…"
@@ -302,12 +294,11 @@ export default function TrackOrderPage() {
 
         {/* ETA row */}
         {order && !["Delivered", "Cancelled"].includes(order.status) && (
-          <div className="flex items-center gap-3 rounded-2xl p-4"
-               style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.13)" }}>
-            <Clock size={18} style={{ color: "#60a5fa" }} className="shrink-0" />
+          <div className="flex items-center gap-3 rounded-2xl p-4 bg-blue-50 border border-blue-100">
+            <Clock size={18} className="text-blue-600 shrink-0" />
             <div>
-              <p className="font-body text-sm font-700" style={{ color: "#93c5fd" }}>Estimated delivery</p>
-              <p className="font-body text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <p className="font-body text-sm font-700 text-blue-900">Estimated delivery</p>
+              <p className="font-body text-xs mt-0.5 text-blue-700">
                 {order.estimatedDeliveryMins ?? 25}–{(order.estimatedDeliveryMins ?? 25) + 10} mins
                 {lastPoll && ` · Updated ${timeAgo(lastPoll)}`}
               </p>
@@ -317,12 +308,11 @@ export default function TrackOrderPage() {
 
         {/* Delivered banner */}
         {order?.status === "Delivered" && (
-          <div className="flex flex-col items-center gap-3 rounded-2xl p-6 text-center"
-               style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.18)" }}>
-            <CheckCircle size={36} style={{ color: "#4ade80" }} />
-            <p className="font-display text-xl text-white">Delivered! 🎉</p>
+          <div className="flex flex-col items-center gap-3 rounded-2xl p-6 text-center bg-green-50 border border-green-100">
+            <CheckCircle size={36} className="text-green-600" />
+            <p className="font-display text-xl text-green-900">Delivered! 🎉</p>
             {order.deliveredAt && (
-              <p className="font-body text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
+              <p className="font-body text-sm text-green-700">
                 {timeAgo(order.deliveredAt)}
               </p>
             )}
@@ -331,13 +321,11 @@ export default function TrackOrderPage() {
 
         {/* Delivery address card */}
         {addr && (
-          <div className="flex items-start gap-3 rounded-2xl p-4"
-               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <MapPin size={15} className="mt-0.5 shrink-0" style={{ color: "#60a5fa" }} />
+          <div className="flex items-start gap-3 rounded-2xl p-4 bg-white border border-mm-border shadow-card">
+            <MapPin size={15} className="mt-0.5 shrink-0 text-mm-red" />
             <div>
-              <p className="font-body text-[10px] uppercase tracking-wider mb-0.5"
-                 style={{ color: "rgba(255,255,255,0.3)" }}>Delivering to</p>
-              <p className="font-body text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>
+              <p className="font-body text-[10px] uppercase tracking-wider mb-0.5 text-mm-muted">Delivering to</p>
+              <p className="font-body text-sm text-mm-cream font-700">
                 {typeof addr === "string"
                   ? addr
                   : [addr.street, addr.city, addr.pincode].filter(Boolean).join(", ")}
@@ -348,10 +336,9 @@ export default function TrackOrderPage() {
 
         {/* No GPS note */}
         {!hasDeliveryPin && order?.status === "Out for Delivery" && (
-          <div className="flex items-center gap-2.5 rounded-xl px-4 py-3"
-               style={{ background: "rgba(234,179,8,0.07)", border: "1px solid rgba(234,179,8,0.15)" }}>
-            <Truck size={14} className="shrink-0" style={{ color: "#facc15" }} />
-            <p className="font-body text-xs" style={{ color: "#fde047" }}>
+          <div className="flex items-center gap-2.5 rounded-xl px-4 py-3 bg-amber-50 border border-amber-100">
+            <Truck size={14} className="shrink-0 text-amber-600" />
+            <p className="font-body text-xs text-amber-800">
               Delivery partner location loading… map will update in ~10 s.
             </p>
           </div>
@@ -361,15 +348,12 @@ export default function TrackOrderPage() {
         <div className="flex gap-3 pt-2">
           <button id="track-order-again-btn"
                   onClick={() => navigate("menu")}
-                  className="flex-1 py-3 rounded-xl font-body font-700 text-sm text-white"
-                  style={{ background: "linear-gradient(135deg,#e8284b,#b91c1c)" }}>
+                  className="flex-1 py-3.5 rounded-xl font-body font-700 text-sm text-white bg-mm-red hover:bg-red-600 transition-colors shadow-glow-red">
             🛒 Order Again
           </button>
           <button id="track-go-home-btn"
                   onClick={() => navigate("home")}
-                  className="flex-1 py-3 rounded-xl font-body font-700 text-sm"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-                           color: "rgba(255,255,255,0.65)" }}>
+                  className="flex-1 py-3.5 rounded-xl font-body font-700 text-sm border border-mm-border text-mm-cream hover:border-mm-red/40 hover:text-mm-red bg-white transition-all">
             🏠 Go Home
           </button>
         </div>

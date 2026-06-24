@@ -96,7 +96,7 @@ function AdminLiveMap() {
           attributionControl={false}
         >
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             attribution="&copy; CARTO"
           />
           {pins.length > 0 && <FitBounds positions={pins} />}
@@ -121,10 +121,10 @@ function AdminLiveMap() {
       {/* Overlay: no active deliveries */}
       {!loading && pins.length === 0 && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2
-                        bg-gray-900/60 text-white rounded-2xl" style={{ zIndex: 999 }}>
+                        bg-white/80 backdrop-blur-sm text-mm-cream rounded-2xl" style={{ zIndex: 999 }}>
           <div className="text-4xl">🛵</div>
           <p className="font-body text-sm font-700">No active deliveries right now</p>
-          <p className="font-body text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
+          <p className="font-body text-xs text-mm-muted">
             Map will update when orders are Out for Delivery
           </p>
         </div>

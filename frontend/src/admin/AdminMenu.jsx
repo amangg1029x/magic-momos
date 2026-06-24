@@ -255,21 +255,14 @@ export default function AdminMenu() {
                       {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
-                  <Field label="Full Price (₹)" value={form.price} onChange={(v) => setForm((f) => ({ ...f, price: v }))} type="number" required />
+                  <Field label="Tag — optional" value={form.tag} onChange={(v) => setForm((f) => ({ ...f, tag: v }))} placeholder="Bestseller, New, Spicy…" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field label="Half Price (₹) — optional" value={form.halfPrice} onChange={(v) => setForm((f) => ({ ...f, halfPrice: v }))} type="number" />
-                  <Field label="Tag — optional" value={form.tag} onChange={(v) => setForm((f) => ({ ...f, tag: v }))} placeholder="Bestseller, New, Spicy…" />
+                  <Field label="Full Price (₹)" value={form.price} onChange={(v) => setForm((f) => ({ ...f, price: v }))} type="number" required />
                 </div>
                 {/* Piece counts */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field
-                    label={form.halfPrice ? "Pieces — full plate (optional)" : "Pieces per serving (optional)"}
-                    value={form.pieces}
-                    onChange={(v) => setForm((f) => ({ ...f, pieces: v }))}
-                    type="number"
-                    placeholder="e.g. 12"
-                  />
                   {form.halfPrice && (
                     <Field
                       label="Pieces — half plate (optional)"
@@ -279,6 +272,13 @@ export default function AdminMenu() {
                       placeholder="e.g. 6"
                     />
                   )}
+                  <Field
+                    label={form.halfPrice ? "Pieces — full plate (optional)" : "Pieces per serving (optional)"}
+                    value={form.pieces}
+                    onChange={(v) => setForm((f) => ({ ...f, pieces: v }))}
+                    type="number"
+                    placeholder="e.g. 12"
+                  />
                 </div>
                 <div>
                   <label className="font-body text-xs font-600 text-gray-500 mb-1.5 block">Description</label>

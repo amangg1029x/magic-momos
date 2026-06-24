@@ -144,7 +144,7 @@ export default function MenuItemCard({ item, cartItems = [], onAdd, onInc, onDec
         </div>
 
         {/* ── rating ── */}
-        <div className="hidden sm:flex items-center gap-1.5">
+        {/* <div className="hidden sm:flex items-center gap-1.5">
           <div className="flex items-center gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
@@ -159,7 +159,7 @@ export default function MenuItemCard({ item, cartItems = [], onAdd, onInc, onDec
           <span className="font-body text-[12px] text-mm-muted">
             {item.rating} <span className="opacity-60">({item.reviews})</span>
           </span>
-        </div>
+        </div> */}
 
         {/* ── footer: price + cart control ── */}
         <div className="flex flex-col gap-2.5 pt-3 border-t border-mm-border">

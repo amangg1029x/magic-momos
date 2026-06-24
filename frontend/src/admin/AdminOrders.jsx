@@ -42,7 +42,7 @@ const deliveryMapIcon = L.divIcon({
 });
 
 // RESTAURANT_COORDS — update these to your actual restaurant lat/lng
-const RESTAURANT = { lat: 28.6753, lng: 77.0990, name: "Magic Momos" };
+const RESTAURANT = { lat: 28.502812, lng: 77.329165, name: "Magic Momos" };
 
 function FitBounds({ positions }) {
   const map = useMap();

@@ -80,7 +80,7 @@ CLIENT_URL=http://localhost:5173
 # Optional — for contact form emails (Gmail App Password)
 SMTP_USER=your_gmail@gmail.com
 SMTP_PASS=xxxx_xxxx_xxxx_xxxx
-CONTACT_RECEIVER=hello@magicmomos.in
+CONTACT_RECEIVER=magicmomos12@gmail.com
 ```
 
 **Generate secure JWT secrets** (run in terminal):

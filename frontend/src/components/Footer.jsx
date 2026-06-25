@@ -11,6 +11,13 @@ const QUICK_LINKS = [
   { label: "Contact",     href: "contact"     },
 ];
 
+const LEGAL_LINKS = [
+  { label: "Terms & Conditions", href: "terms"        },
+  { label: "Privacy Policy",     href: "privacy"      },
+  { label: "Refund Policy",      href: "refund"       },
+  { label: "Cancellation Policy",href: "cancellation" },
+];
+
 const HOURS = [
   { day: "Mon – Fri",   time: "06:00 PM – 12:00 PM" },
   { day: "Saturday",    time: "05:00 PM – 12:00 PM" },
@@ -40,7 +47,7 @@ export default function Footer() {
       <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pt-16 pb-8">
 
         {/* ── main grid ── */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
 
           {/* brand column */}
           <div className="lg:col-span-1 flex flex-col gap-5">
@@ -92,6 +99,27 @@ export default function Footer() {
                     onClick={() => navigate(href)}
                     className="font-body text-sm text-mm-muted hover:text-mm-gold
                                transition-colors flex items-center gap-1.5 group"
+                  >
+                    <span className="w-0 group-hover:w-2 h-px bg-mm-gold transition-all duration-200" />
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* legal links */}
+          <div>
+            <h4 className="font-display text-lg text-mm-cream tracking-wider mb-5">
+              Legal
+            </h4>
+            <ul className="flex flex-col gap-2.5">
+              {LEGAL_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <a
+                    onClick={() => navigate(href)}
+                    className="font-body text-sm text-mm-muted hover:text-mm-gold
+                               transition-colors flex items-center gap-1.5 group cursor-pointer"
                   >
                     <span className="w-0 group-hover:w-2 h-px bg-mm-gold transition-all duration-200" />
                     {label}

@@ -14,7 +14,7 @@ const settingSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      default: "hello@magicmomos.in",
+      default: "magicmomos12@gmail.com",
       trim: true,
     },
     address: {

@@ -83,7 +83,7 @@ The workspace is structured into two main components:
    CLIENT_URL=http://localhost:5173
    SMTP_USER=your_gmail@gmail.com
    SMTP_PASS=app_specific_gmail_password
-   CONTACT_RECEIVER=hello@magicmomos.in
+   CONTACT_RECEIVER=magicmomos12@gmail.com
    ```
 5. Seed the database (creates the default admin credentials and initial menu list):
    ```bash

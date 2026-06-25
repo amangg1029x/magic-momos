@@ -20,8 +20,12 @@ import RegisterPage     from "./pages/RegisterPage";
 import AccountPage      from "./pages/AccountPage";
 import AdminPage        from "./pages/AdminPage";
 import DeliveryPage     from "./pages/DeliveryPage";
-import OutOfRangePage   from "./pages/OutOfRangePage";
-import BottomNavigation from "./components/BottomNavigation";
+import OutOfRangePage    from "./pages/OutOfRangePage";
+import TermsPage         from "./pages/TermsPage";
+import PrivacyPage       from "./pages/PrivacyPage";
+import RefundPage        from "./pages/RefundPage";
+import CancellationPage  from "./pages/CancellationPage";
+import BottomNavigation  from "./components/BottomNavigation";
 
 function AppInner() {
   const { page, navigate, isNative } = useNav();
@@ -29,6 +33,7 @@ function AppInner() {
   // ── Deep-link via URL hash ────────────────────────────────────────────────
   // Delivery partners can bookmark  https://yourapp.com/#delivery
   // Admins automatically land on    https://yourapp.com/#admin  (or via stored token)
+  // Razorpay policy pages:          https://yourapp.com/#terms  etc.
   useEffect(() => {
     const hash = window.location.hash.replace("#", "").toLowerCase().trim();
     if (hash === "delivery" || getDeliveryToken()) {
@@ -37,6 +42,11 @@ function AppInner() {
     }
     if (hash === "admin" || getAdminToken()) {
       navigate("admin", null, { noScroll: true });
+      return;
+    }
+    const DIRECT_PAGES = ["terms", "privacy", "refund", "cancellation", "menu", "contact", "login", "register"];
+    if (DIRECT_PAGES.includes(hash)) {
+      navigate(hash, null, { noScroll: true });
     }
   }, [navigate]);
 
@@ -63,7 +73,11 @@ function AppInner() {
       case "track":       return <TrackOrderPage />;
       case "login":       return <LoginPage />;
       case "register":    return <RegisterPage />;
-      case "out-of-range":return <OutOfRangePage />;
+      case "out-of-range":  return <OutOfRangePage />;
+      case "terms":         return <TermsPage />;
+      case "privacy":       return <PrivacyPage />;
+      case "refund":        return <RefundPage />;
+      case "cancellation":  return <CancellationPage />;
       case "delivery":    return <DeliveryPage />;
       case "account":
         return (

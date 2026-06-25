@@ -4,39 +4,39 @@ import { useNav } from "../context/NavigationContext";
 
 const INFO_CARDS = [
   {
-    icon:   Phone,
-    title:  "Call Us",
-    line1:  "+91 70422 89004",
-    line2:  "Mon – Sun, 6 PM – 12 PM",
+    icon: Phone,
+    title: "Call Us",
+    line1: "+91 70422 89004",
+    line2: "Mon – Sun, 6 PM – 12 PM",
     accent: "#E8284B",
-    bg:     "bg-red-50",
+    bg: "bg-red-50",
     border: "border-red-100",
   },
   {
-    icon:   Mail,
-    title:  "Email Us",
-    line1:  "hello@magicmomos.in",
-    line2:  "Reply within 4 hours",
+    icon: Mail,
+    title: "Email Us",
+    line1: "magicmomos12@gmail.com",
+    line2: "Reply within 4 hours",
     accent: "#7C3AED",
-    bg:     "bg-violet-50",
+    bg: "bg-violet-50",
     border: "border-violet-100",
   },
   {
-    icon:   MapPin,
-    title:  "Find Us",
-    line1:  "Magic Momos, Gyan Mandir Chowk, Ekta Vihar",
-    line2:  "New Delhi – 110044",
+    icon: MapPin,
+    title: "Find Us",
+    line1: "Magic Momos, Gyan Mandir Chowk, Ekta Vihar",
+    line2: "New Delhi – 110044",
     accent: "#059669",
-    bg:     "bg-emerald-50",
+    bg: "bg-emerald-50",
     border: "border-emerald-100",
   },
   {
-    icon:   Clock,
-    title:  "Hours",
-    line1:  "Open Daily",
-    line2:  "6:00 PM – 12:00 PM",
+    icon: Clock,
+    title: "Hours",
+    line1: "Open Daily",
+    line2: "6:00 PM – 12:00 PM",
     accent: "#F5A623",
-    bg:     "bg-amber-50",
+    bg: "bg-amber-50",
     border: "border-amber-100",
   },
 ];
@@ -141,7 +141,7 @@ export default function ContactPageHero() {
                 <Phone size={14} /> Call Now
               </motion.a>
               <motion.a
-                href="mailto:hello@magicmomos.in"
+                href="mailto:magicmomos12@gmail.com"
                 whileHover={{ scale: 1.04 }}
                 className="inline-flex items-center gap-2 border border-mm-border text-mm-cream
                            px-6 py-3 rounded-full font-body font-700 text-sm

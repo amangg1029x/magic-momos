@@ -83,4 +83,15 @@
   }
 
   /* section fade-in handled by Framer Motion */
+
+  /* ── Policy page prose ── */
+  .prose-policy p {
+    @apply font-body text-sm text-mm-muted leading-relaxed;
+  }
+  .prose-policy strong {
+    @apply text-mm-cream font-semibold;
+  }
+  .prose-policy a {
+    @apply text-mm-red hover:underline;
+  }
 }

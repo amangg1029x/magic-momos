@@ -45,8 +45,9 @@ function Confetti({ active }) {
 }
 
 export default function OrderSuccessPage() {
-  const { pageData, navigate } = useNav();
+  const { pageData, navigate, settings } = useNav();
   const { open: openRazorpay } = useRazorpay();
+  const bizName = settings?.businessName || "Magic Momos";
 
   // Whether this landing is a genuine success, or an online order that's
   // still waiting on payment (modal dismissed/failed but order was created).
@@ -113,7 +114,7 @@ export default function OrderSuccessPage() {
         amount:   razorpay.amount,
         currency: razorpay.currency,
         order_id: razorpay.orderId,
-        name:     "Magic Momos",
+        name:     bizName,
         description: `Order ${order.orderNumber}`,
         theme: { color: "#E8284B" },
       });

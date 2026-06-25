@@ -15,13 +15,14 @@ import api from "../services/api";
 const PINCODE_RE = /^\d{6}$/;
 const PHONE_RE   = /^[6-9]\d{9}$/;
 
-const PAYMENT_METHODS = [
+const ALL_PAYMENT_METHODS = [
   {
     id:    "cod",
     icon:  Banknote,
     title: "Cash on Delivery",
     desc:  "Pay in cash when your order arrives",
     accent:"#059669",
+    settingKey: "codEnabled",
   },
   {
     id:    "online",
@@ -30,6 +31,7 @@ const PAYMENT_METHODS = [
     desc:  "UPI, Cards & Wallets — instant",
     accent:"#3B82F6",
     badge: "Recommended",
+    settingKey: "onlinePaymentEnabled",
   },
 ];
 
@@ -42,6 +44,11 @@ export default function CheckoutPage({ cart }) {
   const { navigate, isNative, storeStatus, settings }  = useNav();
   const { user, isAuthenticated } = useAuth();
   const isClosed = storeStatus && !storeStatus.open;
+
+  // Filter payment methods based on admin settings (fallback to COD-only if settings not loaded)
+  const PAYMENT_METHODS = ALL_PAYMENT_METHODS.filter(
+    (m) => !settings || settings[m.settingKey] !== false
+  );
 
   const {
     items, subtotal, discount, deliveryFee, total,
@@ -76,6 +83,13 @@ export default function CheckoutPage({ cart }) {
   const [errors,  setErrors]  = useState({});
   const [placing, setPlacing] = useState(false);
   const [placeError, setPlaceError] = useState("");
+
+  // Auto-select first available payment method when settings load
+  useEffect(() => {
+    if (PAYMENT_METHODS.length > 0 && !PAYMENT_METHODS.find((m) => m.id === paymentMethod)) {
+      setPaymentMethod(PAYMENT_METHODS[0].id);
+    }
+  }, [settings]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Granular stage so the button text reflects exactly what's happening
   // during an online payment, rather than one generic spinner the whole time.
@@ -204,7 +218,7 @@ export default function CheckoutPage({ cart }) {
           amount:   razorpay.amount,
           currency: razorpay.currency,
           order_id: razorpay.orderId,
-          name:     "Magic Momos",
+          name:     settings?.businessName || "Magic Momos",
           description: `Order ${order.orderNumber}`,
           prefill: {
             name:    form.name,

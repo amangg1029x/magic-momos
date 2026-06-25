@@ -2,47 +2,54 @@ import { motion } from "framer-motion";
 import { Phone, Mail, MapPin, Clock, ChevronRight } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 
-const INFO_CARDS = [
-  {
-    icon: Phone,
-    title: "Call Us",
-    line1: "+91 70422 89004",
-    line2: "Mon – Sun, 6 PM – 12 PM",
-    accent: "#E8284B",
-    bg: "bg-red-50",
-    border: "border-red-100",
-  },
-  {
-    icon: Mail,
-    title: "Email Us",
-    line1: "magicmomos12@gmail.com",
-    line2: "Reply within 4 hours",
-    accent: "#7C3AED",
-    bg: "bg-violet-50",
-    border: "border-violet-100",
-  },
-  {
-    icon: MapPin,
-    title: "Find Us",
-    line1: "Magic Momos, Gyan Mandir Chowk, Ekta Vihar",
-    line2: "New Delhi – 110044",
-    accent: "#059669",
-    bg: "bg-emerald-50",
-    border: "border-emerald-100",
-  },
-  {
-    icon: Clock,
-    title: "Hours",
-    line1: "Open Daily",
-    line2: "6:00 PM – 12:00 PM",
-    accent: "#F5A623",
-    bg: "bg-amber-50",
-    border: "border-amber-100",
-  },
-];
-
 export default function ContactPageHero() {
-  const { navigate } = useNav();
+  const { navigate, settings } = useNav();
+
+  const phone     = settings?.phone     || "+91 70422 89004";
+  const email     = settings?.email     || "magicmomos12@gmail.com";
+  const address   = settings?.address   || "Gyan Mandir Chowk, Ekta Vihar, New Delhi – 110044";
+  const bizName   = settings?.businessName || "Magic Momos";
+  const openTime  = settings?.openTime  || "06:00 PM";
+  const closeTime = settings?.closeTime || "12:00 PM";
+
+  const INFO_CARDS = [
+    {
+      icon: Phone,
+      title: "Call Us",
+      line1: phone,
+      line2: `Open daily, ${openTime} – ${closeTime}`,
+      accent: "#E8284B",
+      bg: "bg-red-50",
+      border: "border-red-100",
+    },
+    {
+      icon: Mail,
+      title: "Email Us",
+      line1: email,
+      line2: "Reply within 4 hours",
+      accent: "#7C3AED",
+      bg: "bg-violet-50",
+      border: "border-violet-100",
+    },
+    {
+      icon: MapPin,
+      title: "Find Us",
+      line1: bizName,
+      line2: address,
+      accent: "#059669",
+      bg: "bg-emerald-50",
+      border: "border-emerald-100",
+    },
+    {
+      icon: Clock,
+      title: "Hours",
+      line1: "Open Daily",
+      line2: `${openTime} – ${closeTime}`,
+      accent: "#F5A623",
+      bg: "bg-amber-50",
+      border: "border-amber-100",
+    },
+  ];
 
   return (
     <section className="relative overflow-hidden bg-mm-card2 border-b border-mm-border">
@@ -131,7 +138,7 @@ export default function ContactPageHero() {
             </p>
             <div className="flex items-center gap-3">
               <motion.a
-                href="tel:+917042289004"
+                href={`tel:${phone.replace(/\s/g, "")}`}
                 whileHover={{ scale: 1.04, boxShadow: "0 0 20px rgba(232,40,75,0.25)" }}
                 whileTap={{ scale: 0.96 }}
                 className="inline-flex items-center gap-2 bg-mm-red text-white
@@ -141,7 +148,7 @@ export default function ContactPageHero() {
                 <Phone size={14} /> Call Now
               </motion.a>
               <motion.a
-                href="mailto:magicmomos12@gmail.com"
+                href={`mailto:${email}`}
                 whileHover={{ scale: 1.04 }}
                 className="inline-flex items-center gap-2 border border-mm-border text-mm-cream
                            px-6 py-3 rounded-full font-body font-700 text-sm

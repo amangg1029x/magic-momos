@@ -1,4 +1,5 @@
 const Setting = require("../models/Setting");
+const { createNotification } = require("./notificationController");
 
 // ── GET /api/settings or GET /api/admin/settings ─────────────────────────────
 // Returns store settings, creating them if they don't exist yet
@@ -57,11 +58,28 @@ const updateSettings = async (req, res, next) => {
       (key) => updateData[key] === undefined && delete updateData[key]
     );
 
+    const oldSettings = await Setting.findOne();
+
     const settings = await Setting.findOneAndUpdate({}, updateData, {
       new: true,
       upsert: true,
       runValidators: true,
     });
+
+    // Broadcast announcement as a customer notification when it changes
+    if (
+      announcementText &&
+      announcementText.trim() &&
+      announcementText.trim() !== (oldSettings?.announcementText || "").trim()
+    ) {
+      createNotification({
+        recipientId:   null,           // null = broadcast to all customers
+        recipientRole: "customer",
+        type:          "announcement",
+        title:         "📢 Announcement",
+        body:          announcementText.trim(),
+      });
+    }
 
     res.json({
       success: true,

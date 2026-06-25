@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Phone, Clock, Instagram, Facebook, Twitter, ArrowUp } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Twitter, ArrowUp } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 
 const QUICK_LINKS = [
@@ -18,11 +18,7 @@ const LEGAL_LINKS = [
   { label: "Cancellation Policy",href: "cancellation" },
 ];
 
-const HOURS = [
-  { day: "Mon – Fri",   time: "06:00 PM – 12:00 PM" },
-  { day: "Saturday",    time: "05:00 PM – 12:00 PM" },
-  { day: "Sunday",      time: "05:00 PM – 12:00 PM" },
-];
+// HOURS now built dynamically from settings inside the component
 
 const SOCIALS = [
   { icon: Instagram, href: "#", label: "Instagram", color: "hover:text-pink-400"   },
@@ -36,7 +32,14 @@ const DIVIDER = (
 
 export default function Footer() {
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-  const { navigate } = useNav();
+  const { navigate, settings } = useNav();
+
+  const phone   = settings?.phone   || "+91 70422 89004";
+  const email   = settings?.email   || "hello@magicmomos.in";
+  const address = settings?.address || "Gyan Mandir Chowk, Ekta Vihar, New Delhi – 110044";
+  const bizName = settings?.businessName || "Magic Momos";
+  const openTime  = settings?.openTime  || "06:00 PM";
+  const closeTime = settings?.closeTime || "12:00 PM";
 
   return (
     <footer className="relative bg-mm-black border-t border-mm-border overflow-hidden">
@@ -135,12 +138,12 @@ export default function Footer() {
               Opening Hours
             </h4>
             <ul className="flex flex-col gap-3">
-              {HOURS.map(({ day, time }) => (
+              {["Mon – Sun"].map((day) => (
                 <li key={day} className="flex items-start gap-2">
                   <Clock size={13} className="text-mm-gold mt-1 shrink-0" />
                   <div>
                     <p className="font-body text-xs text-mm-muted uppercase tracking-wider">{day}</p>
-                    <p className="font-body text-sm text-mm-cream/80">{time}</p>
+                    <p className="font-body text-sm text-mm-cream/80">{openTime} – {closeTime}</p>
                   </div>
                 </li>
               ))}
@@ -156,17 +159,25 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin size={14} className="text-mm-red mt-0.5 shrink-0" />
                 <p className="font-body text-sm text-mm-muted leading-relaxed">
-                  Magic Momos, Gyan Mandir Chowk<br />
-                  Ekta Vihar, New Delhi – 110044
+                  {address}
                 </p>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone size={14} className="text-mm-red shrink-0" />
                 <a
-                  href="tel:+917042289004"
+                  href={`tel:${phone.replace(/\s/g, "")}`}
                   className="font-body text-sm text-mm-muted hover:text-mm-gold transition-colors"
                 >
-                  +91 70422 89004
+                  {phone}
+                </a>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Mail size={14} className="text-mm-red shrink-0" />
+                <a
+                  href={`mailto:${email}`}
+                  className="font-body text-sm text-mm-muted hover:text-mm-gold transition-colors"
+                >
+                  {email}
                 </a>
               </li>
             </ul>

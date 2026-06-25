@@ -182,11 +182,11 @@ export default function AdminSettings() {
               <option value="closed">Force Closed</option>
             </select>
           </Row>
-          <Row label="Announcement Text">
+          <Row label="Announcement (sends notification)">
             <textarea
               value={form.announcementText}
               onChange={(e) => update("announcementText", e.target.value)}
-              placeholder="E.g., Free delivery on all orders above ₹199 today! 🎉"
+              placeholder="E.g., Free delivery on all orders above ₹199 today! 🎉 — saving will send this to all customers as a notification."
               rows={2}
               className="w-full px-3.5 py-2 rounded-xl border border-gray-200 font-body text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30 focus:border-[#E8284B]"
             />
@@ -195,7 +195,11 @@ export default function AdminSettings() {
 
         <Section title="Payment Methods">
           <Toggle label="Cash on Delivery" checked={form.codEnabled} onChange={(v) => update("codEnabled", v)} />
-          <Toggle label="Online Payment" checked={form.onlinePaymentEnabled} onChange={(v) => update("onlinePaymentEnabled", v)} />
+          <Toggle label="Online Payment (Razorpay)" checked={form.onlinePaymentEnabled} onChange={(v) => update("onlinePaymentEnabled", v)} />
+          <p className="font-body text-xs text-gray-400 flex items-center gap-1.5 pt-1">
+            <Info size={12} className="shrink-0" />
+            Disabled methods are hidden from customers at checkout. At least one must be enabled.
+          </p>
         </Section>
 
         <div className="flex flex-wrap items-center gap-3">

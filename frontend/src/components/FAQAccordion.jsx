@@ -1,37 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
+import { useNav } from "../context/NavigationContext";
+import { DELIVERY_RADIUS_KM } from "../data/restaurantConfig";
 
-const FAQS = [
-  /*  {
-      q: "What are your opening hours?",
-      a: "We're open every day from 10:00 AM to 11:00 PM — including weekends and public holidays. Our kitchen closes 30 minutes before closing time so your order still arrives fresh.",
-    }, */
-  {
-    q: "Do you offer home delivery?",
-    a: "Yes! We deliver to all areas within 5 km of Gyan Mandir Chowk, Ekta Vihar. Delivery is free on orders above ₹199. Orders below that carry a ₹30 delivery charge. Average delivery time is 20–30 minutes.",
-  },
-  /*  {
-      q: "Are your momos vegetarian?",
-      a: "We have both! Our menu clearly labels every item as veg (🌿) or non-veg (🔴). Steam Veg Momos, Fried Veg Momos, Tandoori Momos, and Kurkure Momos are all 100% vegetarian. Steam Chicken and Fried Chicken Momos are non-veg.",
-    }, */
-  {
-    q: "Can I place a bulk/catering order?",
-    a: "Absolutely. We love catering to offices, college events, birthday parties, and corporate dos. For orders above 50 plates, please call us or email at least 24 hours in advance and we'll arrange special pricing and packaging.",
-  },
-  {
-    q: "How fresh are your ingredients?",
-    a: "Every ingredient is sourced fresh each morning from our local vegetable market. We use zero frozen ingredients, zero artificial preservatives, and zero shortcuts. If something runs out, we'd rather say 'sold out' than compromise on freshness.",
-  },
-  {
-    q: "What if I have a complaint about my order?",
-    a: "Call us immediately at +91 70422 89004. If there's a genuine issue — wrong order, cold food, or anything else — we'll either re-deliver or issue a full refund. No lengthy processes, just quick solutions. Your satisfaction is our priority.",
-  },
-  /*  {
-      q: "Do you have dine-in seating?",
-      a: "Yes, we have a 20-seater dine-in area at our Lajpat Nagar location. Walk in anytime during business hours — we don't take reservations for the dine-in section. For groups of 10+, a heads-up call is appreciated.",
-    }, */
-];
+// FAQS built dynamically inside the component (see below)
 
 function AccordionItem({ item, index, isOpen, onToggle }) {
   return (
@@ -83,6 +56,32 @@ function AccordionItem({ item, index, isOpen, onToggle }) {
 
 export default function FAQAccordion() {
   const [open, setOpen] = useState(0);
+  const { settings } = useNav();
+
+  const phone      = settings?.phone                 || "+91 70422 89004";
+  const email      = settings?.email                 || "magicmomos12@gmail.com";
+  const fee        = settings?.deliveryFee           ?? 30;
+  const freeAbove  = settings?.freeDeliveryThreshold ?? 199;
+  const radius     = DELIVERY_RADIUS_KM;
+
+  const FAQS = [
+    {
+      q: "Do you offer home delivery?",
+      a: `Yes! We deliver to all areas within ${radius} km of our location. Delivery is free on orders above ₹${freeAbove}. Orders below that carry a ₹${fee} delivery charge. Average delivery time is 20–30 minutes.`,
+    },
+    {
+      q: "Can I place a bulk/catering order?",
+      a: "Absolutely. We love catering to offices, college events, birthday parties, and corporate dos. For orders above 50 plates, please call us or email at least 24 hours in advance and we'll arrange special pricing and packaging.",
+    },
+    {
+      q: "How fresh are your ingredients?",
+      a: "Every ingredient is sourced fresh each morning from our local vegetable market. We use zero frozen ingredients, zero artificial preservatives, and zero shortcuts. If something runs out, we'd rather say 'sold out' than compromise on freshness.",
+    },
+    {
+      q: "What if I have a complaint about my order?",
+      a: `Call us immediately at ${phone}. If there's a genuine issue — wrong order, cold food, or anything else — we'll either re-deliver or issue a full refund. No lengthy processes, just quick solutions. Your satisfaction is our priority.`,
+    },
+  ];
 
   return (
     <section className="py-20 sm:py-28 bg-mm-card overflow-hidden">
@@ -115,7 +114,7 @@ export default function FAQAccordion() {
             className="font-body text-mm-muted text-sm mt-3 max-w-sm mx-auto"
           >
             Most questions answered here. Can't find yours?{" "}
-            <a href="mailto:magicmomos12@gmail.com" className="text-mm-red hover:underline">
+            <a href={`mailto:${email}`} className="text-mm-red hover:underline">
               Email us.
             </a>
           </motion.p>

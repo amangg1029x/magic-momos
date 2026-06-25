@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { NavigationProvider, useNav } from "./context/NavigationContext";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
@@ -30,25 +30,30 @@ import BottomNavigation  from "./components/BottomNavigation";
 function AppInner() {
   const { page, navigate, isNative } = useNav();
 
+  const navigateRef = useRef(navigate);
+  useEffect(() => { navigateRef.current = navigate; });
+
   // ── Deep-link via URL hash ────────────────────────────────────────────────
   // Delivery partners can bookmark  https://yourapp.com/#delivery
   // Admins automatically land on    https://yourapp.com/#admin  (or via stored token)
   // Razorpay policy pages:          https://yourapp.com/#terms  etc.
+  // Runs once on mount only — the popstate listener in NavigationContext
+  // handles subsequent back/forward navigation.
   useEffect(() => {
     const hash = window.location.hash.replace("#", "").toLowerCase().trim();
     if (hash === "delivery" || getDeliveryToken()) {
-      navigate("delivery", null, { noScroll: true });
+      navigateRef.current("delivery", null, { noScroll: true });
       return;
     }
     if (hash === "admin" || getAdminToken()) {
-      navigate("admin", null, { noScroll: true });
+      navigateRef.current("admin", null, { noScroll: true });
       return;
     }
     const DIRECT_PAGES = ["terms", "privacy", "refund", "cancellation", "menu", "contact", "login", "register"];
     if (DIRECT_PAGES.includes(hash)) {
-      navigate(hash, null, { noScroll: true });
+      navigateRef.current(hash, null, { noScroll: true });
     }
-  }, [navigate]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * The cart lives here, one level above every page, so that adding an

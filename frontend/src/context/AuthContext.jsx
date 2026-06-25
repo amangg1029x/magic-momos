@@ -17,9 +17,25 @@ export function AuthProvider({ children }) {
     api.auth.me()
       .then(({ user }) => {
         setUser(user);
+        // Persist a lightweight user snapshot for offline resilience
+        try { localStorage.setItem("mm_user_cache", JSON.stringify(user)); } catch {}
         initPushNotifications("customer");
       })
-      .catch(() => clearToken())          // stale / invalid token → clear it
+      .catch((err) => {
+        // Only wipe the token when the server explicitly rejects it (401).
+        // Network errors (offline, timeout, DNS failure) must NOT log the user out —
+        // the token is still valid; the device just has no connectivity right now.
+        if (err?.status === 401) {
+          clearToken();
+          localStorage.removeItem("mm_user_cache");
+        } else {
+          // Restore from cache so the UI still shows the user as logged in
+          try {
+            const cached = localStorage.getItem("mm_user_cache");
+            if (cached) setUser(JSON.parse(cached));
+          } catch {}
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -37,6 +53,7 @@ export function AuthProvider({ children }) {
     const res = await api.auth.login(data);
     setToken(res.token);
     setUser(res.user);
+    try { localStorage.setItem("mm_user_cache", JSON.stringify(res.user)); } catch {}
     initPushNotifications("customer");
     return res;
   }, []);
@@ -45,6 +62,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     clearToken();
     setUser(null);
+    localStorage.removeItem("mm_user_cache");
   }, []);
 
   // ── Update profile (called after profile edit) ─────────────────────────────

@@ -1,7 +1,15 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Phone } from "lucide-react";
+import { useNav } from "../context/NavigationContext";
 
 export default function CTASection() {
+    const { navigate, settings } = useNav();
+
+    const phone      = settings?.phone                 || "+91 70422 89004";
+    const openTime   = settings?.openTime              || "06:00 PM";
+    const closeTime  = settings?.closeTime             || "12:00 PM";
+    const freeAbove  = settings?.freeDeliveryThreshold ?? 199;
+
     return (
         <section className="relative py-24 sm:py-32 overflow-hidden bg-mm-black">
             {/* ── layered background ── */}
@@ -85,6 +93,7 @@ export default function CTASection() {
                     className="flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
                     <motion.button
+                        onClick={() => navigate("menu")}
                         whileHover={{ scale: 1.07, boxShadow: "0 0 50px rgba(232,40,75,0.7)" }}
                         whileTap={{ scale: 0.93 }}
                         className="group flex items-center gap-3 bg-mm-red text-white
@@ -96,7 +105,7 @@ export default function CTASection() {
                     </motion.button>
 
                     <motion.a
-                        href="tel:+911234567890"
+                        href={`tel:${phone.replace(/\s/g, "")}`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="flex items-center gap-2.5 glass border border-mm-border
@@ -118,8 +127,8 @@ export default function CTASection() {
                     className="flex flex-wrap items-center justify-center gap-6 mt-12 text-mm-muted"
                 >
                     {[
-                        "🕐 Open 6 PM – 12 PM",
-                        "🛵 Free delivery on ₹199+",
+                        `🕐 Open ${openTime} – ${closeTime}`,
+                        `🛵 Free delivery on ₹${freeAbove}+`,
                         "❄️ No preservatives",
                         "♻️ Eco packaging",
                     ].map((item) => (

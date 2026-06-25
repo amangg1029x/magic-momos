@@ -1,14 +1,16 @@
 import { motion } from "framer-motion";
 import { MapPin, Clock, Navigation } from "lucide-react";
-
-const HOURS = [
-  { days: "Monday – Friday", time: "06:00 PM – 12:00 PM", note: ""         },
-  { days: "Saturday",        time: "05:00 PM – 12:00 PM", note: "Extended" },
-  { days: "Sunday",          time: "05:00 PM – 12:00 PM", note: "Extended"         },
-  { days: "Public Holidays", time: "06:00 PM – 12:00 PM", note: "Open!"   },
-];
+import { useNav } from "../context/NavigationContext";
 
 export default function MapAndHours() {
+  const { settings, storeStatus } = useNav();
+
+  const bizName   = settings?.businessName || "Magic Momos";
+  const address   = settings?.address      || "Gyan Mandir Chowk, Ekta Vihar, New Delhi – 110044";
+  const openTime  = settings?.openTime     || "06:00 PM";
+  const closeTime = settings?.closeTime    || "12:00 PM";
+  const isOpen    = storeStatus?.open ?? true;
+
   return (
     <section className="py-20 sm:py-28 bg-mm-black overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
@@ -84,8 +86,8 @@ export default function MapAndHours() {
                   <MapPin size={24} className="text-white" />
                 </div>
                 <div className="bg-white border border-mm-border rounded-2xl px-4 py-2 shadow-card text-center">
-                  <p className="font-body font-700 text-mm-cream text-sm">Magic Momos</p>
-                  <p className="font-body text-mm-muted text-xs">Gyan Mandir Chowk, Ekta Vihar, New Delhi</p>
+                  <p className="font-body font-700 text-mm-cream text-sm">{bizName}</p>
+                  <p className="font-body text-mm-muted text-xs">{address}</p>
                 </div>
               </motion.div>
             </div>
@@ -95,10 +97,10 @@ export default function MapAndHours() {
               <MapPin size={16} className="text-mm-red mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="font-body font-700 text-mm-cream text-sm">
-                  Magic Momos
+                  {bizName}
                 </p>
                 <p className="font-body text-mm-muted text-xs mt-0.5">
-                  Gyan Mandir Chowk, Ekta Vihar, New Delhi - 110044
+                  {address}
                 </p>
               </div>
               <motion.a
@@ -134,43 +136,26 @@ export default function MapAndHours() {
               </div>
 
               <ul className="space-y-3">
-                {HOURS.map(({ days, time, note }, i) => {
-                  const isToday = i === new Date().getDay() === 6 ? 1
-                    : new Date().getDay() === 0 ? 2 : 0;
-                  return (
-                    <motion.li
-                      key={days}
-                      initial={{ opacity: 0, x: 16 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: i * 0.07 }}
-                      className="flex items-center justify-between py-3
-                                 border-b border-mm-border last:border-0"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-body text-sm text-mm-cream font-600">{days}</span>
-                        {note && (
-                          <span className="text-[10px] font-body font-700 px-1.5 py-0.5 rounded-full
-                                           bg-green-100 text-green-700">
-                            {note}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-body text-sm text-mm-muted">{time}</span>
-                    </motion.li>
-                  );
-                })}
+                <motion.li
+                  initial={{ opacity: 0, x: 16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4 }}
+                  className="flex items-center justify-between py-3 border-b border-mm-border"
+                >
+                  <span className="font-body text-sm text-mm-cream font-600">Every Day</span>
+                  <span className="font-body text-sm text-mm-muted">{openTime} – {closeTime}</span>
+                </motion.li>
               </ul>
 
               {/* open now badge */}
-              <div className="mt-5 flex items-center gap-2 bg-green-50 border border-green-200
-                              rounded-xl px-4 py-3">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <p className="font-body text-sm font-700 text-green-700">
-                  We're open right now!
+              <div className={`mt-5 flex items-center gap-2 border rounded-xl px-4 py-3 ${isOpen ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+                <div className={`w-2 h-2 rounded-full animate-pulse ${isOpen ? "bg-green-500" : "bg-red-400"}`} />
+                <p className={`font-body text-sm font-700 ${isOpen ? "text-green-700" : "text-red-700"}`}>
+                  {isOpen ? "We're open right now!" : "We're currently closed"}
                 </p>
-                <span className="ml-auto font-body text-xs text-green-600">
-                  Closes at 12 PM
+                <span className={`ml-auto font-body text-xs ${isOpen ? "text-green-600" : "text-red-500"}`}>
+                  {isOpen ? `Closes at ${closeTime}` : `Opens at ${openTime}`}
                 </span>
               </div>
             </div>

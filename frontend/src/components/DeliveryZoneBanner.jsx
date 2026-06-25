@@ -48,14 +48,6 @@ export default function DeliveryZoneBanner() {
       textColor: "text-amber-800",
       allowDismiss: true,
     };
-  } else if (settings && settings.announcementText) {
-    bannerConfig = {
-      bg: "bg-amber-50 border-b border-amber-100",
-      text: settings.announcementText,
-      icon: <span className="text-sm">📢</span>,
-      textColor: "text-amber-900 font-600",
-      allowDismiss: true,
-    };
   } else if (status === "out-of-range" || status === "in-range") {
     const outOfRange = status === "out-of-range";
     bannerConfig = {

@@ -212,11 +212,16 @@ export default function Footer() {
 
         {/* ── bottom bar ── */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="font-body text-xs text-mm-muted text-center sm:text-left">
-            © {new Date().getFullYear()} Magic Momos. All rights reserved.
-            <span className="mx-2 text-mm-border">|</span>
-            Made with ❤️ in Delhi
-          </p>
+          <div className="flex flex-col items-center sm:items-start gap-1">
+            <p className="font-body text-xs text-mm-muted text-center sm:text-left">
+              © {new Date().getFullYear()} Magic Momos. All rights reserved.
+              <span className="mx-2 text-mm-border">|</span>
+              Made with ❤️ in Delhi
+            </p>
+            <p className="font-body text-xs text-mm-muted/60 text-center sm:text-left">
+              Proprietor: Manoj Kumar Gupta
+            </p>
+          </div>
 
           <motion.button
             onClick={scrollTop}

@@ -76,7 +76,7 @@ export default function AppDownloadSection() {
             className="flex flex-wrap items-center gap-4"
           >
             <a
-              href="/magic-momos.apk"
+              href="../../android/app/build/outputs/apk/debug/app-debug.apk"
               download
               className="group flex items-center gap-3 bg-mm-red text-white px-8 py-4 rounded-full font-body font-800 text-sm sm:text-base tracking-wide hover:bg-red-600 transition-all duration-300 shadow-glow-red hover:scale-105"
             >

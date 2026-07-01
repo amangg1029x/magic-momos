@@ -35,7 +35,7 @@ export default function RefundPage() {
         <p>To request a refund:</p>
         <PolicyList items={[
           "Contact us within 1 hour of receiving your order.",
-          "Email magicmomos12@gmail.com or call +91 70422 89004 with your order number.",
+          "Email support@magicmomos.app or call +91 70422 89004 with your order number.",
           "Attach a photo of the incorrect or damaged item where applicable.",
           "Our team will review your request within 24 hours.",
         ]} />
@@ -60,7 +60,7 @@ export default function RefundPage() {
       <PolicySection title="7. Contact">
         <p>
           For all refund-related queries, reach out to us at{" "}
-          <a href="mailto:magicmomos12@gmail.com" className="text-mm-red hover:underline">magicmomos12@gmail.com</a>{" "}
+          <a href="mailto:support@magicmomos.app" className="text-mm-red hover:underline">support@magicmomos.app</a>{" "}
           or +91 70422 89004.
         </p>
       </PolicySection>

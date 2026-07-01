@@ -14,7 +14,7 @@ export default function TermsPage() {
         <p>
           Magic Momos (referred to as "we", "us", or "our") is a food delivery and takeaway service
           operated from Gyan Mandir Chowk, Ekta Vihar, New Delhi – 110044, India.
-          Contact: <a href="mailto:magicmomos12@gmail.com" className="text-mm-red hover:underline">magicmomos12@gmail.com</a> | +91 70422 89004.
+          Contact: <a href="mailto:support@magicmomos.app" className="text-mm-red hover:underline">support@magicmomos.app</a> | +91 70422 89004.
         </p>
       </PolicySection>
 
@@ -73,7 +73,7 @@ export default function TermsPage() {
       <PolicySection title="10. Contact">
         <p>
           For any questions regarding these Terms, please contact us at{" "}
-          <a href="mailto:magicmomos12@gmail.com" className="text-mm-red hover:underline">magicmomos12@gmail.com</a>.
+          <a href="mailto:support@magicmomos.app" className="text-mm-red hover:underline">support@magicmomos.app</a>.
         </p>
       </PolicySection>
     </PolicyPage>

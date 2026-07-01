@@ -5,11 +5,11 @@ import { useNav } from "../context/NavigationContext";
 export default function ContactPageHero() {
   const { navigate, settings } = useNav();
 
-  const phone     = settings?.phone     || "+91 70422 89004";
-  const email     = settings?.email     || "magicmomos12@gmail.com";
-  const address   = settings?.address   || "Gyan Mandir Chowk, Ekta Vihar, New Delhi – 110044";
-  const bizName   = settings?.businessName || "Magic Momos";
-  const openTime  = settings?.openTime  || "06:00 PM";
+  const phone = settings?.phone || "+91 70422 89004";
+  const email = settings?.email || "support@magicmomos.app";
+  const address = settings?.address || "Gyan Mandir Chowk, Ekta Vihar, New Delhi – 110044";
+  const bizName = settings?.businessName || "Magic Momos";
+  const openTime = settings?.openTime || "06:00 PM";
   const closeTime = settings?.closeTime || "12:00 PM";
 
   const INFO_CARDS = [

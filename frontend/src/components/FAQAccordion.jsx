@@ -58,11 +58,11 @@ export default function FAQAccordion() {
   const [open, setOpen] = useState(0);
   const { settings } = useNav();
 
-  const phone      = settings?.phone                 || "+91 70422 89004";
-  const email      = settings?.email                 || "magicmomos12@gmail.com";
-  const fee        = settings?.deliveryFee           ?? 30;
-  const freeAbove  = settings?.freeDeliveryThreshold ?? 199;
-  const radius     = DELIVERY_RADIUS_KM;
+  const phone = settings?.phone || "+91 70422 89004";
+  const email = settings?.email || "support@magicmomos.app";
+  const fee = settings?.deliveryFee ?? 30;
+  const freeAbove = settings?.freeDeliveryThreshold ?? 199;
+  const radius = DELIVERY_RADIUS_KM;
 
   const FAQS = [
     {

@@ -75,13 +75,13 @@ export default function PrivacyPage() {
           "Request deletion of your account and data.",
           "Withdraw consent for marketing communications at any time.",
         ]} />
-        <p className="mt-2">To exercise any of these rights, email us at <a href="mailto:magicmomos12@gmail.com" className="text-mm-red hover:underline">magicmomos12@gmail.com</a>.</p>
+        <p className="mt-2">To exercise any of these rights, email us at <a href="mailto:support@ge " className="text-mm-red hover:underline">support@magicmomos.app</a>.</p>
       </PolicySection>
 
       <PolicySection title="9. Contact">
         <p>
           For privacy-related concerns, contact our Data Controller at{" "}
-          <a href="mailto:magicmomos12@gmail.com" className="text-mm-red hover:underline">magicmomos12@gmail.com</a>{" "}
+          <a href="mailto:support@magicmomos.app" className="text-mm-red hover:underline">support@magicmomos.app</a>{" "}
           or call +91 70422 89004.
         </p>
       </PolicySection>

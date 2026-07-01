@@ -6,7 +6,7 @@ import api from "../services/api";
 const DEFAULTS = {
   businessName: "Magic Momos",
   phone: "+91 70422 89004",
-  email: "magicmomos12@gmail.com",
+  email: "support@magicmomos.app",
   address: "Lajpat Nagar, New Delhi",
   deliveryFee: 30,
   freeDeliveryThreshold: 199,

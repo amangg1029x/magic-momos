@@ -52,7 +52,7 @@ export default function CancellationPage() {
       <PolicySection title="6. Contact">
         <p>
           To cancel an order or for any cancellation-related queries, please contact us immediately at{" "}
-          <a href="mailto:magicmomos12@gmail.com" className="text-mm-red hover:underline">magicmomos12@gmail.com</a>{" "}
+          <a href="mailto:support@magicmomos.app" className="text-mm-red hover:underline">support@magicmomos.app</a>{" "}
           or call <a href="tel:+917042289004" className="text-mm-red hover:underline">+91 70422 89004</a>.
         </p>
       </PolicySection>

@@ -1,49 +1,63 @@
 const Notification = require("../models/Notification");
+const Setting = require("../models/Setting");
 const User = require("../models/User");
 const AdminToken = require("../models/AdminToken");
 const DeliveryToken = require("../models/DeliveryToken");
 const messaging = require("../config/firebase");
 
 // Helper to push messages to list of device tokens
-const sendPushNotification = async (tokens, title, body, data = {}, channelId = null) => {
+// If alarmMode=true, sends a data-only message (no 'notification' field) so
+// the app's FirebaseMessagingService can intercept it and start the alarm service.
+const sendPushNotification = async (tokens, title, body, data = {}, channelId = null, alarmMode = false) => {
   if (!messaging || !tokens || tokens.length === 0) return;
-  
+
   try {
     const messages = tokens.map(token => {
-      const msg = {
+      if (alarmMode) {
+        // DATA-ONLY message — no 'notification' field.
+        // FCM delivers this to onMessageReceived() even when the app is killed.
+        return {
+          token,
+          data: {
+            ...data,
+            alarm: "true",
+            title,
+            body,
+            click_action: "FLUTTER_NOTIFICATION_CLICK",
+          },
+          android: { priority: "high" },
+          apns: { headers: { "apns-priority": "10", "apns-push-type": "background" },
+                  payload: { aps: { "content-available": 1 } } },
+        };
+      }
+
+      // NORMAL notification message
+      return {
         token,
         notification: { title, body },
         data: {
           ...data,
+          alarm: "false",
           click_action: "FLUTTER_NOTIFICATION_CLICK",
         },
-        // Android-specific: route to the correct channel so the custom ringtone plays
         android: {
           priority: "high",
           notification: {
             channelId: channelId || "default",
-            sound: channelId === "new_order" ? "order_ringtone" : "default",
-            // Also send a heads-up notification even when the app is in foreground
+            sound: channelId === "new_order_v2" ? "order_ringtone" : "default",
             notificationPriority: "PRIORITY_MAX",
             visibility: "PUBLIC",
           },
         },
-        // APNS (iOS) high-priority flag
         apns: {
           headers: { "apns-priority": "10" },
-          payload: {
-            aps: {
-              sound: channelId === "new_order" ? "order_ringtone.wav" : "default",
-              badge: 1,
-            },
-          },
+          payload: { aps: { sound: "default", badge: 1 } },
         },
       };
-      return msg;
     });
 
     const response = await messaging.sendEach(messages);
-    console.log(`[Push] Successfully sent ${response.successCount} messages. Failed: ${response.failureCount}`);
+    console.log(`[Push] Sent ${response.successCount} ok, ${response.failureCount} failed (alarmMode=${alarmMode})`);
   } catch (err) {
     console.error("[Push] Error sending push notification:", err.message);
   }
@@ -100,14 +114,17 @@ const createNotification = async (data) => {
     }
 
     if (tokens.length > 0) {
-      // Use the "new_order_v2" channel for admin order_placed notifications
-      // so the custom ringtone fires even when the app is closed/backgrounded.
-      // NOTE: Channel ID must match what is registered in MainActivity.java.
-      const channelId =
-        data.recipientRole === "admin" && data.type === "order_placed"
-          ? "new_order_v2"
-          : null;
-      sendPushNotification(tokens, data.title, data.body, pushData, channelId);
+      // For admin order_placed notifications, check if alarm ring is enabled.
+      // If yes: send a data-only FCM so our AlarmService intercepts and loops audio.
+      // If no: send a normal notification with the default channel sound.
+      let alarmMode = false;
+      let channelId = null;
+      if (data.recipientRole === "admin" && data.type === "order_placed") {
+        const settings = await Setting.findOne().select("alarmRingEnabled").lean();
+        alarmMode = settings?.alarmRingEnabled !== false; // default true if no doc yet
+        channelId = "new_order_v2";
+      }
+      sendPushNotification(tokens, data.title, data.body, pushData, channelId, alarmMode);
     }
   } catch (err) {
     // Never throw — notifications are best-effort, must not break the main flow

@@ -57,6 +57,12 @@ const settingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    // When true, backend sends a data-only FCM message so the Android alarm
+    // service fires a looping ring. When false, a normal notification is sent.
+    alarmRingEnabled: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

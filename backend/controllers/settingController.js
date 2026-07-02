@@ -36,6 +36,7 @@ const updateSettings = async (req, res, next) => {
       onlinePaymentEnabled,
       storeStatusOverride,
       announcementText,
+      alarmRingEnabled,
     } = req.body;
 
     const updateData = {
@@ -51,6 +52,8 @@ const updateSettings = async (req, res, next) => {
       onlinePaymentEnabled: Boolean(onlinePaymentEnabled),
       storeStatusOverride,
       announcementText,
+      // alarmRingEnabled may be undefined (not sent) — preserve existing value
+      ...(alarmRingEnabled !== undefined && { alarmRingEnabled: Boolean(alarmRingEnabled) }),
     };
 
     // Filter out undefined values to only update what was provided

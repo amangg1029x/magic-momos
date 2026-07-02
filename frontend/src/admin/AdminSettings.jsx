@@ -16,6 +16,7 @@ const DEFAULTS = {
   onlinePaymentEnabled: false,
   storeStatusOverride: "auto",
   announcementText: "",
+  alarmRingEnabled: true,
 };
 
 export default function AdminSettings() {
@@ -191,6 +192,13 @@ export default function AdminSettings() {
               className="w-full px-3.5 py-2 rounded-xl border border-gray-200 font-body text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30 focus:border-[#E8284B]"
             />
           </Row>
+          <div className="border-t border-gray-100 my-4 pt-4">
+            <Toggle label="Continuous Alarm Ring" checked={form.alarmRingEnabled} onChange={(v) => update("alarmRingEnabled", v)} />
+            <p className="font-body text-xs text-gray-400 flex items-center gap-1.5 pt-1.5">
+              <Info size={12} className="shrink-0" />
+              If enabled, new orders ring continuously like an alarm until stopped (app open or closed). If disabled, standard notification tone is played once.
+            </p>
+          </div>
         </Section>
 
         <Section title="Payment Methods">

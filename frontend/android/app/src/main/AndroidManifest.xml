@@ -36,8 +36,7 @@
 
         <!--
             Tell FCM which notification channel to use for ALL background/killed-app
-            notifications. Without this, Android 8+ ignores the channelId in the
-            FCM payload and plays the system default sound.
+            notifications when alarm mode is OFF (normal notification path).
         -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
@@ -48,12 +47,42 @@
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" />
 
+        <!--
+            Custom FCM service — intercepts data-only "alarm=true" messages and
+            starts OrderAlarmService to loop audio continuously.
+        -->
+        <service
+            android:name=".MagicMomosMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!--
+            Foreground service that plays order_ringtone.wav on loop and shows
+            a persistent "STOP ALARM" notification until dismissed.
+        -->
+        <service
+            android:name=".OrderAlarmService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+        <!--
+            BroadcastReceiver that handles taps on the "STOP ALARM" notification button.
+        -->
+        <receiver
+            android:name=".StopAlarmReceiver"
+            android:exported="false" />
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
 
@@ -68,3 +97,4 @@
         </intent>
     </queries>
 </manifest>
+

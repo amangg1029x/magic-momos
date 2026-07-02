@@ -7,7 +7,7 @@ class RingtonePlayer {
     this.intervalId = null;
   }
 
-  start() {
+  start(loop = true) {
     if (this.intervalId) return;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
@@ -20,43 +20,46 @@ class RingtonePlayer {
       }
       const now = this.audioCtx.currentTime;
 
-      const osc1 = this.audioCtx.createOscillator();
-      const osc2 = this.audioCtx.createOscillator();
-      const mainGain = this.audioCtx.createGain();
-      const tremolo = this.audioCtx.createGain();
-      
-      osc1.type = "sine";
-      osc1.frequency.setValueAtTime(853, now);
-      osc2.type = "sine";
-      osc2.frequency.setValueAtTime(960, now);
+      // Note helper for music-box style synth
+      const playNote = (freq, startTime, duration, amp) => {
+        if (!this.audioCtx || freq === 0) return;
+        const osc = this.audioCtx.createOscillator();
+        const gainNode = this.audioCtx.createGain();
 
-      const lfo = this.audioCtx.createOscillator();
-      lfo.type = "sine";
-      lfo.frequency.setValueAtTime(16, now);
-      
-      const lfoGain = this.audioCtx.createGain();
-      lfoGain.gain.setValueAtTime(0.5, now);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, startTime);
 
-      mainGain.gain.setValueAtTime(0, now);
-      mainGain.gain.linearRampToValueAtTime(0.3, now + 0.05);
-      mainGain.gain.setValueAtTime(0.3, now + 1.2);
-      mainGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(amp, startTime + 0.005);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
-      lfo.connect(lfoGain);
-      lfoGain.connect(tremolo.gain);
+        osc.connect(gainNode);
+        gainNode.connect(this.audioCtx.destination);
 
-      osc1.connect(tremolo);
-      osc2.connect(tremolo);
-      tremolo.connect(mainGain);
-      mainGain.connect(this.audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      };
 
-      osc1.start(now);
-      osc2.start(now);
-      lfo.start(now);
+      const noteFreqs = {
+        C4: 261.63, E4: 329.63, G4: 392.00, C5: 523.25,
+        A4: 440.00, E5: 659.25, G5: 783.99, C6: 1046.50
+      };
 
-      osc1.stop(now + 1.5);
-      osc2.stop(now + 1.5);
-      lfo.stop(now + 1.5);
+      // Play beautiful arpeggio
+      playNote(noteFreqs.C4, now + 0.0, 0.4, 0.15);
+      playNote(noteFreqs.E4, now + 0.2, 0.4, 0.15);
+      playNote(noteFreqs.G4, now + 0.4, 0.4, 0.15);
+      playNote(noteFreqs.C5, now + 0.6, 0.8, 0.2);
+
+      playNote(noteFreqs.G4, now + 1.0, 0.4, 0.15);
+      playNote(noteFreqs.A4, now + 1.2, 0.4, 0.15);
+      playNote(noteFreqs.C5, now + 1.4, 0.4, 0.15);
+      playNote(noteFreqs.E5, now + 1.6, 0.8, 0.2);
+
+      playNote(noteFreqs.C5, now + 2.0, 0.4, 0.15);
+      playNote(noteFreqs.E5, now + 2.2, 0.4, 0.15);
+      playNote(noteFreqs.G5, now + 2.4, 0.4, 0.15);
+      playNote(noteFreqs.C6, now + 2.6, 1.0, 0.25);
     };
 
     try {
@@ -64,7 +67,9 @@ class RingtonePlayer {
     } catch (e) {
       console.warn("Failed to play ring tone immediately:", e);
     }
-    this.intervalId = setInterval(playRingCycle, 3000);
+    if (loop) {
+      this.intervalId = setInterval(playRingCycle, 5000);
+    }
   }
 
   stop() {
@@ -173,8 +178,20 @@ export function NotificationProvider({ children }) {
       });
 
       if (shouldRing) {
-        setIsRinging(true);
-        ringtone.start();
+        // Fetch setting status to determine if we should loop or play once
+        (async () => {
+          let loop = true;
+          try {
+            const settingsRes = await api.settings.get();
+            if (settingsRes.success && settingsRes.settings) {
+              loop = settingsRes.settings.alarmRingEnabled !== false;
+            }
+          } catch (e) {
+            console.warn("Failed to fetch settings for alarm mode, defaulting to true", e);
+          }
+          setIsRinging(loop); // UI banner only needs to show if looping/must be dismissed
+          ringtone.start(loop);
+        })();
       }
     } catch {
       // Silently ignore network errors during polling

@@ -26,6 +26,7 @@ import PrivacyPage       from "./pages/PrivacyPage";
 import RefundPage        from "./pages/RefundPage";
 import CancellationPage  from "./pages/CancellationPage";
 import BottomNavigation  from "./components/BottomNavigation";
+import MobileAppDownloadModal from "./components/MobileAppDownloadModal";
 
 function AppInner() {
   const { page, navigate, isNative } = useNav();
@@ -100,6 +101,7 @@ function AppInner() {
     <div className={isNative ? "pb-24" : ""}>
       {renderPage()}
       <BottomNavigation />
+      {!isNative && !["admin", "delivery"].includes(page) && <MobileAppDownloadModal />}
     </div>
   );
 }

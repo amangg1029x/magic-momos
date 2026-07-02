@@ -7,6 +7,7 @@ import {
 import { useNav } from "../context/NavigationContext";
 import api from "../services/api";
 import NotificationBell from "../components/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 
 const NAV_ITEMS = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -21,6 +22,7 @@ export default function AdminLayout({ children, subPage, onNavigate }) {
   const [desktopOpen, setDesktopOpen] = useState(true);
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const { navigate } = useNav();
+  const { isRinging, stopRinging } = useNotifications();
 
   const handleNav = (id) => { onNavigate(id); setMobileOpen(false); };
   const showLabel  = desktopOpen || mobileOpen;
@@ -198,6 +200,57 @@ export default function AdminLayout({ children, subPage, onNavigate }) {
           {children}
         </main>
       </div>
+
+      {/* ── Ringing Alarm Banner/Modal ── */}
+      <AnimatePresence>
+        {isRinging && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            className="fixed bottom-6 right-6 z-[9999] max-w-sm w-full p-5 rounded-2xl
+                       bg-[#b91c1c] text-white shadow-[0_10px_30px_rgba(185,28,28,0.4)]
+                       border-2 border-white/20 flex flex-col gap-4 overflow-hidden"
+          >
+            {/* Pulsing warning backdrop glow */}
+            <div className="absolute inset-0 bg-red-600 animate-pulse opacity-20 pointer-events-none" />
+
+            <div className="relative z-10 flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0 animate-bounce">
+                <ShoppingBag size={24} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-display text-lg tracking-wider leading-none mb-1">
+                  NEW ORDER PLACED!
+                </h4>
+                <p className="font-body text-xs text-white/80 leading-relaxed">
+                  A customer has placed a new order. The phone will continue ringing until silenced.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative z-10 flex gap-2">
+              <button
+                onClick={stopRinging}
+                className="flex-1 bg-white text-[#b91c1c] py-2.5 rounded-xl font-body font-800 text-xs tracking-wider
+                           hover:bg-red-50 active:bg-white transition-colors uppercase cursor-pointer"
+              >
+                Stop Ringing
+              </button>
+              <button
+                onClick={() => {
+                  stopRinging();
+                  handleNav("orders");
+                }}
+                className="px-4 bg-white/20 text-white border border-white/20 py-2.5 rounded-xl font-body font-700 text-xs tracking-wider
+                           hover:bg-white/30 active:bg-white/20 transition-colors uppercase cursor-pointer"
+              >
+                View Orders
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

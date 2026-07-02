@@ -10,8 +10,10 @@ import com.getcapacitor.BridgeActivity;
 import com.ionicframework.capacitor.Checkout;
 
 public class MainActivity extends BridgeActivity {
-    /** Channel ID referenced by the FCM payload (backend sends android.channelId = this) */
-    public static final String NEW_ORDER_CHANNEL_ID = "new_order";
+    /** Channel ID referenced by the FCM payload (backend sends android.channelId = this)
+     *  NOTE: If you change the sound/vibration settings, increment the suffix (v2→v3)
+     *  because Android permanently caches channel settings and won't update them. */
+    public static final String NEW_ORDER_CHANNEL_ID = "new_order_v2";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

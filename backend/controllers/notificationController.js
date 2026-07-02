@@ -100,11 +100,12 @@ const createNotification = async (data) => {
     }
 
     if (tokens.length > 0) {
-      // Use the "new_order" channel for admin order_placed notifications
+      // Use the "new_order_v2" channel for admin order_placed notifications
       // so the custom ringtone fires even when the app is closed/backgrounded.
+      // NOTE: Channel ID must match what is registered in MainActivity.java.
       const channelId =
         data.recipientRole === "admin" && data.type === "order_placed"
-          ? "new_order"
+          ? "new_order_v2"
           : null;
       sendPushNotification(tokens, data.title, data.body, pushData, channelId);
     }

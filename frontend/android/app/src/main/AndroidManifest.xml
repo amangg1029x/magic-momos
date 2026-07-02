@@ -33,6 +33,21 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!--
+            Tell FCM which notification channel to use for ALL background/killed-app
+            notifications. Without this, Android 8+ ignores the channelId in the
+            FCM payload and plays the system default sound.
+        -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="new_order_v2" />
+
+        <!-- Default small icon used when FCM notification has no icon field -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

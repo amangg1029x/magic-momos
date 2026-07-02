@@ -5,27 +5,42 @@ const DeliveryToken = require("../models/DeliveryToken");
 const messaging = require("../config/firebase");
 
 // Helper to push messages to list of device tokens
-const sendPushNotification = async (tokens, title, body, data = {}) => {
+const sendPushNotification = async (tokens, title, body, data = {}, channelId = null) => {
   if (!messaging || !tokens || tokens.length === 0) return;
   
   try {
-    const payload = {
-      notification: {
-        title,
-        body,
-      },
-      data: {
-        ...data,
-        click_action: "FLUTTER_NOTIFICATION_CLICK", // for some libraries/platforms
-      },
-    };
-
-    // sendEachForMulticast expects [{ token, notification, data }] or we can use sendEach
-    const messages = tokens.map(token => ({
-      token,
-      notification: payload.notification,
-      data: payload.data,
-    }));
+    const messages = tokens.map(token => {
+      const msg = {
+        token,
+        notification: { title, body },
+        data: {
+          ...data,
+          click_action: "FLUTTER_NOTIFICATION_CLICK",
+        },
+        // Android-specific: route to the correct channel so the custom ringtone plays
+        android: {
+          priority: "high",
+          notification: {
+            channelId: channelId || "default",
+            sound: channelId === "new_order" ? "order_ringtone" : "default",
+            // Also send a heads-up notification even when the app is in foreground
+            notificationPriority: "PRIORITY_MAX",
+            visibility: "PUBLIC",
+          },
+        },
+        // APNS (iOS) high-priority flag
+        apns: {
+          headers: { "apns-priority": "10" },
+          payload: {
+            aps: {
+              sound: channelId === "new_order" ? "order_ringtone.wav" : "default",
+              badge: 1,
+            },
+          },
+        },
+      };
+      return msg;
+    });
 
     const response = await messaging.sendEach(messages);
     console.log(`[Push] Successfully sent ${response.successCount} messages. Failed: ${response.failureCount}`);
@@ -33,6 +48,7 @@ const sendPushNotification = async (tokens, title, body, data = {}) => {
     console.error("[Push] Error sending push notification:", err.message);
   }
 };
+
 
 // ── Shared helper used by other controllers to fire-and-forget notifications ──
 // Usage: createNotification({ recipientId, recipientRole, type, title, body, orderId })
@@ -84,8 +100,13 @@ const createNotification = async (data) => {
     }
 
     if (tokens.length > 0) {
-      // Send FCM push asynchronously
-      sendPushNotification(tokens, data.title, data.body, pushData);
+      // Use the "new_order" channel for admin order_placed notifications
+      // so the custom ringtone fires even when the app is closed/backgrounded.
+      const channelId =
+        data.recipientRole === "admin" && data.type === "order_placed"
+          ? "new_order"
+          : null;
+      sendPushNotification(tokens, data.title, data.body, pushData, channelId);
     }
   } catch (err) {
     // Never throw — notifications are best-effort, must not break the main flow

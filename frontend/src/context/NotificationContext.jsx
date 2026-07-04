@@ -160,13 +160,6 @@ export function NotificationProvider({ children }) {
         seenIdsRef.current.add(n._id);
         // Only toast for unread
         if (!n.read) {
-          const toastType =
-            n.type === "order_placed" ? "info"    :
-            n.type === "order_status" ? "success" :
-            n.type === "payment"      ? "success" :
-            n.type === "coupon"       ? "info"    : "info";
-          addToast({ type: toastType, title: n.title, body: n.body, notificationId: n._id });
-
           // If role is admin and notification type is order_placed and created within last 15 minutes
           if (role === "admin" && n.type === "order_placed") {
             const timeDiff = Date.now() - new Date(n.createdAt).getTime();

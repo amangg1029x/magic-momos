@@ -22,7 +22,6 @@ export const initPushNotifications = async (role = "customer") => {
 
     if (permStatus.receive !== "granted") {
       console.warn("[Push] Permission not granted:", permStatus.receive);
-      alert("[Push] Notification permission was NOT granted. Status: " + permStatus.receive);
       return;
     }
 
@@ -41,7 +40,6 @@ export const initPushNotifications = async (role = "customer") => {
 
   } catch (err) {
     console.error("[Push] Error in initPushNotifications:", err);
-    alert("[Push] Init error: " + (err.message || String(err)));
   }
 };
 
@@ -65,14 +63,12 @@ const addPushListeners = async (role) => {
       console.log("[Push] ✅ Token saved to server:", result);
     } catch (err) {
       console.error("[Push] ❌ Failed to save token to server:", err.message, err.status, err.data);
-      alert("[Push] Token save failed: " + err.message + " (status " + err.status + ")");
     }
   });
 
   // FCM registration failure
   await PushNotifications.addListener("registrationError", (error) => {
     console.error("[Push] ❌ FCM registration error:", JSON.stringify(error));
-    alert("[Push] FCM registration failed: " + JSON.stringify(error));
   });
 
   // Foreground notification received

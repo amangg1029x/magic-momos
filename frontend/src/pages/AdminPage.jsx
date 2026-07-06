@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import api, { getAdminToken } from "../services/api";
+import { useNav } from "../context/NavigationContext";
 import AdminLogin from "../admin/AdminLogin";
 import AdminLayout from "../admin/AdminLayout";
 import AdminDashboard from "../admin/AdminDashboard";
@@ -13,9 +14,21 @@ import AdminSettings from "../admin/AdminSettings";
 import { initPushNotifications } from "../services/pushNotifications";
 
 export default function AdminPage() {
+  const { registerBackHandler } = useNav();
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed]     = useState(false);
   const [subPage, setSubPage]   = useState("dashboard");
+
+  useEffect(() => {
+    if (!authed || subPage === "dashboard") return;
+
+    const unregister = registerBackHandler(() => {
+      setSubPage("dashboard");
+      return true;
+    });
+
+    return unregister;
+  }, [authed, subPage, registerBackHandler]);
 
   useEffect(() => {
     (async () => {

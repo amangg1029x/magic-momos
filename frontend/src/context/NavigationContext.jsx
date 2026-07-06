@@ -61,8 +61,23 @@ export function NavigationProvider({ children }) {
     }
   };
 
+  const customBackHandlersRef = useRef([]);
+
+  const registerBackHandler = useCallback((handler) => {
+    customBackHandlersRef.current.push(handler);
+    return () => {
+      customBackHandlersRef.current = customBackHandlersRef.current.filter((h) => h !== handler);
+    };
+  }, []);
+
   const goBack = () => {
-    if (page === "menu") {
+    if (customBackHandlersRef.current.length > 0) {
+      const handler = customBackHandlersRef.current[customBackHandlersRef.current.length - 1];
+      const handled = handler();
+      if (handled) return;
+    }
+
+    if (["menu", "admin", "delivery"].includes(page)) {
       if (isNative) {
         App.exitApp();
       }
@@ -205,7 +220,7 @@ export function NavigationProvider({ children }) {
   const storeStatus = getStoreOpenStatus();
 
   return (
-    <NavContext.Provider value={{ page, pageData, navigate, goBack, isNative, stack, settings, fetchSettings, storeStatus }}>
+    <NavContext.Provider value={{ page, pageData, navigate, goBack, isNative, stack, settings, fetchSettings, storeStatus, registerBackHandler }}>
       {children}
     </NavContext.Provider>
   );

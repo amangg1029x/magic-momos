@@ -114,12 +114,15 @@ const createNotification = async (data) => {
     }
 
     if (tokens.length > 0) {
-      // For admin order_placed notifications, check if alarm ring is enabled.
+      // For admin and delivery order notifications, check if alarm ring is enabled.
       // If yes: send a data-only FCM so our AlarmService intercepts and loops audio.
       // If no: send a normal notification with the default channel sound.
       let alarmMode = false;
       let channelId = null;
-      if (data.recipientRole === "admin" && data.type === "order_placed") {
+      if (
+        (data.recipientRole === "admin" && data.type === "order_placed") ||
+        (data.recipientRole === "delivery" && data.type === "order_status")
+      ) {
         const settings = await Setting.findOne().select("alarmRingEnabled").lean();
         alarmMode = settings?.alarmRingEnabled !== false; // default true if no doc yet
         channelId = "new_order_v2";

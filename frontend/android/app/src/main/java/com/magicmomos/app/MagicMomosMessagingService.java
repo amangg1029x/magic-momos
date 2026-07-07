@@ -30,10 +30,10 @@ public class MagicMomosMessagingService extends FirebaseMessagingService {
         String alarmFlag = data.get("alarm");
         String type      = data.get("type");
 
-        // Only trigger alarm for order_placed data messages with alarm=true
-        if ("true".equals(alarmFlag) && "order_placed".equals(type)) {
-            String title = data.getOrDefault("title", "New Order! 🥟");
-            String body  = data.getOrDefault("body",  "A customer placed a new order.");
+        // Only trigger alarm for order_placed or order_status data messages with alarm=true
+        if ("true".equals(alarmFlag) && ("order_placed".equals(type) || "order_status".equals(type))) {
+            String title = data.getOrDefault("title", "New Update! 🥟");
+            String body  = data.getOrDefault("body",  "You have a new update.");
 
             Intent alarmIntent = new Intent(this, OrderAlarmService.class);
             alarmIntent.putExtra("title", title);

@@ -18,6 +18,10 @@ exports.registerCustomerToken = async (req, res, next) => {
       { $pull: { fcmTokens: { token } } }
     );
 
+    // Also remove from Admin and Delivery tokens
+    await AdminToken.deleteMany({ token });
+    await DeliveryToken.deleteMany({ token });
+
     // Fetch user and add token (keep max 5 tokens)
     const user = await User.findById(userId);
     if (!user) {
@@ -51,6 +55,11 @@ exports.registerAdminToken = async (req, res, next) => {
 
     // Remove token from other admins/entries to prevent duplicates
     await AdminToken.deleteMany({ token });
+    await DeliveryToken.deleteMany({ token });
+    await User.updateMany(
+      { "fcmTokens.token": token },
+      { $pull: { fcmTokens: { token } } }
+    );
 
     // Create or update the token entry
     await AdminToken.findOneAndUpdate(
@@ -84,6 +93,11 @@ exports.registerDeliveryToken = async (req, res, next) => {
 
     // Remove token from other entries
     await DeliveryToken.deleteMany({ token });
+    await AdminToken.deleteMany({ token });
+    await User.updateMany(
+      { "fcmTokens.token": token },
+      { $pull: { fcmTokens: { token } } }
+    );
 
     // Create or update token
     await DeliveryToken.findOneAndUpdate(

@@ -14,4 +14,4 @@ export const RESTAURANT_LOCATION = {
 
 // Maximum distance (in km) we currently deliver to.
 // Bump this up as the business grows — it's the only line that needs to change.
-export const DELIVERY_RADIUS_KM = 5;
+export const DELIVERY_RADIUS_KM = 2;

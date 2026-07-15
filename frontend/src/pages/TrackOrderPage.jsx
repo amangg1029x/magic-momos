@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { ArrowLeft, MapPin, Truck, Clock, CheckCircle, RefreshCw, Radio } from "lucide-react";
+import { ArrowLeft, MapPin, Truck, Clock, CheckCircle, RefreshCw, Radio, Phone, User } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 import api from "../services/api";
+import { getSocket } from "../services/socket";
 
 // Fix Leaflet default icon path broken by Vite
 delete L.Icon.Default.prototype._getIconUrl;
@@ -109,6 +110,23 @@ export default function TrackOrderPage() {
     return () => clearInterval(pollRef.current);
   }, [orderId, fetchOrder, navigate]);
 
+  // Socket: live order status and rider assignment updates
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    const onUpdate = (payload) => {
+      if (!payload || payload.orderId === orderId || payload._id === orderId) {
+        fetchOrder(true);
+      }
+    };
+    socket.on("order_status_update", onUpdate);
+    socket.on("order_assigned", onUpdate);
+    return () => {
+      socket.off("order_status_update", onUpdate);
+      socket.off("order_assigned", onUpdate);
+    };
+  }, [orderId, fetchOrder]);
+
   // Stop polling once delivered / cancelled
   useEffect(() => {
     if (order?.status === "Delivered" || order?.status === "Cancelled") {
@@ -192,7 +210,7 @@ export default function TrackOrderPage() {
             {hasDeliveryPin && (
               <Marker position={[order.deliveryLocation.lat, order.deliveryLocation.lng]} icon={deliveryIcon}>
                 <Popup>
-                  <strong>🛵 Delivery partner</strong><br />
+                  <strong>🛵 {order.deliveryBoy?.name || "Delivery partner"}</strong><br />
                   {order.deliveryLocation.updatedAt && (
                     <span style={{ fontSize: 12, color: "#666" }}>
                       Updated {timeAgo(order.deliveryLocation.updatedAt)}
@@ -331,6 +349,33 @@ export default function TrackOrderPage() {
                   : [addr.street, addr.city, addr.pincode].filter(Boolean).join(", ")}
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Delivery Boy card — shown once a rider is assigned */}
+        {order?.deliveryBoy && (
+          <div className="flex items-center gap-4 rounded-2xl p-4 bg-white border border-mm-border shadow-card">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0"
+                 style={{ background: "linear-gradient(135deg,#22c55e,#16a34a)" }}>
+              🛵
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-body text-[10px] uppercase tracking-wider mb-0.5 text-mm-muted">Your Delivery Partner</p>
+              <p className="font-body text-sm font-700 text-mm-cream">
+                {order.deliveryBoy.name || "Delivery Partner"}
+              </p>
+              {order.deliveryBoy.phone && (
+                <p className="font-body text-xs text-mm-muted">{order.deliveryBoy.phone}</p>
+              )}
+            </div>
+            {order.deliveryBoy.phone && (
+              <a href={`tel:${order.deliveryBoy.phone}`}
+                 className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 cursor-pointer"
+                 style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.25)" }}
+                 title="Call delivery partner">
+                <Phone size={15} style={{ color: "#16a34a" }} />
+              </a>
+            )}
           </div>
         )}
 

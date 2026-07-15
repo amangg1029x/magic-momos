@@ -19,9 +19,9 @@ export default function DeliveryLogin({ onSuccess }) {
     setError("");
     setLoading(true);
     try {
-      await api.delivery.login(form);
+      const res = await api.delivery.login(form);
       initPushNotifications("delivery");
-      onSuccess();
+      onSuccess(res.deliveryBoy || null);
     } catch (err) {
       setError(err.message || "Invalid email or password. Please try again.");
     } finally {

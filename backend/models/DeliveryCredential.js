@@ -3,6 +3,14 @@ const bcrypt   = require("bcryptjs");
 
 const deliveryCredentialSchema = new mongoose.Schema(
   {
+    name: {
+      type:      String,
+      required:  [true, "Name is required"],
+    },
+    phone: {
+      type:      String,
+      required:  [true, "Phone number is required"],
+    },
     email: {
       type:      String,
       required:  [true, "Email is required"],
@@ -14,6 +22,14 @@ const deliveryCredentialSchema = new mongoose.Schema(
       type:     String,
       required: [true, "Password is required"],
       select:   false,
+    },
+    isSleeping: {
+      type:     Boolean,
+      default:  false,
+    },
+    isActive: {
+      type:     Boolean,
+      default:  true,
     },
   },
   { timestamps: true }

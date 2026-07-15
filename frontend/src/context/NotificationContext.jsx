@@ -105,6 +105,11 @@ export function NotificationProvider({ children }) {
   const seenIdsRef = useRef(new Set());
   const pollRef    = useRef(null);
 
+  const startRinging = useCallback((loop = true) => {
+    ringtone.start(loop);
+    setIsRinging(loop);
+  }, []);
+
   const stopRinging = useCallback(() => {
     ringtone.stop();
     setIsRinging(false);
@@ -258,6 +263,7 @@ export function NotificationProvider({ children }) {
         markAllRead,
         refreshNotifications,
         isRinging,
+        startRinging,
         stopRinging,
       }}
     >

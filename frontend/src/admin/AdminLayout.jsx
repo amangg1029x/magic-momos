@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, ShoppingBag, UtensilsCrossed,
-  Settings, LogOut, Menu, X, ChevronRight, Tag, Users,
+  Settings, LogOut, Menu, X, ChevronRight, Tag, Users, Truck,
 } from "lucide-react";
 import { useNav } from "../context/NavigationContext";
 import api from "../services/api";
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { id: "menu",      icon: UtensilsCrossed, label: "Menu Items"},
   { id: "coupons",   icon: Tag,             label: "Coupons"   },
   { id: "users",     icon: Users,           label: "Customers" },
+  { id: "delivery",  icon: Truck,           label: "Delivery Boys" },
   { id: "settings",  icon: Settings,        label: "Settings"  },
 ];
 

@@ -100,6 +100,11 @@ const orderSchema = new mongoose.Schema(
       updatedAt: { type: Date },
     },
 
+    deliveryBoy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref:  "DeliveryCredential",
+    },
+
     specialInstructions: { type: String, maxlength: 300 },
   },
   { timestamps: true }

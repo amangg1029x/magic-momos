@@ -63,7 +63,9 @@ const adminProtect = async (req, res, next) => {
 };
 
 // ── Delivery partner middleware ────────────────────────────────────────────────
-const deliveryProtect = (req, res, next) => {
+const DeliveryCredential = require("../models/DeliveryCredential");
+
+const deliveryProtect = async (req, res, next) => {
   const token = extractToken(req);
 
   if (!token) {
@@ -71,11 +73,20 @@ const deliveryProtect = (req, res, next) => {
   }
 
   const decoded = verifyToken(token, process.env.JWT_DELIVERY_SECRET);
-  if (!decoded || decoded.role !== "delivery") {
+  if (!decoded || decoded.role !== "delivery" || !decoded.id) {
     return res.status(401).json({ success: false, message: "Delivery token is invalid or expired." });
   }
 
-  next();
+  try {
+    const deliveryBoy = await DeliveryCredential.findById(decoded.id);
+    if (!deliveryBoy || !deliveryBoy.isActive) {
+      return res.status(401).json({ success: false, message: "Delivery partner account not found or deactivated." });
+    }
+    req.deliveryBoy = deliveryBoy;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: "Authentication failed." });
+  }
 };
 
 // ── Optional auth: attaches user if token present, doesn't block guests ───────

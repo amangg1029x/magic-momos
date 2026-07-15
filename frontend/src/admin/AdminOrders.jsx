@@ -78,7 +78,7 @@ function AdminLiveMap() {
   const pins = liveOrders
     .filter(o => o.deliveryLocation?.lat != null)
     .map(o => ({ lat: o.deliveryLocation.lat, lng: o.deliveryLocation.lng,
-                 name: o.customer?.name, num: o.orderNumber }));
+                 name: o.deliveryBoy?.name || o.customer?.name || "Rider", num: o.orderNumber }));
 
   return (
     <div className="rounded-2xl overflow-hidden shadow-md border border-gray-100 mb-5"
@@ -159,7 +159,7 @@ function OrderCard({ order, onSelect }) {
     >
       <div className="flex items-center justify-between gap-3">
         <span className="font-body font-600 text-gray-800 text-sm">
-          #{id.toString().slice(-6).toUpperCase()}
+          {order.orderNumber || `#${id.toString().slice(-6).toUpperCase()}`}
         </span>
         <span className={`font-body text-xs font-600 px-2.5 py-1 rounded-full shrink-0 ${cfg.bg} ${cfg.text}`}>
           {order.status}
@@ -331,7 +331,7 @@ export default function AdminOrders() {
                         className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 cursor-pointer transition-colors"
                       >
                         <td className="px-5 py-3.5 font-body font-600 text-gray-800">
-                          #{id.toString().slice(-6).toUpperCase()}
+                          {o.orderNumber || `#${id.toString().slice(-6).toUpperCase()}`}
                         </td>
                         <td className="px-5 py-3.5 font-body text-gray-600">
                           {o.customer?.name || o.customerName}
@@ -402,7 +402,7 @@ export default function AdminOrders() {
             >
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-display text-lg text-gray-900 tracking-wide">
-                  ORDER #{(selected._id || selected.id).toString().slice(-6).toUpperCase()}
+                  ORDER {selected.orderNumber}
                 </h3>
                 <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-700 shrink-0">
                   <X size={20} />
@@ -438,6 +438,30 @@ export default function AdminOrders() {
                   <CreditCard size={15} className="text-gray-400 shrink-0" />
                   {selected.paymentMethod || "COD"}
                 </div>
+
+                {/* Delivery boy card */}
+                {selected.deliveryBoy && (
+                  <div className="flex items-center gap-3 rounded-xl p-3 mt-1"
+                       style={{ background: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
+                         style={{ background: "linear-gradient(135deg,#22c55e,#16a34a)" }}>🛵</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-body text-[10px] uppercase tracking-wider text-gray-400">Delivery Partner</p>
+                      <p className="font-body text-sm font-700 text-gray-800">{selected.deliveryBoy.name}</p>
+                      {selected.deliveryBoy.phone && (
+                        <p className="font-body text-xs text-gray-500">{selected.deliveryBoy.phone}</p>
+                      )}
+                    </div>
+                    {selected.deliveryBoy.phone && (
+                      <a href={`tel:${selected.deliveryBoy.phone}`}
+                         className="w-9 h-9 rounded-xl flex items-center justify-center"
+                         style={{ background: "rgba(34,197,94,0.15)" }}
+                         title="Call delivery partner">
+                        <Phone size={14} style={{ color: "#16a34a" }} />
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="bg-gray-50 rounded-2xl p-4 mb-5">

@@ -458,7 +458,7 @@ const getOrder = async (req, res, next) => {
       ? { orderNumber: id }
       : { _id: id };
 
-    const order = await Order.findOne(query);
+    const order = await Order.findOne(query).populate("deliveryBoy", "name phone");
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found." });
     }
@@ -550,7 +550,7 @@ const adminGetOrders = async (req, res, next) => {
     }
 
     const [orders, total] = await Promise.all([
-      Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Order.find(query).populate("deliveryBoy", "name phone email").sort({ createdAt: -1 }).skip(skip).limit(limit),
       Order.countDocuments(query),
     ]);
 
@@ -569,7 +569,7 @@ const adminGetOrder = async (req, res, next) => {
   try {
     const { id } = req.params;
     const query  = id.startsWith("MM-") ? { orderNumber: id } : { _id: id };
-    const order  = await Order.findOne(query);
+    const order  = await Order.findOne(query).populate("deliveryBoy", "name phone email");
     if (!order) return res.status(404).json({ success: false, message: "Order not found." });
     res.json({ success: true, order });
   } catch (err) {
@@ -634,7 +634,60 @@ const updateOrderStatus = async (req, res, next) => {
       });
     }
 
-    res.json({ success: true, message: `Order status updated to ${status}.`, order });
+    const populatedOrder = await Order.findById(order._id).populate("deliveryBoy", "name phone email");
+
+    // Real-time socket updates
+    const io = req.app.get("io");
+    if (io) {
+      // Broadcast status change to admin and customer
+      io.to("admin").emit("order_status_update", {
+        orderId: order._id,
+        status: status,
+        order: populatedOrder,
+      });
+      if (order.customer?.userId) {
+        io.to(`customer-${order.customer.userId}`).emit("order_status_update", {
+          orderId: order._id,
+          status: status,
+          order: populatedOrder,
+        });
+      }
+
+      // Ringing alarm for riders
+      if (status === "Preparing") {
+        io.to("delivery-active").emit("new_order", {
+          _id: order._id,
+          orderNumber: order.orderNumber,
+          customer: {
+            name: order.customer.name,
+            phone: order.customer.phone,
+          },
+          address: order.address,
+          total: order.total,
+          items: order.items,
+          specialInstructions: order.specialInstructions,
+        });
+        console.log(`[Socket] Broadcast new_order ${order.orderNumber} to delivery-active`);
+      }
+
+      // Notify riders when an order is cancelled so they stop showing/ringing it
+      if (status === "Cancelled") {
+        io.to("delivery-active").emit("order_cancelled", {
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+        });
+        // Also notify the assigned delivery boy specifically (in case they are active)
+        if (order.deliveryBoy) {
+          io.to(`delivery-boy-${order.deliveryBoy}`).emit("order_cancelled", {
+            orderId: order._id,
+            orderNumber: order.orderNumber,
+          });
+        }
+        console.log(`[Socket] Broadcast order_cancelled ${order.orderNumber} to delivery-active`);
+      }
+    }
+
+    res.json({ success: true, message: `Order status updated to ${status}.`, order: populatedOrder });
   } catch (err) {
     next(err);
   }

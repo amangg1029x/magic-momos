@@ -211,6 +211,14 @@ const api = {
       toggleStatus: (id) => patch(`/admin/users/${id}/toggle-status`, {}, "admin"),
     },
 
+    // Delivery boys CRUD management
+    deliveryBoys: {
+      getAll: ()          => get("/admin/delivery-boys", "admin"),
+      create: (data)      => post("/admin/delivery-boys", data, "admin"),
+      update: (id, data)  => put(`/admin/delivery-boys/${id}`, data, "admin"),
+      delete: (id)        => del(`/admin/delivery-boys/${id}`, "admin"),
+    },
+
     // Admin notifications
     notifications: {
       getAll:      ()   => get("/admin/notifications", "admin"),
@@ -228,8 +236,11 @@ const api = {
       return res;
     },
     logout: () => { clearDeliveryToken(); },
+    getProfile: ()           => get("/delivery/me", "delivery"),
+    toggleSleepStatus: (isSleeping) => patch("/delivery/sleep", { isSleeping }, "delivery"),
     getOrders: ()            => get("/delivery/orders", "delivery"),
     getHistory: ()           => get("/delivery/history", "delivery"),
+    acceptOrder: (id)        => post(`/delivery/orders/${id}/accept`, {}, "delivery"),
     updateStatus: (id, status) => patch(`/delivery/orders/${id}/status`, { status }, "delivery"),
     updateLocation: (id, lat, lng) => patch(`/delivery/orders/${id}/location`, { lat, lng }, "delivery"),
 

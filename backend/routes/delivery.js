@@ -6,6 +6,9 @@ const {
   deliveryUpdateStatus,
   getDeliveryHistory,
   updateDeliveryLocation,
+  getDeliveryMe,
+  toggleSleepStatus,
+  acceptOrder,
 } = require("../controllers/deliveryController");
 const { deliveryProtect } = require("../middleware/auth");
 const { loginRules, validate } = require("../middleware/validators");
@@ -25,7 +28,10 @@ const loginLimiter = rateLimit({
 router.post("/login", loginLimiter, loginRules, validate, deliveryLogin);
 
 // ── Protected (requires delivery JWT) ────────────────────────────────────────
+router.get("/me",                   deliveryProtect, getDeliveryMe);
+router.patch("/sleep",              deliveryProtect, toggleSleepStatus);
 router.get("/orders",               deliveryProtect, getDeliveryOrders);
+router.post("/orders/:id/accept",   deliveryProtect, acceptOrder);
 router.patch("/orders/:id/status",  deliveryProtect, deliveryUpdateStatus);
 router.patch("/orders/:id/location",deliveryProtect, updateDeliveryLocation);
 router.get("/history",              deliveryProtect, getDeliveryHistory);

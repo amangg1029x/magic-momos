@@ -1,7 +1,14 @@
 const router = require("express").Router();
 
 const { adminLogin, getAdminMe }    = require("../controllers/adminAuthController");
-const { getDeliveryCredentials, updateDeliveryCredentials } = require("../controllers/deliveryController");
+const {
+  getDeliveryCredentials,
+  updateDeliveryCredentials,
+  getDeliveryBoys,
+  addDeliveryBoy,
+  updateDeliveryBoy,
+  deleteDeliveryBoy,
+} = require("../controllers/deliveryController");
 const { getSettings, updateSettings } = require("../controllers/settingController");
 const { getCoupons, createCoupon, deleteCoupon } = require("../controllers/couponController");
 const { getUsers, toggleUserStatus } = require("../controllers/adminUserController");
@@ -65,6 +72,12 @@ router.patch("/contacts/:id",   adminUpdateContact);
 // Delivery credentials management
 router.get("/delivery-credentials", getDeliveryCredentials);
 router.put("/delivery-credentials", updateDeliveryCredentials);
+
+// Delivery boys management
+router.get("/delivery-boys",        getDeliveryBoys);
+router.post("/delivery-boys",       addDeliveryBoy);
+router.put("/delivery-boys/:id",    updateDeliveryBoy);
+router.delete("/delivery-boys/:id", deleteDeliveryBoy);
 
 // Settings management
 router.get("/settings", getSettings);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import api, { getAdminToken } from "../services/api";
+import { initSocket } from "../services/socket";
 import { useNav } from "../context/NavigationContext";
 import AdminLogin from "../admin/AdminLogin";
 import AdminLayout from "../admin/AdminLayout";
@@ -10,6 +11,7 @@ import AdminMenu from "../admin/AdminMenu";
 import AdminCoupons from "../admin/AdminCoupons";
 import AdminUsers from "../admin/AdminUsers";
 import AdminSettings from "../admin/AdminSettings";
+import AdminDelivery from "../admin/AdminDelivery";
 
 import { initPushNotifications } from "../services/pushNotifications";
 
@@ -40,6 +42,7 @@ export default function AdminPage() {
         await api.admin.me();
         setAuthed(true);
         initPushNotifications("admin");
+        initSocket();
       } catch {
         api.admin.logout();
       } finally {
@@ -66,6 +69,7 @@ export default function AdminPage() {
     menu:      AdminMenu,
     coupons:   AdminCoupons,
     users:     AdminUsers,
+    delivery:  AdminDelivery,
     settings:  AdminSettings,
   };
   const ActiveView = SUB_VIEWS[subPage] || AdminDashboard;

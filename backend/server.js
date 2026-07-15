@@ -104,10 +104,89 @@ app.use(errorHandler);
 
 // ── Start server ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const http = require("http");
+const { Server } = require("socket.io");
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+  },
+});
+
+app.set("io", io);
+
+const jwt = require("jsonwebtoken");
+const DeliveryCredential = require("./models/DeliveryCredential");
+
+io.on("connection", async (socket) => {
+  console.log(`[Socket] Client connected: ${socket.id}`);
+
+  const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+  if (token) {
+    try {
+      const decodedAdmin = jwt.verify(token, process.env.JWT_ADMIN_SECRET);
+      if (decodedAdmin) {
+        socket.role = "admin";
+        socket.join("admin");
+        console.log(`[Socket] Socket ${socket.id} connected as Admin`);
+      }
+    } catch (e) {
+      try {
+        const decodedDelivery = jwt.verify(token, process.env.JWT_DELIVERY_SECRET);
+        if (decodedDelivery && decodedDelivery.role === "delivery") {
+          socket.role = "delivery";
+          socket.deliveryBoyId = decodedDelivery.id;
+          socket.join(`delivery-boy-${decodedDelivery.id}`);
+
+          const rider = await DeliveryCredential.findById(decodedDelivery.id);
+          if (rider && rider.isActive && !rider.isSleeping) {
+            socket.join("delivery-active");
+            console.log(`[Socket] Rider ${rider.name} joined delivery-active`);
+          }
+        }
+      } catch (e) {
+        try {
+          const decodedCustomer = jwt.verify(token, process.env.JWT_SECRET);
+          if (decodedCustomer) {
+            socket.role = "customer";
+            socket.customerId = decodedCustomer.id;
+            socket.join(`customer-${decodedCustomer.id}`);
+            console.log(`[Socket] Customer ${decodedCustomer.id} joined customer room`);
+          }
+        } catch (e) {
+          // invalid token
+        }
+      }
+    }
+  }
+
+  socket.on("join", (room) => {
+    socket.join(room);
+    console.log(`[Socket] Socket ${socket.id} joined room: ${room}`);
+  });
+
+  socket.on("join-delivery", async () => {
+    if (socket.role === "delivery" && socket.deliveryBoyId) {
+      const rider = await DeliveryCredential.findById(socket.deliveryBoyId);
+      if (rider && rider.isActive && !rider.isSleeping) {
+        socket.join("delivery-active");
+        console.log(`[Socket] Dynamic join: Rider ${rider.name} joined delivery-active`);
+      }
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`[Socket] Client disconnected: ${socket.id}`);
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`\n🚀  Magic Momos API running on port ${PORT}`);
   console.log(`    ENV: ${process.env.NODE_ENV || "development"}`);
   console.log(`    Health: http://localhost:${PORT}/api/health\n`);
 });
 
-module.exports = app; // exported for testing
+module.exports = server; // exported for testing

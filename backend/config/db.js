@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) {
+    console.log("ℹ️  MongoDB is already connected or connecting.");
+    return;
+  }
+
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       // These options prevent deprecation warnings and ensure stable connections
@@ -15,11 +20,28 @@ const connectDB = async () => {
   }
 };
 
+const closeConnection = async (reason, exitCodeOrSignal) => {
+  if (mongoose.connection.readyState !== 0) {
+    try {
+      await mongoose.connection.close();
+      console.log(`MongoDB connection closed (${reason}).`);
+    } catch (err) {
+      console.error(`Error closing MongoDB connection: ${err.message}`);
+    }
+  }
+  
+  if (typeof exitCodeOrSignal === "string") {
+    process.kill(process.pid, exitCodeOrSignal);
+  } else {
+    process.exit(exitCodeOrSignal);
+  }
+};
+
 // Graceful disconnect on app termination
-process.on("SIGINT", async () => {
-  await mongoose.connection.close();
-  console.log("MongoDB connection closed (app termination).");
-  process.exit(0);
-});
+process.on("SIGINT", () => closeConnection("app termination (SIGINT)", 0));
+process.on("SIGTERM", () => closeConnection("app termination (SIGTERM)", 0));
+
+// Graceful disconnect on nodemon restart
+process.once("SIGUSR2", () => closeConnection("nodemon restart (SIGUSR2)", "SIGUSR2"));
 
 module.exports = connectDB;

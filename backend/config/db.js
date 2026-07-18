@@ -11,6 +11,8 @@ const connectDB = async () => {
       // These options prevent deprecation warnings and ensure stable connections
       serverSelectionTimeoutMS: 10000, // 10s timeout for Atlas cold starts
       socketTimeoutMS: 45000,
+      maxPoolSize: 10, // Limit maximum connections per instance to avoid exhausting the Atlas M0 limit (500 connections)
+      minPoolSize: 1,  // Keep at least 1 connection warm
     });
 
     console.log(`✅  MongoDB connected: ${conn.connection.host}`);

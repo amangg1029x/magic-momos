@@ -701,6 +701,23 @@ const getDashboard = async (req, res, next) => {
     const weekAgo = new Date(today); weekAgo.setDate(today.getDate() - 7);
     const monthAgo = new Date(today); monthAgo.setDate(today.getDate() - 30);
 
+    // ── Compute last completed Sun–Sat week window ────────────────────────────
+    // dayOfWeek: 0=Sun, 1=Mon, …, 6=Sat
+    const dayOfWeek = today.getDay();
+    // Start of this week's Sunday (could be today if today is Sunday)
+    const thisWeekSunday = new Date(today);
+    thisWeekSunday.setDate(today.getDate() - dayOfWeek);
+    // Last completed week: the Sunday before this week's Sunday
+    const lastWeekSunday   = new Date(thisWeekSunday);
+    lastWeekSunday.setDate(thisWeekSunday.getDate() - 7);
+    const lastWeekSaturday = new Date(lastWeekSunday);
+    lastWeekSaturday.setDate(lastWeekSunday.getDate() + 7); // exclusive upper bound (next Sunday at 00:00)
+
+    // Human-readable label for the week range
+    const fmt = (d) =>
+      d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    const weekLabel = `${fmt(lastWeekSunday)} – ${fmt(new Date(lastWeekSaturday.getTime() - 1))}`;
+
     const [
       todayOrders,
       weekOrders,
@@ -709,6 +726,8 @@ const getDashboard = async (req, res, next) => {
       pendingOrders,
       topItems,
       weeklyRevenueRaw,
+      deliveryBoyAllTime,
+      deliveryBoyLastWeek,
     ] = await Promise.all([
       // Today stats
       Order.aggregate([
@@ -765,6 +784,41 @@ const getDashboard = async (req, res, next) => {
         },
         { $sort: { _id: 1 } },
       ]),
+      // All-time deliveries per delivery boy
+      Order.aggregate([
+        { $match: { status: "Delivered", deliveryBoy: { $exists: true, $ne: null } } },
+        { $group: { _id: "$deliveryBoy", totalDeliveries: { $sum: 1 } } },
+        {
+          $lookup: {
+            from:         "deliverycredentials",
+            localField:   "_id",
+            foreignField: "_id",
+            as:           "boy",
+          },
+        },
+        { $unwind: { path: "$boy", preserveNullAndEmptyArrays: false } },
+        {
+          $project: {
+            _id:             1,
+            name:            "$boy.name",
+            phone:           "$boy.phone",
+            isActive:        "$boy.isActive",
+            totalDeliveries: 1,
+          },
+        },
+        { $sort: { totalDeliveries: -1 } },
+      ]),
+      // Last completed Sun–Sat week deliveries per delivery boy
+      Order.aggregate([
+        {
+          $match: {
+            status:      "Delivered",
+            deliveryBoy: { $exists: true, $ne: null },
+            deliveredAt: { $gte: lastWeekSunday, $lt: lastWeekSaturday },
+          },
+        },
+        { $group: { _id: "$deliveryBoy", lastWeekDeliveries: { $sum: 1 } } },
+      ]),
     ]);
 
     // Build the weekly revenue data for the past 7 days, filling in 0 for empty days
@@ -786,6 +840,20 @@ const getDashboard = async (req, res, next) => {
       });
     }
 
+    // Merge all-time and last-week counts into a single array
+    const lastWeekMap = {};
+    deliveryBoyLastWeek.forEach(r => { lastWeekMap[r._id.toString()] = r.lastWeekDeliveries; });
+
+    const deliveryBoyStats = deliveryBoyAllTime.map(boy => ({
+      _id:               boy._id,
+      name:              boy.name,
+      phone:             boy.phone,
+      isActive:          boy.isActive,
+      totalDeliveries:   boy.totalDeliveries,
+      lastWeekDeliveries: lastWeekMap[boy._id.toString()] || 0,
+      weekLabel,
+    }));
+
     res.json({
       success: true,
       dashboard: {
@@ -796,6 +864,7 @@ const getDashboard = async (req, res, next) => {
         pendingOrders,
         topItems,
         weeklyRevenue,
+        deliveryBoyStats,
       },
     });
   } catch (err) {

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   IndianRupee, ShoppingBag, TrendingUp, Clock,
-  Package, AlertTriangle, Loader2,
+  Package, AlertTriangle, Loader2, Truck, User,
 } from "lucide-react";
 import api from "../services/api";
 import { STATUS_CONFIG } from "../data/adminData";
@@ -64,6 +64,67 @@ function PendingOrderCard({ order }) {
   );
 }
 
+// ── InitialsBadge ─────────────────────────────────────────────────────────────
+const AVATAR_COLORS = [
+  "bg-indigo-500", "bg-rose-500", "bg-emerald-500",
+  "bg-amber-500",  "bg-violet-500", "bg-cyan-500",
+];
+function InitialsBadge({ name }) {
+  const initials = (name || "?")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  const colorIdx = (name?.charCodeAt(0) || 0) % AVATAR_COLORS.length;
+  return (
+    <div
+      className={`w-9 h-9 rounded-full ${AVATAR_COLORS[colorIdx]} flex items-center
+                  justify-center text-white font-body font-700 text-xs shrink-0`}
+    >
+      {initials}
+    </div>
+  );
+}
+
+// ── DeliveryBoyCard ───────────────────────────────────────────────────────────
+// Mobile-only card for a single delivery boy's stats.
+function DeliveryBoyCard({ boy, rank }) {
+  return (
+    <div className="border border-gray-100 rounded-xl p-3.5 space-y-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <InitialsBadge name={boy.name} />
+          <div>
+            <p className="font-body text-sm font-600 text-gray-900">{boy.name}</p>
+            <p className="font-body text-xs text-gray-400">{boy.phone}</p>
+          </div>
+        </div>
+        <span
+          className={`inline-flex items-center font-body text-[11px] font-600 px-2.5 py-0.5 rounded-full shrink-0
+                      ${boy.isActive ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500"}`}
+        >
+          {boy.isActive ? "Active" : "Inactive"}
+        </span>
+      </div>
+      <div className="flex items-center gap-4 pt-0.5">
+        <div>
+          <p className="font-display text-xl text-gray-900">{boy.totalDeliveries}</p>
+          <p className="font-body text-[10px] text-gray-400">Total deliveries</p>
+        </div>
+        <div className="w-px h-8 bg-gray-100" />
+        <div>
+          <span className="inline-flex items-center font-body text-xs font-600
+                           bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full">
+            {boy.lastWeekDeliveries} last week
+          </span>
+          <p className="font-body text-[10px] text-gray-400 mt-0.5">{boy.weekLabel}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
@@ -103,7 +164,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const { today, week, month, total, pendingOrders = [], topItems = [], weeklyRevenue = [] } = data;
+  const { today, week, month, total, pendingOrders = [], topItems = [], weeklyRevenue = [], deliveryBoyStats = [] } = data;
   const maxRev = Math.max(...weeklyRevenue.map((d) => d.revenue), 1);
 
   return (
@@ -231,6 +292,99 @@ export default function AdminDashboard() {
                           }}
                         >
                           {order.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </motion.div>
+
+      {/* delivery boy performance */}
+      <motion.div
+        variants={fadeUp} initial="hidden" animate="show" transition={{ duration: 0.4, delay: 0.35 }}
+        className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100"
+      >
+        <div className="flex items-center justify-between mb-5 gap-3">
+          <h3 className="font-display text-base text-gray-900 tracking-wide">DELIVERY BOY PERFORMANCE</h3>
+          <span className="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 font-body
+                           text-xs font-600 px-3 py-1 rounded-full shrink-0">
+            <Truck size={12} /> {deliveryBoyStats.length} riders
+          </span>
+        </div>
+
+        {deliveryBoyStats.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 gap-3">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+              <Truck size={22} className="text-gray-400" />
+            </div>
+            <p className="font-body text-sm text-gray-400">No delivery data yet.</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile: stacked cards */}
+            <div className="sm:hidden space-y-3">
+              {deliveryBoyStats.map((boy, i) => (
+                <DeliveryBoyCard key={boy._id} boy={boy} rank={i + 1} />
+              ))}
+            </div>
+
+            {/* Desktop: table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left font-body text-xs text-gray-400 border-b border-gray-100">
+                    <th className="pb-2.5 font-500">#</th>
+                    <th className="pb-2.5 font-500">Rider</th>
+                    <th className="pb-2.5 font-500">Total Deliveries</th>
+                    <th className="pb-2.5 font-500">Last Week</th>
+                    <th className="pb-2.5 font-500">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deliveryBoyStats.map((boy, i) => (
+                    <tr key={boy._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                      <td className="py-3">
+                        <span className="w-7 h-7 rounded-full bg-indigo-50 text-indigo-600 font-body
+                                         font-700 text-xs flex items-center justify-center">
+                          {i + 1}
+                        </span>
+                      </td>
+                      <td className="py-3">
+                        <div className="flex items-center gap-2.5">
+                          <InitialsBadge name={boy.name} />
+                          <div>
+                            <p className="font-body text-sm font-600 text-gray-900">{boy.name}</p>
+                            <p className="font-body text-xs text-gray-400">{boy.phone}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <span className="font-display text-xl text-gray-900">{boy.totalDeliveries}</span>
+                        <span className="font-body text-xs text-gray-400 ml-1">orders</span>
+                      </td>
+                      <td className="py-3">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="inline-flex items-center gap-1 font-body text-xs font-600
+                                           bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full w-fit">
+                            {boy.lastWeekDeliveries} deliveries
+                          </span>
+                          <span className="font-body text-[10px] text-gray-400">{boy.weekLabel}</span>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <span
+                          className={`inline-flex items-center gap-1 font-body text-[11px] font-600
+                                      px-2.5 py-0.5 rounded-full ${
+                                        boy.isActive
+                                          ? "bg-green-50 text-green-600"
+                                          : "bg-gray-100 text-gray-500"
+                                      }`}
+                        >
+                          {boy.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
                     </tr>

@@ -18,10 +18,10 @@ export default function HomePage() {
       <DeliveryZoneBanner />
       <main>
         <HeroSection />
+        {!isNative && <AppDownloadSection />}
         <MenuHighlights />
         <WhyChooseUs />
         <BestSellers />
-        {!isNative && <AppDownloadSection />}
         <CTASection />
       </main>
       {!isNative && <Footer />}

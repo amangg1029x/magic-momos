@@ -19,3 +19,22 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Protect our app's custom native services, activities, and receivers from obfuscation
+-keep class com.magicmomos.app.MainActivity { *; }
+-keep class com.magicmomos.app.MagicMomosMessagingService { *; }
+-keep class com.magicmomos.app.OrderAlarmService { *; }
+-keep class com.magicmomos.app.StopAlarmReceiver { *; }
+
+# Protect Capacitor and standard Plugins
+-keep class com.getcapacitor.** { *; }
+-dontwarn com.getcapacitor.**
+
+# Protect Firebase and Google Play Services
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+
+# Protect Razorpay SDK
+-keep class com.razorpay.** { *; }
+-dontwarn com.razorpay.**
+

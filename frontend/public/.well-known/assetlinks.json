@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.magicmomos.app",
+      "sha256_cert_fingerprints":
+        ["F2:6E:4D:D9:22:D5:95:47:22:6E:7D:CE:73:E3:6B:DD:2A:58:3D:5C:96:F8:D8:65:D5:70:E7:C7:0B:FB:C3:99"]
+    }
+  }
+]

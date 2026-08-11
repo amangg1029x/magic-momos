@@ -127,7 +127,8 @@ const forgotPassword = async (req, res, next) => {
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await user.save({ validateBeforeSave: false });
 
-    const resetLink = `${process.env.CLIENT_URL || "https://magicmomos.app"}/#reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
+    const baseUrl = (process.env.CLIENT_URL || "https://magicmomos.app").replace(/\/+$/, "");
+    const resetLink = `${baseUrl}/?token=${rawToken}&email=${encodeURIComponent(user.email)}#reset-password`;
 
     const mailer = getTransporter();
     if (mailer) {

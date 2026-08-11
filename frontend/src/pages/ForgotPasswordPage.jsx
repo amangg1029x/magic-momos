@@ -285,12 +285,11 @@ export default function ForgotPasswordPage() {
   const [sentEmail, setSentEmail] = useState("");
 
   useEffect(() => {
-    const hash = window.location.hash || "";
-    // Expected format: #reset-password?token=xxx&email=yyy
-    const qIndex = hash.indexOf("?");
-    if (qIndex !== -1) {
-      const params = new URLSearchParams(hash.slice(qIndex + 1));
-      const t = params.get("token");
+    // Support both standard query strings (?token=xxx) and hash query strings (#reset-password?token=xxx)
+    const searchStr = window.location.search || (window.location.hash.includes("?") ? window.location.hash.slice(window.location.hash.indexOf("?")) : "");
+    if (searchStr) {
+      const params = new URLSearchParams(searchStr);
+      const t = params.get("token") || params.get("resetToken");
       const e = params.get("email");
       if (t && e) {
         setUrlToken(t);

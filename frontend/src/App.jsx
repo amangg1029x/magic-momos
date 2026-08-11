@@ -52,6 +52,10 @@ function AppInner() {
       navigateRef.current("admin", null, { noScroll: true });
       return;
     }
+    if (window.location.search.includes("token=") || window.location.search.includes("resetToken=")) {
+      navigateRef.current("reset-password", null, { noScroll: true });
+      return;
+    }
     const DIRECT_PAGES = ["terms", "privacy", "refund", "cancellation", "menu", "contact", "login", "register", "forgot-password", "reset-password"];
     if (DIRECT_PAGES.includes(hash)) {
       navigateRef.current(hash, null, { noScroll: true });

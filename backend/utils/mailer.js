@@ -1,4 +1,7 @@
+const dns      = require("dns");
+dns.setDefaultResultOrder("ipv4first"); // Render can't reach Gmail over IPv6 — force IPv4
 const nodemailer = require("nodemailer");
+
 
 // Single shared transporter — lazy-initialised once, reused by all controllers
 let transporter = null;

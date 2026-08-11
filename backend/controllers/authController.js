@@ -131,11 +131,10 @@ const forgotPassword = async (req, res, next) => {
     // Send reset email in the background (non-blocking)
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       const transporter = nodemailer.createTransport({
-        host:              process.env.SMTP_HOST || "smtp.gmail.com",
+        host:              process.env.SMTP_HOST || "smtp4.gmail.com",
         port:              Number(process.env.SMTP_PORT) || 587,
         secure:            false,
-        family:            4,    // force IPv4
-        connectionTimeout: 10000, // 10 s — fail fast instead of 120 s default
+        connectionTimeout: 10000,
         socketTimeout:     10000,
         auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
       });

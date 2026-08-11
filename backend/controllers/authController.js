@@ -126,39 +126,41 @@ const forgotPassword = async (req, res, next) => {
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await user.save({ validateBeforeSave: false });
 
-    // Respond immediately — don't make the user wait for email delivery
-    res.json({ success: true, message: "If that email is registered, you'll receive a reset link shortly." });
+    const resetLink = `${process.env.CLIENT_URL || "https://magicmomos.app"}/#reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
-    // Send reset email in the background (non-blocking) — reuses cached transporter like contactController
     const mailer = getTransporter();
     if (mailer) {
-      const resetLink = `${process.env.CLIENT_URL || "https://magicmomos.app"}/#reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
-
-      mailer.sendMail({
-        from:    `"Magic Momos" <${process.env.SMTP_USER}>`,
-        to:      user.email,
-        subject: "Reset your Magic Momos password 🔑",
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:auto">
-            <h2 style="color:#E8284B">Password Reset Request</h2>
-            <p>Hi ${user.name},</p>
-            <p>We received a request to reset your password. Click the button below to choose a new one.</p>
-            <p style="text-align:center;margin:32px 0">
-              <a href="${resetLink}"
-                 style="background:#E8284B;color:#fff;padding:14px 32px;border-radius:50px;
-                        text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
-                Reset Password
-              </a>
-            </p>
-            <p style="color:#888;font-size:13px">This link expires in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email.</p>
-            <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-            <p style="color:#aaa;font-size:12px">Magic Momos · Badarpur, New Delhi</p>
-          </div>
-        `,
-      })
-        .then(() => console.log(`[Auth] Reset email sent to ${user.email}`))
-        .catch((err) => console.error("[Auth] Reset email error:", err.message));
+      try {
+        await mailer.sendMail({
+          from:    `"Magic Momos" <${process.env.SMTP_USER || "magicmomos12@gmail.com"}>`,
+          to:      user.email,
+          subject: "Reset your Magic Momos password 🔑",
+          html: `
+            <div style="font-family:sans-serif;max-width:480px;margin:auto">
+              <h2 style="color:#E8284B">Password Reset Request</h2>
+              <p>Hi ${user.name},</p>
+              <p>We received a request to reset your password. Click the button below to choose a new one.</p>
+              <p style="text-align:center;margin:32px 0">
+                <a href="${resetLink}"
+                   style="background:#E8284B;color:#fff;padding:14px 32px;border-radius:50px;
+                          text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
+                  Reset Password
+                </a>
+              </p>
+              <p style="color:#888;font-size:13px">This link expires in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email.</p>
+              <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+              <p style="color:#aaa;font-size:12px">Magic Momos · Badarpur, New Delhi</p>
+            </div>
+          `,
+        });
+        console.log(`[Auth] Reset email sent to ${user.email}`);
+      } catch (err) {
+        console.error("[Auth] Reset email error:", err.message);
+      }
     }
+
+    res.json({ success: true, message: "If that email is registered, you'll receive a reset link shortly." });
+
   } catch (err) {
     next(err);
   }

@@ -9,44 +9,41 @@ const submitContact = async (req, res, next) => {
     // 1. Save to DB
     const contact = await Contact.create({ name, email, phone, subject, message });
 
-    // 2. Send notification email (non-blocking — we don't fail the request if email fails)
+    // 2. Send emails via mailer (await so free host runtime doesn't freeze task)
     const mail = getTransporter();
     if (mail) {
-      mail
-        .sendMail({
-          from:    `"Magic Momos Website" <${process.env.SMTP_USER}>`,
-          to:      process.env.CONTACT_RECEIVER || process.env.SMTP_USER,
-          replyTo: email,
-          subject: `[Magic Momos] ${subject || "New Contact Message"} — from ${name}`,
-          html: `
-            <h2>New contact form submission</h2>
-            <table cellpadding="8" style="border-collapse:collapse;">
-              <tr><td><b>Name</b></td><td>${name}</td></tr>
-              <tr><td><b>Email</b></td><td>${email}</td></tr>
-              <tr><td><b>Phone</b></td><td>${phone || "—"}</td></tr>
-              <tr><td><b>Subject</b></td><td>${subject || "General Enquiry"}</td></tr>
-              <tr><td valign="top"><b>Message</b></td><td>${message.replace(/\n/g, "<br>")}</td></tr>
-            </table>
-          `,
-        })
-        .catch((err) => console.error("Contact email error:", err.message));
+      const p1 = mail.sendMail({
+        from:    `"Magic Momos Website" <${process.env.SMTP_USER || "magicmomos12@gmail.com"}>`,
+        to:      process.env.CONTACT_RECEIVER || process.env.SMTP_USER || "magicmomos12@gmail.com",
+        replyTo: email,
+        subject: `[Magic Momos] ${subject || "New Contact Message"} — from ${name}`,
+        html: `
+          <h2>New contact form submission</h2>
+          <table cellpadding="8" style="border-collapse:collapse;">
+            <tr><td><b>Name</b></td><td>${name}</td></tr>
+            <tr><td><b>Email</b></td><td>${email}</td></tr>
+            <tr><td><b>Phone</b></td><td>${phone || "—"}</td></tr>
+            <tr><td><b>Subject</b></td><td>${subject || "General Enquiry"}</td></tr>
+            <tr><td valign="top"><b>Message</b></td><td>${message.replace(/\n/g, "<br>")}</td></tr>
+          </table>
+        `,
+      }).catch((err) => console.error("Contact email error:", err.message));
 
-      // 3. Auto-reply to the customer
-      mail
-        .sendMail({
-          from:    `"Magic Momos" <${process.env.SMTP_USER}>`,
-          to:      email,
-          subject: "We received your message! 🥟 — Magic Momos",
-          html: `
-            <p>Hi ${name},</p>
-            <p>Thank you for reaching out to Magic Momos! 🥟</p>
-            <p>We've received your message and will get back to you within <b>4 hours</b> during business hours (10 AM – 11 PM).</p>
-            <p>Your reference: <b>#${contact._id}</b></p>
-            <hr>
-            <p style="color:#666;font-size:13px;">Magic Momos · Badarpur, New Delhi</p>
-          `,
-        })
-        .catch((err) => console.error("Auto-reply email error:", err.message));
+      const p2 = mail.sendMail({
+        from:    `"Magic Momos" <${process.env.SMTP_USER || "magicmomos12@gmail.com"}>`,
+        to:      email,
+        subject: "We received your message! 🥟 — Magic Momos",
+        html: `
+          <p>Hi ${name},</p>
+          <p>Thank you for reaching out to Magic Momos! 🥟</p>
+          <p>We've received your message and will get back to you within <b>4 hours</b> during business hours (10 AM – 11 PM).</p>
+          <p>Your reference: <b>#${contact._id}</b></p>
+          <hr>
+          <p style="color:#666;font-size:13px;">Magic Momos · Badarpur, New Delhi</p>
+        `,
+      }).catch((err) => console.error("Auto-reply email error:", err.message));
+
+      await Promise.all([p1, p2]);
     }
 
     res.status(201).json({
@@ -54,6 +51,7 @@ const submitContact = async (req, res, next) => {
       message: "Your message has been received! We'll reply within 4 hours.",
       id:      contact._id,
     });
+
   } catch (err) {
     next(err);
   }

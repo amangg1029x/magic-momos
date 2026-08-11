@@ -33,7 +33,6 @@ const submitContact = async (req, res, next) => {
     // 2. Send notification email (non-blocking — we don't fail the request if email fails)
     const mail = getTransporter();
     if (mail) {
-      // 2a. Notify the admin/owner
       mail
         .sendMail({
           from:    `"Magic Momos Website" <${process.env.SMTP_USER}>`,
@@ -51,10 +50,9 @@ const submitContact = async (req, res, next) => {
             </table>
           `,
         })
-        .then(() => console.log(`[Contact] Admin notification sent for contact #${contact._id}`))
-        .catch((err) => console.error(`[Contact] Admin email FAILED for #${contact._id}:`, err.message, err.code || ""));
+        .catch((err) => console.error("Contact email error:", err.message));
 
-      // 2b. Auto-reply to the customer
+      // 3. Auto-reply to the customer
       mail
         .sendMail({
           from:    `"Magic Momos" <${process.env.SMTP_USER}>`,
@@ -69,10 +67,7 @@ const submitContact = async (req, res, next) => {
             <p style="color:#666;font-size:13px;">Magic Momos · Badarpur, New Delhi</p>
           `,
         })
-        .then(() => console.log(`[Contact] Auto-reply sent to ${email}`))
-        .catch((err) => console.error(`[Contact] Auto-reply FAILED to ${email}:`, err.message, err.code || ""));
-    } else {
-      console.warn("[Contact] SMTP transporter not available — emails skipped.");
+        .catch((err) => console.error("Auto-reply email error:", err.message));
     }
 
     res.status(201).json({

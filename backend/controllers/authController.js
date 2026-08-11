@@ -128,7 +128,12 @@ const forgotPassword = async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     const baseUrl = (process.env.CLIENT_URL || "https://magicmomos.app").replace(/\/+$/, "");
-    const resetLink = `${baseUrl}/?token=${rawToken}&email=${encodeURIComponent(user.email)}#reset-password`;
+    // Token + email live entirely in the hash fragment (#...) rather than the
+    // query string. Fragments never get sent to the server and are never
+    // touched by Brevo's click-tracking redirect rewriter, which can mangle
+    // a query string that's followed by a #fragment. This avoids the 404s
+    // we were seeing from the tracked link.
+    const resetLink = `${baseUrl}/#reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
     const mailer = getTransporter();
     if (mailer) {
@@ -144,8 +149,6 @@ const forgotPassword = async (req, res, next) => {
               <p>We received a request to reset your password. Click the button below to choose a new one.</p>
               <p style="text-align:center;margin:32px 0">
                 <a href="${resetLink}"
-                   data-brevo-disable-tracking="true"
-                   data-mailin-noreplace="true"
                    style="background:#E8284B;color:#fff;padding:14px 32px;border-radius:50px;
                           text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
                   Reset Password

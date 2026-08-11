@@ -131,6 +131,7 @@ const forgotPassword = async (req, res, next) => {
         host:   process.env.SMTP_HOST || "smtp.gmail.com",
         port:   Number(process.env.SMTP_PORT) || 587,
         secure: false,
+        family: 4, // force IPv4 — Render cannot reach Gmail over IPv6
         auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
       });
 

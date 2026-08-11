@@ -1,4 +1,6 @@
 require("dotenv").config();
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first"); // Render: force IPv4 for all DNS (smtp.gmail.com resolves to IPv6 by default)
 const geocodeRouter = require("./routes/geocode.js");
 
 const express    = require("express");

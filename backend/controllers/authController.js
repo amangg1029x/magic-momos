@@ -1,6 +1,6 @@
-const jwt    = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const User   = require("../models/User");
+const User = require("../models/User");
 const nodemailer = require("nodemailer");
 
 // ── Helper: sign a customer JWT ───────────────────────────────────────────────
@@ -19,7 +19,7 @@ const register = async (req, res, next) => {
       return res.status(409).json({ success: false, message: "Email already registered." });
     }
 
-    const user  = await User.create({ name, email, password, phone });
+    const user = await User.create({ name, email, password, phone });
     const token = signToken(user._id);
 
     res.status(201).json({
@@ -72,7 +72,7 @@ const updateMe = async (req, res, next) => {
     });
 
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
-      new:        true,
+      new: true,
       runValidators: true,
     });
 
@@ -119,9 +119,9 @@ const forgotPassword = async (req, res, next) => {
     }
 
     // Generate a raw token and store hashed version
-    const rawToken  = crypto.randomBytes(32).toString("hex");
-    const hashed    = crypto.createHash("sha256").update(rawToken).digest("hex");
-    user.passwordResetToken   = hashed;
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashed = crypto.createHash("sha256").update(rawToken).digest("hex");
+    user.passwordResetToken = hashed;
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await user.save({ validateBeforeSave: false });
 
@@ -131,19 +131,20 @@ const forgotPassword = async (req, res, next) => {
     // Send reset email in the background (non-blocking)
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       const transporter = nodemailer.createTransport({
-        host:              process.env.SMTP_HOST || "smtp4.gmail.com",
-        port:              Number(process.env.SMTP_PORT) || 587,
-        secure:            false,
-        connectionTimeout: 10000,
-        socketTimeout:     10000,
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: false,
+        family: 4,    // force IPv4
+        connectionTimeout: 10000, // 10 s — fail fast instead of 120 s default
+        socketTimeout: 10000,
         auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
       });
 
       const resetLink = `${process.env.CLIENT_URL || "https://magicmomos.app"}/#reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
       transporter.sendMail({
-        from:    `"Magic Momos" <${process.env.SMTP_USER}>`,
-        to:      user.email,
+        from: `"Magic Momos" <${process.env.SMTP_USER}>`,
+        to: user.email,
         subject: "Reset your Magic Momos password 🔑",
         html: `
           <div style="font-family:sans-serif;max-width:480px;margin:auto">
@@ -186,8 +187,8 @@ const resetPassword = async (req, res, next) => {
 
     const hashed = crypto.createHash("sha256").update(token).digest("hex");
     const user = await User.findOne({
-      email:                email.toLowerCase().trim(),
-      passwordResetToken:   hashed,
+      email: email.toLowerCase().trim(),
+      passwordResetToken: hashed,
       passwordResetExpires: { $gt: new Date() },
     }).select("+passwordResetToken +passwordResetExpires");
 
@@ -195,8 +196,8 @@ const resetPassword = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Reset link is invalid or has expired." });
     }
 
-    user.password             = newPassword;
-    user.passwordResetToken   = undefined;
+    user.password = newPassword;
+    user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
 

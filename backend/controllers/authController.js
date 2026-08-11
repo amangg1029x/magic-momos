@@ -116,24 +116,16 @@ const forgotPassword = async (req, res, next) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     // Always respond success to prevent user enumeration
     if (!user) {
-      console.warn(`[Auth] Forgot password requested for non-existent user email: ${email}`);
-      return res.json({ success: true, message: "If that email is registered, you'll receive a reset link shortly." });
+      console.warn(`[Auth] Forgot password requested for non-existent email: ${email}`);
+      return res.json({ success: true, message: "If that email is registered, you'll receive an OTP shortly." });
     }
 
-    // Generate a raw token and store hashed version
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    const hashed = crypto.createHash("sha256").update(rawToken).digest("hex");
-    user.passwordResetToken = hashed;
-    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    // Generate 6-digit OTP and store hashed version
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashed = crypto.createHash("sha256").update(otp).digest("hex");
+    user.passwordResetOTP = hashed;
+    user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await user.save({ validateBeforeSave: false });
-
-    const baseUrl = (process.env.CLIENT_URL || "https://magicmomos.app").replace(/\/+$/, "");
-    // Token + email live entirely in the hash fragment (#...) rather than the
-    // query string. Fragments never get sent to the server and are never
-    // touched by Brevo's click-tracking redirect rewriter, which can mangle
-    // a query string that's followed by a #fragment. This avoids the 404s
-    // we were seeing from the tracked link.
-    const resetLink = `${baseUrl}/#reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
     const mailer = getTransporter();
     if (mailer) {
@@ -141,32 +133,31 @@ const forgotPassword = async (req, res, next) => {
         await mailer.sendMail({
           from:    `"Magic Momos" <${process.env.SMTP_USER || "magicmomos12@gmail.com"}>`,
           to:      user.email,
-          subject: "Reset your Magic Momos password 🔑",
+          subject: "Your Magic Momos password reset code 🔑",
           html: `
             <div style="font-family:sans-serif;max-width:480px;margin:auto">
-              <h2 style="color:#E8284B">Password Reset Request</h2>
+              <h2 style="color:#E8284B">Password Reset Code</h2>
               <p>Hi ${user.name},</p>
-              <p>We received a request to reset your password. Click the button below to choose a new one.</p>
-              <p style="text-align:center;margin:32px 0">
-                <a href="${resetLink}"
-                   style="background:#E8284B;color:#fff;padding:14px 32px;border-radius:50px;
-                          text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
-                  Reset Password
-                </a>
-              </p>
-              <p style="color:#888;font-size:13px">This link expires in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email.</p>
+              <p>Use the code below to reset your Magic Momos password. It expires in <strong>10 minutes</strong>.</p>
+              <div style="text-align:center;margin:32px 0">
+                <div style="display:inline-block;background:#f5f5f5;border:2px dashed #E8284B;
+                            border-radius:12px;padding:20px 40px">
+                  <span style="font-size:36px;font-weight:900;letter-spacing:10px;color:#E8284B">${otp}</span>
+                </div>
+              </div>
+              <p style="color:#888;font-size:13px">Enter this code on the Magic Momos app. If you didn't request this, ignore this email.</p>
               <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
               <p style="color:#aaa;font-size:12px">Magic Momos · Badarpur, New Delhi</p>
             </div>
           `,
         });
-        console.log(`[Auth] Reset email sent to ${user.email}`);
+        console.log(`[Auth] OTP sent to ${user.email}`);
       } catch (err) {
-        console.error("[Auth] Reset email error:", err.message);
+        console.error("[Auth] OTP email error:", err.message);
       }
     }
 
-    res.json({ success: true, message: "If that email is registered, you'll receive a reset link shortly." });
+    res.json({ success: true, message: "If that email is registered, you'll receive an OTP shortly." });
 
   } catch (err) {
     next(err);
@@ -176,27 +167,27 @@ const forgotPassword = async (req, res, next) => {
 // ── POST /api/auth/reset-password ────────────────────────────────────────────
 const resetPassword = async (req, res, next) => {
   try {
-    const { token, email, newPassword } = req.body;
-    if (!token || !email || !newPassword) {
-      return res.status(400).json({ success: false, message: "Token, email, and new password are required." });
+    const { otp, email, newPassword } = req.body;
+    if (!otp || !email || !newPassword) {
+      return res.status(400).json({ success: false, message: "OTP, email, and new password are required." });
     }
     if (newPassword.length < 6) {
       return res.status(400).json({ success: false, message: "Password must be at least 6 characters." });
     }
 
-    const hashed = crypto.createHash("sha256").update(token).digest("hex");
+    const hashed = crypto.createHash("sha256").update(otp.trim()).digest("hex");
     const user = await User.findOne({
       email: email.toLowerCase().trim(),
-      passwordResetToken: hashed,
+      passwordResetOTP: hashed,
       passwordResetExpires: { $gt: new Date() },
-    }).select("+passwordResetToken +passwordResetExpires");
+    }).select("+passwordResetOTP +passwordResetExpires");
 
     if (!user) {
-      return res.status(400).json({ success: false, message: "Reset link is invalid or has expired." });
+      return res.status(400).json({ success: false, message: "OTP is invalid or has expired." });
     }
 
     user.password = newPassword;
-    user.passwordResetToken = undefined;
+    user.passwordResetOTP = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
 

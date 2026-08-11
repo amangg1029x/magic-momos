@@ -1,26 +1,24 @@
 require("dotenv").config();
-const dns = require("dns");
-dns.setDefaultResultOrder("ipv4first"); // Render: force IPv4 for all DNS (smtp.gmail.com resolves to IPv6 by default)
 const geocodeRouter = require("./routes/geocode.js");
 
-const express    = require("express");
-const cors       = require("cors");
-const helmet     = require("helmet");
-const morgan     = require("morgan");
-const rateLimit  = require("express-rate-limit");
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
 
-const connectDB                   = require("./config/db");
-const { errorHandler, notFound }  = require("./middleware/errorHandler");
+const connectDB = require("./config/db");
+const { errorHandler, notFound } = require("./middleware/errorHandler");
 
 // ── Route modules ─────────────────────────────────────────────────────────────
-const authRoutes     = require("./routes/auth");
-const adminRoutes    = require("./routes/admin");
-const menuRoutes     = require("./routes/menu");
-const orderRoutes    = require("./routes/orders");
-const contactRoutes  = require("./routes/contact");
+const authRoutes = require("./routes/auth");
+const adminRoutes = require("./routes/admin");
+const menuRoutes = require("./routes/menu");
+const orderRoutes = require("./routes/orders");
+const contactRoutes = require("./routes/contact");
 const deliveryRoutes = require("./routes/delivery");
 const settingsRoutes = require("./routes/settings");
-const couponRoutes   = require("./routes/coupons");
+const couponRoutes = require("./routes/coupons");
 
 // ── Connect to MongoDB ────────────────────────────────────────────────────────
 connectDB();
@@ -43,7 +41,7 @@ app.use(
       cb(new Error(`CORS: origin ${origin} not allowed`));
     },
     credentials: true,
-    methods:     ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -72,9 +70,9 @@ app.use(
   "/api",
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max:      process.env.NODE_ENV === "production" ? 200 : 10000,
+    max: process.env.NODE_ENV === "production" ? 200 : 10000,
     standardHeaders: true,
-    legacyHeaders:   false,
+    legacyHeaders: false,
     message: { success: false, message: "Too many requests. Please slow down." },
   })
 );
@@ -84,21 +82,21 @@ app.get("/api/health", (req, res) => {
   res.json({
     success: true,
     message: "Magic Momos API is running 🥟",
-    env:     process.env.NODE_ENV,
-    time:    new Date().toISOString(),
+    env: process.env.NODE_ENV,
+    time: new Date().toISOString(),
   });
 });
 
 // ── Route mounts ──────────────────────────────────────────────────────────────
-app.use("/api/auth",     authRoutes);
-app.use("/api/admin",    adminRoutes);
-app.use("/api/menu",     menuRoutes);
-app.use("/api/orders",   orderRoutes);
-app.use("/api/contact",  contactRoutes);
-app.use("/api/geocode",  geocodeRouter);
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/menu", menuRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/contact", contactRoutes);
+app.use("/api/geocode", geocodeRouter);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/settings", settingsRoutes);
-app.use("/api/coupons",  couponRoutes);
+app.use("/api/coupons", couponRoutes);
 
 // ── 404 + global error handler ────────────────────────────────────────────────
 app.use(notFound);

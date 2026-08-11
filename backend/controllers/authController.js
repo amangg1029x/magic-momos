@@ -3,6 +3,23 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const nodemailer = require("nodemailer");
 
+// ── Nodemailer transporter (lazy-initialised + cached — same as contactController) ─
+let _transporter = null;
+const getTransporter = () => {
+  if (_transporter) return _transporter;
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn("⚠️  SMTP credentials not set — reset emails will be skipped.");
+    return null;
+  }
+  _transporter = nodemailer.createTransport({
+    host:   process.env.SMTP_HOST || "smtp.gmail.com",
+    port:   Number(process.env.SMTP_PORT) || 587,
+    secure: false,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+  return _transporter;
+};
+
 // ── Helper: sign a customer JWT ───────────────────────────────────────────────
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -128,23 +145,14 @@ const forgotPassword = async (req, res, next) => {
     // Respond immediately — don't make the user wait for email delivery
     res.json({ success: true, message: "If that email is registered, you'll receive a reset link shortly." });
 
-    // Send reset email in the background (non-blocking)
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || "smtp.gmail.com",
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure: false,
-        family: 4,    // force IPv4
-        connectionTimeout: 10000, // 10 s — fail fast instead of 120 s default
-        socketTimeout: 10000,
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      });
-
+    // Send reset email in the background (non-blocking) — reuses cached transporter like contactController
+    const mailer = getTransporter();
+    if (mailer) {
       const resetLink = `${process.env.CLIENT_URL || "https://magicmomos.app"}/#reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
-      transporter.sendMail({
-        from: `"Magic Momos" <${process.env.SMTP_USER}>`,
-        to: user.email,
+      mailer.sendMail({
+        from:    `"Magic Momos" <${process.env.SMTP_USER}>`,
+        to:      user.email,
         subject: "Reset your Magic Momos password 🔑",
         html: `
           <div style="font-family:sans-serif;max-width:480px;margin:auto">
@@ -166,8 +174,6 @@ const forgotPassword = async (req, res, next) => {
       })
         .then(() => console.log(`[Auth] Reset email sent to ${user.email}`))
         .catch((err) => console.error("[Auth] Reset email error:", err.message));
-    } else {
-      console.warn("[Auth] SMTP not configured — password reset email skipped.");
     }
   } catch (err) {
     next(err);

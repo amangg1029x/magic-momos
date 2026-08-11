@@ -143,6 +143,8 @@ const forgotPassword = async (req, res, next) => {
               <p>We received a request to reset your password. Click the button below to choose a new one.</p>
               <p style="text-align:center;margin:32px 0">
                 <a href="${resetLink}"
+                   data-brevo-disable-tracking="true"
+                   data-mailin-noreplace="true"
                    style="background:#E8284B;color:#fff;padding:14px 32px;border-radius:50px;
                           text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
                   Reset Password

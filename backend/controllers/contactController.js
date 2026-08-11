@@ -1,26 +1,5 @@
-const nodemailer = require("nodemailer");
-const Contact    = require("../models/Contact");
-
-// ── Nodemailer transporter (lazy-initialised so missing env vars don't crash) ─
-let transporter = null;
-
-const getTransporter = () => {
-  if (transporter) return transporter;
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn("⚠️  SMTP credentials not set — contact emails will be skipped.");
-    return null;
-  }
-  transporter = nodemailer.createTransport({
-    host:   process.env.SMTP_HOST || "smtp.gmail.com",
-    port:   Number(process.env.SMTP_PORT) || 587,
-    secure: false, // STARTTLS
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-  return transporter;
-};
+const { getTransporter } = require("../utils/mailer");
+const Contact             = require("../models/Contact");
 
 // ── POST /api/contact ─────────────────────────────────────────────────────────
 const submitContact = async (req, res, next) => {

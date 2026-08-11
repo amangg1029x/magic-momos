@@ -1,8 +1,8 @@
 const nodemailer = require("nodemailer");
 
 // Single shared transporter — lazy-initialised once, reused by all controllers.
-// family:4 forces a TCP/IPv4 connection at the socket level — bypasses Render's
-// IPv6-preferring DNS which causes ENETUNREACH on smtp.gmail.com:587.
+// Port 465 with secure:true uses SSL directly instead of port 587 STARTTLS,
+// which avoids timeouts on cloud providers like Render.
 let transporter = null;
 
 const getTransporter = () => {
@@ -13,9 +13,9 @@ const getTransporter = () => {
   }
   transporter = nodemailer.createTransport({
     host:   process.env.SMTP_HOST || "smtp.gmail.com",
-    port:   Number(process.env.SMTP_PORT) || 587,
-    secure: false,
-    family: 4, // Force IPv4 — Render resolves smtp.gmail.com to IPv6 by default (ENETUNREACH)
+    port:   Number(process.env.SMTP_PORT) || 465,
+    secure: true, // true for port 465 (SSL)
+    family: 4,    // Force IPv4
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,

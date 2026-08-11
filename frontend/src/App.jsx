@@ -27,6 +27,7 @@ import RefundPage        from "./pages/RefundPage";
 import CancellationPage  from "./pages/CancellationPage";
 import BottomNavigation  from "./components/BottomNavigation";
 import MobileAppDownloadModal from "./components/MobileAppDownloadModal";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 function AppInner() {
   const { page, navigate, isNative } = useNav();
@@ -41,7 +42,8 @@ function AppInner() {
   // Runs once on mount only — the popstate listener in NavigationContext
   // handles subsequent back/forward navigation.
   useEffect(() => {
-    const hash = window.location.hash.replace("#", "").toLowerCase().trim();
+    const rawHash = window.location.hash.replace("#", "").toLowerCase().trim();
+    const hash = rawHash.split("?")[0]; // strip query params for page matching
     if (hash === "delivery" || getDeliveryToken()) {
       navigateRef.current("delivery", null, { noScroll: true });
       return;
@@ -50,7 +52,7 @@ function AppInner() {
       navigateRef.current("admin", null, { noScroll: true });
       return;
     }
-    const DIRECT_PAGES = ["terms", "privacy", "refund", "cancellation", "menu", "contact", "login", "register"];
+    const DIRECT_PAGES = ["terms", "privacy", "refund", "cancellation", "menu", "contact", "login", "register", "forgot-password", "reset-password"];
     if (DIRECT_PAGES.includes(hash)) {
       navigateRef.current(hash, null, { noScroll: true });
     }
@@ -79,6 +81,8 @@ function AppInner() {
       case "track":       return <TrackOrderPage />;
       case "login":       return <LoginPage />;
       case "register":    return <RegisterPage />;
+      case "forgot-password": return <ForgotPasswordPage />;
+      case "reset-password":  return <ForgotPasswordPage />;
       case "out-of-range":  return <OutOfRangePage />;
       case "terms":         return <TermsPage />;
       case "privacy":       return <PrivacyPage />;
@@ -98,7 +102,7 @@ function AppInner() {
   };
 
   return (
-    <div className={isNative ? "pb-24" : ""}>
+    <div className={isNative ? "pb-16" : ""}>
       {renderPage()}
       <BottomNavigation />
       {!isNative && !["admin", "delivery"].includes(page) && <MobileAppDownloadModal />}

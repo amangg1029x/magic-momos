@@ -180,7 +180,7 @@ export default function ContactPageHero() {
                 <Icon size={18} style={{ color: accent }} />
               </div>
               <p className="font-body text-[11px] text-mm-muted uppercase tracking-wider mb-1">{title}</p>
-              <p className="font-body font-700 text-mm-cream text-sm leading-tight">{line1}</p>
+              <p className="font-body font-700 text-mm-cream text-sm leading-tight break-all">{line1}</p>
               <p className="font-body text-mm-muted text-xs mt-0.5">{line2}</p>
             </motion.div>
           ))}

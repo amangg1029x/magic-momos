@@ -1,5 +1,5 @@
 const router  = require("express").Router();
-const { register, login, getMe, updateMe, changePassword } = require("../controllers/authController");
+const { register, login, getMe, updateMe, changePassword, forgotPassword, resetPassword } = require("../controllers/authController");
 const { protect } = require("../middleware/auth");
 const { registerRules, loginRules, validate } = require("../middleware/validators");
 const rateLimit = require("express-rate-limit");
@@ -18,8 +18,10 @@ const authLimiter = rateLimit({
   legacyHeaders:   false,
 });
 
-router.post("/register", authLimiter, registerRules, validate, register);
-router.post("/login",    authLimiter, loginRules,    validate, login);
+router.post("/register",        authLimiter, registerRules, validate, register);
+router.post("/login",           authLimiter, loginRules,    validate, login);
+router.post("/forgot-password", authLimiter, forgotPassword);
+router.post("/reset-password",  authLimiter, resetPassword);
 
 // Protected routes — require valid customer JWT
 router.get( "/me",              protect, getMe);

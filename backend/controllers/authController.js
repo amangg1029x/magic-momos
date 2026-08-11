@@ -125,19 +125,24 @@ const forgotPassword = async (req, res, next) => {
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await user.save({ validateBeforeSave: false });
 
-    // Send reset email
+    // Respond immediately — don't make the user wait for email delivery
+    res.json({ success: true, message: "If that email is registered, you'll receive a reset link shortly." });
+
+    // Send reset email in the background (non-blocking)
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       const transporter = nodemailer.createTransport({
-        host:   process.env.SMTP_HOST || "smtp.gmail.com",
-        port:   Number(process.env.SMTP_PORT) || 587,
-        secure: false,
-        family: 4, // force IPv4 — Render cannot reach Gmail over IPv6
+        host:              process.env.SMTP_HOST || "smtp.gmail.com",
+        port:              Number(process.env.SMTP_PORT) || 587,
+        secure:            false,
+        family:            4,    // force IPv4
+        connectionTimeout: 10000, // 10 s — fail fast instead of 120 s default
+        socketTimeout:     10000,
         auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
       });
 
       const resetLink = `${process.env.CLIENT_URL || "https://magicmomos.app"}/#reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
-      await transporter.sendMail({
+      transporter.sendMail({
         from:    `"Magic Momos" <${process.env.SMTP_USER}>`,
         to:      user.email,
         subject: "Reset your Magic Momos password 🔑",
@@ -158,12 +163,12 @@ const forgotPassword = async (req, res, next) => {
             <p style="color:#aaa;font-size:12px">Magic Momos · Badarpur, New Delhi</p>
           </div>
         `,
-      }).catch((err) => console.error("[Auth] Reset email error:", err.message));
+      })
+        .then(() => console.log(`[Auth] Reset email sent to ${user.email}`))
+        .catch((err) => console.error("[Auth] Reset email error:", err.message));
     } else {
       console.warn("[Auth] SMTP not configured — password reset email skipped.");
     }
-
-    res.json({ success: true, message: "If that email is registered, you'll receive a reset link shortly." });
   } catch (err) {
     next(err);
   }

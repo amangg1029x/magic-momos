@@ -116,6 +116,7 @@ const forgotPassword = async (req, res, next) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     // Always respond success to prevent user enumeration
     if (!user) {
+      console.warn(`[Auth] Forgot password requested for non-existent user email: ${email}`);
       return res.json({ success: true, message: "If that email is registered, you'll receive a reset link shortly." });
     }
 

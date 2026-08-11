@@ -15,6 +15,9 @@ const sendEmail = async ({ to, subject, html, replyTo }) => {
     to: [{ email: to }],
     subject: subject,
     htmlContent: html,
+    headers: {
+      "X-Mailin-track-clicks": "0",
+    },
     ...(replyTo ? { replyTo: { email: replyTo } } : {}),
   });
 

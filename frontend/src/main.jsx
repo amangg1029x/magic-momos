@@ -9,6 +9,19 @@ if (Capacitor.isNativePlatform()) {
   CapacitorUpdater.notifyAppReady();
 }
 
+// Disable pinch-to-zoom and double-tap zoom
+if (typeof window !== "undefined") {
+  document.addEventListener("touchstart", (e) => {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener("gesturestart", (e) => {
+    e.preventDefault();
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <App />

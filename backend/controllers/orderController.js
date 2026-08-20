@@ -211,21 +211,13 @@ const placeOrder = async (req, res, next) => {
     // ── 6. Fire notifications for COD orders only ────────────────────────────
     // For online payments, notifications & alarm ringing must ONLY fire once
     // payment has been completed and verified (in verifyPayment / paymentWebhook).
+    // Delivery partners are notified when the order moves to 'Preparing'.
     if (order.paymentMethod === "cod") {
       createNotification({
         recipientRole: "admin",
         type: "order_placed",
         title: `New Order ${order.orderNumber} 🥟`,
         body: `${order.customer.name} placed a COD order for ₹${order.total}`,
-        orderId: order._id,
-      });
-
-      // Fire delivery notification so partners know a new order is coming
-      createNotification({
-        recipientRole: "delivery",
-        type: "order_placed",
-        title: `New Order Incoming 🛵`,
-        body: `Order ${order.orderNumber} — ₹${order.total} — is being prepared`,
         orderId: order._id,
       });
     }
@@ -315,15 +307,6 @@ const verifyPayment = async (req, res, next) => {
         orderId: order._id,
       });
 
-      // Fire delivery notification so partners know a new order is ready
-      createNotification({
-        recipientRole: "delivery",
-        type: "order_placed",
-        title: `New Order Incoming 🛵`,
-        body: `Order ${order.orderNumber} — ₹${order.total} — is being prepared`,
-        orderId: order._id,
-      });
-
       // Notify customer their order is confirmed
       if (order.customer.userId) {
         createNotification({
@@ -394,15 +377,6 @@ const paymentWebhook = async (req, res, next) => {
           type: "order_placed",
           title: `New Order ${order.orderNumber} 🥟`,
           body: `${order.customer.name} placed an order for ₹${order.total} (Online Paid)`,
-          orderId: order._id,
-        });
-
-        // Fire delivery notification so partners know a new order is ready
-        createNotification({
-          recipientRole: "delivery",
-          type: "order_placed",
-          title: `New Order Incoming 🛵`,
-          body: `Order ${order.orderNumber} — ₹${order.total} — is being prepared`,
           orderId: order._id,
         });
 

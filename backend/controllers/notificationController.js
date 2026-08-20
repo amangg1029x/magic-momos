@@ -138,19 +138,21 @@ const createNotification = async (data) => {
 // ── Build the query to fetch notifications for the caller ─────────────────────
 
 function buildCustomerQuery(userId) {
-  // Fetch: (a) direct notifications OR (b) broadcast coupon/system for all customers
+  // Fetch direct and broadcast notifications within the last 7 days
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   return {
     recipientRole: "customer",
+    createdAt: { $gte: sevenDaysAgo },
     $or: [
       { recipientId: userId },
-      { recipientId: null, createdAt: { $gte: sevenDaysAgo } },
+      { recipientId: null },
     ],
   };
 }
 
 function buildAdminQuery() {
-  return { recipientRole: "admin" };
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  return { recipientRole: "admin", createdAt: { $gte: sevenDaysAgo } };
 }
 
 function buildDeliveryQuery() {

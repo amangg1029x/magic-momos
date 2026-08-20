@@ -208,23 +208,27 @@ const placeOrder = async (req, res, next) => {
       }
     }
 
-    // ── 6. Fire admin notification (fire-and-forget) ─────────────────────────
-    createNotification({
-      recipientRole: "admin",
-      type: "order_placed",
-      title: `New Order ${order.orderNumber} 🥟`,
-      body: `${order.customer.name} placed an order for ₹${order.total} (${order.paymentMethod.toUpperCase()})`,
-      orderId: order._id,
-    });
+    // ── 6. Fire notifications for COD orders only ────────────────────────────
+    // For online payments, notifications & alarm ringing must ONLY fire once
+    // payment has been completed and verified (in verifyPayment / paymentWebhook).
+    if (order.paymentMethod === "cod") {
+      createNotification({
+        recipientRole: "admin",
+        type: "order_placed",
+        title: `New Order ${order.orderNumber} 🥟`,
+        body: `${order.customer.name} placed a COD order for ₹${order.total}`,
+        orderId: order._id,
+      });
 
-    // Fire delivery notification so partners know a new order is coming
-    createNotification({
-      recipientRole: "delivery",
-      type: "order_placed",
-      title: `New Order Incoming 🛵`,
-      body: `Order ${order.orderNumber} — ₹${order.total} — is being prepared`,
-      orderId: order._id,
-    });
+      // Fire delivery notification so partners know a new order is coming
+      createNotification({
+        recipientRole: "delivery",
+        type: "order_placed",
+        title: `New Order Incoming 🛵`,
+        body: `Order ${order.orderNumber} — ₹${order.total} — is being prepared`,
+        orderId: order._id,
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -294,30 +298,43 @@ const verifyPayment = async (req, res, next) => {
     }
 
     // ── Signature is genuine — mark the order paid and move it forward ───────
+    const wasAlreadyPaid = order.paymentStatus === "Paid";
     order.paymentStatus       = "Paid";
     order.razorpayPaymentId   = razorpay_payment_id;
     order.razorpaySignature   = razorpay_signature;
     if (order.status === "Pending") order.status = "Confirmed";
     await order.save();
 
-    // Notify admin of successful payment
-    createNotification({
-      recipientRole: "admin",
-      type: "payment",
-      title: `Payment Received ✅`,
-      body: `Online payment of ₹${order.total} confirmed for order ${order.orderNumber}`,
-      orderId: order._id,
-    });
-    // Notify customer their order is confirmed
-    if (order.customer.userId) {
+    if (!wasAlreadyPaid) {
+      // Fire admin order_placed notification (triggers alarm ring / push)
       createNotification({
-        recipientId: order.customer.userId,
-        recipientRole: "customer",
-        type: "order_status",
-        title: `Order Confirmed 🎉`,
-        body: `Your order ${order.orderNumber} has been confirmed! Estimated delivery: 20–30 mins.`,
+        recipientRole: "admin",
+        type: "order_placed",
+        title: `New Order ${order.orderNumber} 🥟`,
+        body: `${order.customer.name} placed an order for ₹${order.total} (Online Paid)`,
         orderId: order._id,
       });
+
+      // Fire delivery notification so partners know a new order is ready
+      createNotification({
+        recipientRole: "delivery",
+        type: "order_placed",
+        title: `New Order Incoming 🛵`,
+        body: `Order ${order.orderNumber} — ₹${order.total} — is being prepared`,
+        orderId: order._id,
+      });
+
+      // Notify customer their order is confirmed
+      if (order.customer.userId) {
+        createNotification({
+          recipientId: order.customer.userId,
+          recipientRole: "customer",
+          type: "order_status",
+          title: `Order Confirmed 🎉`,
+          body: `Your order ${order.orderNumber} has been confirmed! Estimated delivery: 20–30 mins.`,
+          orderId: order._id,
+        });
+      }
     }
 
     res.json({
@@ -370,6 +387,36 @@ const paymentWebhook = async (req, res, next) => {
         order.razorpayPaymentId = payload.payment.entity.id;
         if (order.status === "Pending") order.status = "Confirmed";
         await order.save();
+
+        // Fire admin order_placed notification (triggers alarm ring / push)
+        createNotification({
+          recipientRole: "admin",
+          type: "order_placed",
+          title: `New Order ${order.orderNumber} 🥟`,
+          body: `${order.customer.name} placed an order for ₹${order.total} (Online Paid)`,
+          orderId: order._id,
+        });
+
+        // Fire delivery notification so partners know a new order is ready
+        createNotification({
+          recipientRole: "delivery",
+          type: "order_placed",
+          title: `New Order Incoming 🛵`,
+          body: `Order ${order.orderNumber} — ₹${order.total} — is being prepared`,
+          orderId: order._id,
+        });
+
+        // Notify customer their order is confirmed
+        if (order.customer?.userId) {
+          createNotification({
+            recipientId: order.customer.userId,
+            recipientRole: "customer",
+            type: "order_status",
+            title: `Order Confirmed 🎉`,
+            body: `Your order ${order.orderNumber} has been confirmed! Estimated delivery: 20–30 mins.`,
+            orderId: order._id,
+          });
+        }
       }
     }
 

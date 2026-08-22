@@ -37,8 +37,8 @@ export default function CartSidebar({
   }, [open]);
 
   const handleApplyCoupon = async (code) => {
-    const val = code || couponInput;
-    if (!val.trim()) return;
+    const val = typeof code === "string" ? code : couponInput;
+    if (!val || !val.trim()) return;
     setCouponApplying(true);
     const ok = await onApplyCoupon(val);
     if (ok) setCouponInput("");
@@ -313,14 +313,14 @@ export default function CartSidebar({
                           </div>
                           <motion.button
                             whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}
-                            onClick={handleApplyCoupon}
+                            onClick={() => handleApplyCoupon()}
                             disabled={couponApplying || !couponInput.trim()}
                             className="px-4 py-2.5 rounded-xl bg-mm-card2 border border-mm-border
                                        font-body text-xs font-700 text-mm-cream
                                        hover:border-mm-red/40 hover:text-mm-red
-                                       transition-all disabled:opacity-50"
+                                       transition-all disabled:opacity-50 cursor-pointer"
                           >
-                            Apply
+                            {couponApplying ? "Applying..." : "Apply"}
                           </motion.button>
                         </div>
                         <AnimatePresence>

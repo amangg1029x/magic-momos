@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { RefreshCw } from "lucide-react";
 import api from "../services/api";
 
 import Header from "../components/Header";
@@ -26,12 +27,28 @@ export default function MenuPage({ cart }) {
 
     const { isNative } = useNav();
 
-    useEffect(() => {
+    const fetchMenu = useCallback(() => {
+        setMenuLoading(true);
+        setMenuError("");
         api.menu.getAll()
-            .then(({ items }) => setMenuItems(items))
-            .catch((err) => setMenuError(err.message || "Failed to load menu."))
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setMenuItems(data);
+                } else if (data && Array.isArray(data.items)) {
+                    setMenuItems(data.items);
+                } else {
+                    setMenuItems([]);
+                }
+            })
+            .catch((err) => {
+                setMenuError(err.message || "Failed to load menu. Please check your internet connection.");
+            })
             .finally(() => setMenuLoading(false));
     }, []);
+
+    useEffect(() => {
+        fetchMenu();
+    }, [fetchMenu]);
 
     /* category → item count map (for filter pill badges) */
     const counts = useMemo(() => {
@@ -76,9 +93,16 @@ export default function MenuPage({ cart }) {
                 {/* error state */}
                 {!menuLoading && menuError && (
                     <div className="max-w-md mx-auto text-center py-24 px-5">
-                        <p className="text-5xl mb-4">😕</p>
+                        <p className="text-5xl mb-4">📡</p>
                         <h3 className="font-display text-2xl text-mm-cream mb-2">Couldn't load the menu</h3>
-                        <p className="font-body text-sm text-mm-muted">{menuError}</p>
+                        <p className="font-body text-sm text-mm-muted mb-6">{menuError}</p>
+                        <button
+                            onClick={fetchMenu}
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-mm-red hover:bg-red-600 text-white font-body font-700 text-sm shadow-[0_4px_14px_rgba(232,40,75,0.30)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                        >
+                            <RefreshCw size={16} />
+                            Retry
+                        </button>
                     </div>
                 )}
 

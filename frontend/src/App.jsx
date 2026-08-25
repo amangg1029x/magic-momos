@@ -25,6 +25,7 @@ import TermsPage         from "./pages/TermsPage";
 import PrivacyPage       from "./pages/PrivacyPage";
 import RefundPage        from "./pages/RefundPage";
 import CancellationPage  from "./pages/CancellationPage";
+import DeleteAccountPage from "./pages/DeleteAccountPage";
 import BottomNavigation  from "./components/BottomNavigation";
 import MobileAppDownloadModal from "./components/MobileAppDownloadModal";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -52,7 +53,7 @@ function AppInner() {
       navigateRef.current("admin", null, { noScroll: true });
       return;
     }
-    const DIRECT_PAGES = ["terms", "privacy", "refund", "cancellation", "menu", "contact", "login", "register", "forgot-password", "reset-password"];
+    const DIRECT_PAGES = ["terms", "privacy", "refund", "cancellation", "delete-account", "menu", "contact", "login", "register", "forgot-password", "reset-password"];
     if (DIRECT_PAGES.includes(hash)) {
       navigateRef.current(hash, null, { noScroll: true });
     }
@@ -88,6 +89,7 @@ function AppInner() {
       case "privacy":       return <PrivacyPage />;
       case "refund":        return <RefundPage />;
       case "cancellation":  return <CancellationPage />;
+      case "delete-account": return <DeleteAccountPage />;
       case "delivery":    return <DeliveryPage />;
       case "account":
         return (
@@ -102,7 +104,10 @@ function AppInner() {
   };
 
   return (
-    <div className={isNative ? "pb-16" : ""}>
+    <div
+      className={isNative ? "pb-16" : ""}
+      style={isNative ? { paddingBottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" } : undefined}
+    >
       {renderPage()}
       <BottomNavigation />
       {!isNative && !["admin", "delivery"].includes(page) && <MobileAppDownloadModal />}

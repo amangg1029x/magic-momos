@@ -16,6 +16,7 @@ const LEGAL_LINKS = [
   { label: "Privacy Policy",     href: "privacy"      },
   { label: "Refund Policy",      href: "refund"       },
   { label: "Cancellation Policy",href: "cancellation" },
+  { label: "Delete Account",     href: "delete-account" },
 ];
 
 // HOURS now built dynamically from settings inside the component

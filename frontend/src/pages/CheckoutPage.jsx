@@ -179,7 +179,7 @@ export default function CheckoutPage({ cart }) {
       couponCode: coupon?.code || undefined,
     };
 
-    console.log('Placing order payload:', JSON.stringify(payload));
+
     try {
       const { order, razorpay } = await api.orders.place(payload);
 

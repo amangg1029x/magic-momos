@@ -341,6 +341,23 @@ function SettingsTab({ user }) {
     }
   };
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    setDeleteError("");
+    try {
+      await api.auth.deleteAccount();
+      logout();
+      navigate("home");
+    } catch (err) {
+      setDeleteError(err.message || "Failed to delete account. Please try again.");
+      setDeleteLoading(false);
+    }
+  };
+
   const handleLogout = () => { logout(); navigate("home"); };
 
   return (
@@ -404,7 +421,7 @@ function SettingsTab({ user }) {
             whileTap={{ scale: 0.97 }}
             className="w-full flex items-center justify-center gap-2 bg-mm-red hover:bg-red-600
                        text-white py-3.5 rounded-xl font-body font-700 text-sm
-                       transition-colors disabled:opacity-60"
+                       transition-colors disabled:opacity-60 cursor-pointer"
           >
             {pwLoading ? (
               <><motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
@@ -415,22 +432,103 @@ function SettingsTab({ user }) {
       </div>
 
       {/* danger zone */}
-      <div className="bg-white border border-red-100 rounded-2xl p-6 shadow-card">
-        <h3 className="font-display text-xl text-mm-cream mb-2">Account Actions</h3>
-        <p className="font-body text-sm text-mm-muted mb-5">
-          Signed in as <span className="text-mm-cream font-700">{user.email}</span>
-        </p>
-        <motion.button
-          whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(232,40,75,0.15)" }}
-          whileTap={{ scale: 0.97 }}
-          onClick={handleLogout}
-          className="flex items-center gap-2.5 border border-red-200 text-red-600
-                     hover:bg-red-50 px-5 py-3 rounded-xl font-body font-700 text-sm
-                     transition-all duration-200"
-        >
-          <LogOut size={15} /> Sign Out
-        </motion.button>
+      <div className="bg-white border border-red-100 rounded-2xl p-6 shadow-card space-y-6">
+        <div>
+          <h3 className="font-display text-xl text-mm-cream mb-2">Account Actions</h3>
+          <p className="font-body text-sm text-mm-muted mb-4">
+            Signed in as <span className="text-mm-cream font-700">{user.email}</span>
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(232,40,75,0.15)" }}
+            whileTap={{ scale: 0.97 }}
+            onClick={handleLogout}
+            className="flex items-center gap-2.5 border border-red-200 text-red-600
+                       hover:bg-red-50 px-5 py-3 rounded-xl font-body font-700 text-sm
+                       transition-all duration-200 cursor-pointer"
+          >
+            <LogOut size={15} /> Sign Out
+          </motion.button>
+        </div>
+
+        <div className="pt-5 border-t border-red-100">
+          <h4 className="font-display text-lg text-red-600 mb-1">Delete Account</h4>
+          <p className="font-body text-xs text-mm-muted mb-4 leading-relaxed">
+            Permanently delete your account, saved addresses, and profile data. This action cannot be undone.
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setShowDeleteModal(true)}
+            className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600
+                       border border-red-200 px-4 py-2.5 rounded-xl font-body font-700 text-xs
+                       transition-all duration-200 cursor-pointer"
+          >
+            <Trash2 size={14} /> Delete My Account
+          </motion.button>
+        </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !deleteLoading && setShowDeleteModal(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-red-100 z-10"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center text-red-600 mb-4">
+                <Trash2 size={24} />
+              </div>
+              <h3 className="font-display text-2xl text-mm-cream mb-2">Delete Account?</h3>
+              <p className="font-body text-sm text-mm-muted mb-4 leading-relaxed">
+                Are you sure you want to permanently delete your Magic Momos account? All your personal information, saved addresses, and profile settings will be deleted immediately.
+              </p>
+
+              {deleteError && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5 mb-4 text-xs font-body text-red-700">
+                  <AlertCircle size={14} className="text-red-500 shrink-0" />
+                  <span>{deleteError}</span>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  disabled={deleteLoading}
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 py-3 rounded-xl border border-mm-border font-body font-700 text-xs text-mm-cream hover:bg-mm-card2 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={deleteLoading}
+                  onClick={handleDeleteAccount}
+                  className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-body font-700 text-xs shadow-md transition-colors disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {deleteLoading ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Yes, Delete Account"
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

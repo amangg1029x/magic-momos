@@ -191,10 +191,28 @@ const resetPassword = async (req, res, next) => {
     user.passwordResetExpires = undefined;
     await user.save();
 
-    res.json({ success: true, message: "Password reset successfully! You can now sign in." });
+    res.json({ success: true, message: "Password has been reset successfully." });
   } catch (err) {
     next(err);
   }
 };
 
-module.exports = { register, login, getMe, updateMe, changePassword, forgotPassword, resetPassword };
+// ── DELETE /api/auth/me ───────────────────────────────────────────────────────
+const deleteMe = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    // Delete user notifications
+    const Notification = require("../models/Notification");
+    await Notification.deleteMany({ recipientId: userId });
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    res.json({ success: true, message: "Account and associated data deleted successfully." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, login, getMe, updateMe, changePassword, forgotPassword, resetPassword, deleteMe };

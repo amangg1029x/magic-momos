@@ -74,6 +74,7 @@ const api = {
     me:       ()     => get("/auth/me"),
     update:   (data) => put("/auth/me",        data),
     changePassword: (data) => put("/auth/change-password", data),
+    deleteAccount:  ()     => del("/auth/me"),
     forgotPassword: (email) => post("/auth/forgot-password", { email }),
     resetPassword:  (data)  => post("/auth/reset-password",  data),
 

@@ -49,7 +49,10 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-mm-border px-6 pb-2 pt-2 md:hidden">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-mm-border px-6 pt-2 md:hidden"
+      style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom, 0px))" }}
+    >
       <div className="flex items-center justify-between max-w-md mx-auto">
         {tabs.map((tab) => {
           const isActive = page === tab.page;

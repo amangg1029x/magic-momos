@@ -6,6 +6,7 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import androidx.activity.EdgeToEdge;
 import com.getcapacitor.BridgeActivity;
 import com.ionicframework.capacitor.Checkout;
 
@@ -17,6 +18,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
 
         // ── Razorpay native Checkout plugin ──────────────────────────────────

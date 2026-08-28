@@ -17,11 +17,6 @@ const config: CapacitorConfig = {
     CapacitorHttp: {
       enabled: false
     },
-    CapacitorUpdater: {
-      autoUpdate: 'atBackground',
-      appId: 'com.magicmomos.app',
-      autoSplashscreen: true
-    },
     SplashScreen: {
       launchAutoHide: false
     }

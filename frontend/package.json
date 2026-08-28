@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "clean:apk": "node scripts/clean-apk.js",
+    "cap:sync": "npm run build && npx cap sync && node scripts/clean-apk.js",
     "preview": "vite preview"
   },
   "dependencies": {

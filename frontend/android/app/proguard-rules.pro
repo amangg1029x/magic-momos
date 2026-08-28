@@ -38,3 +38,8 @@
 -keep class com.razorpay.** { *; }
 -dontwarn com.razorpay.**
 
+# R8 Optimization & Code Shrinking
+-optimizationpasses 5
+-allowaccessmodification
+-repackageclasses ''
+

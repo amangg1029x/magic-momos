@@ -66,13 +66,16 @@ export default function MobileAppDownloadModal() {
 
             <div className="space-y-3">
               <a
-                href="/magic-momos.apk"
-                download
+                href="https://play.google.com/store/apps/details?id=com.magicmomos.app"
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={handleClose}
                 className="flex items-center justify-center gap-3 w-full bg-mm-red text-white py-3.5 rounded-full font-body font-800 text-sm sm:text-base tracking-wide hover:bg-red-600 transition-all duration-300 shadow-glow-red cursor-pointer"
               >
-                <Download size={18} />
-                Download Android APK
+                <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M3.609 1.814L13.792 12 3.61 22.186a2.21 2.21 0 0 1-.22-.962V2.776c0-.361.08-.696.219-.962zm11.238 11.241l2.42 2.42-12.062 6.945 9.642-9.365zm2.42-2.11l2.87 1.65c.98.563.98 1.487 0 2.05l-2.87 1.65-2.695-2.675 2.695-2.675zM5.205 1.58l12.062 6.945-2.42 2.42-9.642-9.365z"/>
+                </svg>
+                Get it on Google Play
               </a>
               
               <button

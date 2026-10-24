@@ -175,9 +175,8 @@ export function useCart() {
       : Math.min(coupon.value, subtotal)
     : 0;
 
-  const discountedSubtotal = subtotal - discount;
-  const deliveryFeeVal = discountedSubtotal >= freeDeliveryMinSetting ? 0 : deliveryFeeSetting;
-  const total       = discountedSubtotal + deliveryFeeVal;
+  const deliveryFeeVal = subtotal >= freeDeliveryMinSetting ? 0 : deliveryFeeSetting;
+  const total       = Math.max(0, subtotal + deliveryFeeVal - discount);
   const count       = items.reduce((sum, i) => sum + i.qty, 0);
 
   return {

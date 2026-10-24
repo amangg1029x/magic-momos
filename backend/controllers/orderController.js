@@ -150,8 +150,8 @@ const placeOrder = async (req, res, next) => {
       }
     }
 
-    const deliveryCharge = (subtotal - discount) >= freeDeliveryThresholdSetting ? 0 : deliveryFeeSetting;
-    const total          = subtotal - discount + deliveryCharge;
+    const deliveryCharge = subtotal >= freeDeliveryThresholdSetting ? 0 : deliveryFeeSetting;
+    const total          = subtotal + deliveryCharge - discount;
 
     // ── 4. Build and save the order ───────────────────────────────────────────
     const orderData = {

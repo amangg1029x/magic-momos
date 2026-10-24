@@ -21,7 +21,7 @@ export default function CartSidebar({
   const [couponApplying, setCouponApplying] = useState(false);
   const [activeCoupons, setActiveCoupons] = useState([]);
 
-  const toFreeDelivery = Math.max(freeDeliveryThreshold - (subtotal - discount), 0);
+  const toFreeDelivery = Math.max(freeDeliveryThreshold - subtotal, 0);
   const freeDelivery   = deliveryFee === 0 && items.length > 0;
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export default function CartSidebar({
                   <div className="w-full h-1.5 rounded-full bg-amber-200 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(((subtotal - discount) / freeDeliveryThreshold) * 100, 100)}%` }}
+                      animate={{ width: `${Math.min((subtotal / freeDeliveryThreshold) * 100, 100)}%` }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
                       className="h-full rounded-full bg-amber-500"
                     />

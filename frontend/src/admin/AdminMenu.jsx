@@ -126,7 +126,10 @@ export default function AdminMenu() {
       setModalOpen(false);
       fetchItems();
     } catch (err) {
-      setError(err.message || "Couldn't save item");
+      const detailedMsg = err.data?.errors?.length
+        ? err.data.errors.map((e) => `${e.field}: ${e.message}`).join(", ")
+        : err.data?.message || err.message || "Couldn't save item";
+      setError(detailedMsg);
     } finally {
       setSaving(false);
     }

@@ -89,19 +89,24 @@ export default function AdminMenu() {
 
       // If S/M/L, construct sizes array
       let sizes = undefined;
-      let finalPrice = Number(form.price);
+      let finalPrice = Number(form.price) || 0;
 
       if (isPizzaOrSML) {
         const pS = Number(form.priceS) || 0;
-        const pM = Number(form.priceM) || Number(form.price) || 0;
+        const pM = Number(form.priceM) || 0;
         const pL = Number(form.priceL) || 0;
 
-        sizes = [
-          { key: "s", label: "Small", sublabel: "Personal · 7-inch", price: pS || pM },
-          { key: "m", label: "Medium", sublabel: "Sharing · 9-inch", price: pM },
-          { key: "l", label: "Large", sublabel: "Group · 12-inch", price: pL || pM },
-        ];
-        finalPrice = pM || pS || pL || 1;
+        const builtSizes = [];
+        if (pS > 0) builtSizes.push({ key: "s", label: "Small", sublabel: "Personal · 7-inch", price: pS });
+        if (pM > 0) builtSizes.push({ key: "m", label: "Medium", sublabel: "Sharing · 9-inch", price: pM });
+        if (pL > 0) builtSizes.push({ key: "l", label: "Large", sublabel: "Group · 12-inch", price: pL });
+
+        if (builtSizes.length === 0) {
+          throw new Error("Please enter a price for at least one size (S, M, or L)");
+        }
+
+        sizes = builtSizes;
+        finalPrice = builtSizes[0].price;
       }
 
       const payload = {
@@ -314,7 +319,7 @@ export default function AdminMenu() {
                       <label className="font-body text-xs font-700 text-amber-900 block">
                         Pizza Sizes Pricing (₹)
                       </label>
-                      <span className="text-[11px] font-body text-amber-700 font-600">S / M / L</span>
+                      <span className="text-[11px] font-body text-amber-700 font-600">Fill any 1 or more (S / M / L)</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2.5">
                       <Field
@@ -322,24 +327,21 @@ export default function AdminMenu() {
                         value={form.priceS}
                         onChange={(v) => setForm((f) => ({ ...f, priceS: v }))}
                         type="number"
-                        placeholder="149"
-                        required
+                        placeholder="e.g. 149"
                       />
                       <Field
                         label="Medium (M)"
                         value={form.priceM}
                         onChange={(v) => setForm((f) => ({ ...f, priceM: v, price: v }))}
                         type="number"
-                        placeholder="249"
-                        required
+                        placeholder="e.g. 249"
                       />
                       <Field
                         label="Large (L)"
                         value={form.priceL}
                         onChange={(v) => setForm((f) => ({ ...f, priceL: v }))}
                         type="number"
-                        placeholder="349"
-                        required
+                        placeholder="e.g. 349"
                       />
                     </div>
                   </div>

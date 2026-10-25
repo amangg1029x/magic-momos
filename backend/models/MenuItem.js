@@ -10,12 +10,27 @@ const menuItemSchema = new mongoose.Schema(
     category: {
       type:     String,
       required: [true, "Category is required"],
-      enum:     ["momos", "rolls", "snacks", "sides", "drinks"],
+      enum:     ["momos", "rolls", "snacks", "sides", "drinks", "pizza"],
     },
     emoji: {
       type:    String,
       default: "🍽️",
     },
+    // Sizing system: e.g. "half_full", "s_m_l", or "standard"
+    sizeType: {
+      type:    String,
+      enum:    ["standard", "half_full", "s_m_l"],
+      default: "standard",
+    },
+    // Array of sizes for flexible pricing: e.g. [{ key: "s", label: "Small", price: 149 }, ...]
+    sizes: [
+      {
+        key:      { type: String, required: true },
+        label:    { type: String, required: true },
+        sublabel: { type: String },
+        price:    { type: Number, required: true, min: 1 },
+      },
+    ],
     name: {
       type:      String,
       required:  [true, "Item name is required"],

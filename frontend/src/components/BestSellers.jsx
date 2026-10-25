@@ -136,6 +136,7 @@ export default function BestSellers() {
     snacks: "#88B04B",
     sides: "#F7CAC9",
     drinks: "#92A8D1",
+    pizza: "#F59E0B",
   };
 
   const PICKS = bestSellerItems.map(item => ({

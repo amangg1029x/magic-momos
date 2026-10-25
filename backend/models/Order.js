@@ -13,7 +13,7 @@ const orderItemSchema = new mongoose.Schema(
     name:    { type: String, required: true },
     price:   { type: Number, required: true }, // price at time of order (snapshot)
     qty:     { type: Number, required: true, min: 1 },
-    size:    { type: String, enum: ["half", "full"] },
+    size:    { type: String }, // e.g. "half", "full", "s", "m", "l" or label
   },
   { _id: false }
 );

@@ -76,12 +76,29 @@ const placeOrder = async (req, res, next) => {
     // ── 2. Build order line items with snapshotted prices ────────────────────
     const orderItems = reqItems.map((reqItem) => {
       const menuItem = menuItems.find((m) => m.itemId === Number(reqItem.itemId));
-      const hasHalfFull = menuItem.halfPrice != null && menuItem.halfPrice > 0;
-      const size = reqItem.size || (hasHalfFull ? "full" : undefined);
-      const price = (hasHalfFull && size === "half") ? menuItem.halfPrice : menuItem.price;
-      const name = hasHalfFull 
-        ? `${menuItem.name} (${size === "half" ? "Half" : "Full"})` 
-        : menuItem.name;
+      const hasCustomSizes = Array.isArray(menuItem.sizes) && menuItem.sizes.length > 0;
+      const hasHalfFull = !hasCustomSizes && menuItem.halfPrice != null && menuItem.halfPrice > 0;
+
+      let size = reqItem.size;
+      let price = menuItem.price;
+      let name = menuItem.name;
+
+      if (hasCustomSizes) {
+        // Find matching size variant by key (or default to first size / base price)
+        const sizeObj = menuItem.sizes.find(
+          (s) => s.key === size || s.label?.toLowerCase() === size?.toLowerCase()
+        ) || menuItem.sizes[0];
+
+        if (sizeObj) {
+          size = sizeObj.key;
+          price = sizeObj.price;
+          name = `${menuItem.name} (${sizeObj.label || size.toUpperCase()})`;
+        }
+      } else if (hasHalfFull) {
+        size = reqItem.size || "full";
+        price = (size === "half") ? menuItem.halfPrice : menuItem.price;
+        name = `${menuItem.name} (${size === "half" ? "Half" : "Full"})`;
+      }
 
       return {
         menuItem: menuItem._id,

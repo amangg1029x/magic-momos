@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Pencil, Trash2, X, Loader2, Search, Power } from "lucide-react";
 import api from "../services/api";
 
-const CATEGORIES = ["momos", "rolls", "snacks", "sides", "drinks"];
+const CATEGORIES = ["momos", "rolls", "snacks", "sides", "drinks", "pizza"];
 
 const emptyForm = {
   itemId: "", name: "", category: "momos", price: "",
   halfPrice: "", pieces: "", halfPieces: "",
+  sizeType: "standard", // "standard" | "half_full" | "s_m_l"
+  priceS: "", priceM: "", priceL: "",
   desc: "", imageUrl: "", available: true, tag: "",
 };
 
@@ -44,6 +46,19 @@ export default function AdminMenu() {
 
   const openEdit = (item) => {
     setEditing(item);
+
+    // Extract S/M/L prices if present in sizes array
+    const sSize = item.sizes?.find((s) => s.key === "s");
+    const mSize = item.sizes?.find((s) => s.key === "m");
+    const lSize = item.sizes?.find((s) => s.key === "l");
+
+    let detectedSizeType = item.sizeType;
+    if (!detectedSizeType) {
+      if (item.category === "pizza" || item.sizes?.length > 0) detectedSizeType = "s_m_l";
+      else if (item.halfPrice) detectedSizeType = "half_full";
+      else detectedSizeType = "standard";
+    }
+
     setForm({
       itemId:     item.itemId ?? "",
       name:       item.name ?? "",
@@ -52,6 +67,10 @@ export default function AdminMenu() {
       halfPrice:  item.halfPrice ?? "",
       pieces:     item.pieces ?? "",
       halfPieces: item.halfPieces ?? "",
+      sizeType:   detectedSizeType,
+      priceS:     sSize?.price ?? "",
+      priceM:     mSize?.price ?? (item.price ?? ""),
+      priceL:     lSize?.price ?? "",
       desc:       item.desc ?? item.description ?? "",
       imageUrl:   item.imageUrl ?? "",
       available:  item.available ?? item.isAvailable ?? true,
@@ -66,10 +85,31 @@ export default function AdminMenu() {
     setSaving(true);
     setError("");
     try {
+      const isPizzaOrSML = form.category === "pizza" || form.sizeType === "s_m_l";
+
+      // If S/M/L, construct sizes array
+      let sizes = undefined;
+      let finalPrice = Number(form.price);
+
+      if (isPizzaOrSML) {
+        const pS = Number(form.priceS) || 0;
+        const pM = Number(form.priceM) || Number(form.price) || 0;
+        const pL = Number(form.priceL) || 0;
+
+        sizes = [
+          { key: "s", label: "Small", sublabel: "Personal · 7-inch", price: pS || pM },
+          { key: "m", label: "Medium", sublabel: "Sharing · 9-inch", price: pM },
+          { key: "l", label: "Large", sublabel: "Group · 12-inch", price: pL || pM },
+        ];
+        finalPrice = pM || pS || pL || 1;
+      }
+
       const payload = {
         ...form,
-        price:      Number(form.price),
-        halfPrice:  form.halfPrice  ? Number(form.halfPrice)  : undefined,
+        price:      finalPrice,
+        sizeType:   isPizzaOrSML ? "s_m_l" : (form.halfPrice ? "half_full" : "standard"),
+        sizes:      sizes,
+        halfPrice:  (!isPizzaOrSML && form.halfPrice) ? Number(form.halfPrice) : undefined,
         pieces:     form.pieces     ? Number(form.pieces)     : undefined,
         halfPieces: form.halfPieces ? Number(form.halfPieces) : undefined,
       };
@@ -188,7 +228,9 @@ export default function AdminMenu() {
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="font-body font-700 text-[#E8284B]">
-                    {item.halfPrice
+                    {item.sizes?.length > 0
+                      ? item.sizes.map((s) => `${s.label || s.key.toUpperCase()} ₹${s.price}`).join(" · ")
+                      : item.halfPrice
                       ? `Half ₹${item.halfPrice}${item.halfPieces ? ` (${item.halfPieces} pcs)` : ""} · Full ₹${item.price}${item.pieces ? ` (${item.pieces} pcs)` : ""}`
                       : `₹${item.price}${item.pieces ? ` · ${item.pieces} pcs` : ""}`
                     }
@@ -248,7 +290,14 @@ export default function AdminMenu() {
                     <label className="font-body text-xs font-600 text-gray-500 mb-1.5 block">Category</label>
                     <select
                       value={form.category}
-                      onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                      onChange={(e) => {
+                        const cat = e.target.value;
+                        setForm((f) => ({
+                          ...f,
+                          category: cat,
+                          sizeType: cat === "pizza" ? "s_m_l" : f.sizeType,
+                        }));
+                      }}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 font-body text-sm capitalize
                                  focus:outline-none focus:ring-2 focus:ring-[#E8284B]/30"
                     >
@@ -257,29 +306,71 @@ export default function AdminMenu() {
                   </div>
                   <Field label="Tag — optional" value={form.tag} onChange={(v) => setForm((f) => ({ ...f, tag: v }))} placeholder="Bestseller, New, Spicy…" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="Half Price (₹) — optional" value={form.halfPrice} onChange={(v) => setForm((f) => ({ ...f, halfPrice: v }))} type="number" />
-                  <Field label="Full Price (₹)" value={form.price} onChange={(v) => setForm((f) => ({ ...f, price: v }))} type="number" required />
-                </div>
-                {/* Piece counts */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {form.halfPrice && (
-                    <Field
-                      label="Pieces — half plate (optional)"
-                      value={form.halfPieces}
-                      onChange={(v) => setForm((f) => ({ ...f, halfPieces: v }))}
-                      type="number"
-                      placeholder="e.g. 6"
-                    />
-                  )}
-                  <Field
-                    label={form.halfPrice ? "Pieces — full plate (optional)" : "Pieces per serving (optional)"}
-                    value={form.pieces}
-                    onChange={(v) => setForm((f) => ({ ...f, pieces: v }))}
-                    type="number"
-                    placeholder="e.g. 12"
-                  />
-                </div>
+
+                {/* Sizing options: Pizza S/M/L vs Half/Full/Standard */}
+                {form.category === "pizza" || form.sizeType === "s_m_l" ? (
+                  <div className="p-3.5 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="font-body text-xs font-700 text-amber-900 block">
+                        Pizza Sizes Pricing (₹)
+                      </label>
+                      <span className="text-[11px] font-body text-amber-700 font-600">S / M / L</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <Field
+                        label="Small (S)"
+                        value={form.priceS}
+                        onChange={(v) => setForm((f) => ({ ...f, priceS: v }))}
+                        type="number"
+                        placeholder="149"
+                        required
+                      />
+                      <Field
+                        label="Medium (M)"
+                        value={form.priceM}
+                        onChange={(v) => setForm((f) => ({ ...f, priceM: v, price: v }))}
+                        type="number"
+                        placeholder="249"
+                        required
+                      />
+                      <Field
+                        label="Large (L)"
+                        value={form.priceL}
+                        onChange={(v) => setForm((f) => ({ ...f, priceL: v }))}
+                        type="number"
+                        placeholder="349"
+                        required
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Field label="Half Price (₹) — optional" value={form.halfPrice} onChange={(v) => setForm((f) => ({ ...f, halfPrice: v }))} type="number" />
+                      <Field label="Full Price (₹)" value={form.price} onChange={(v) => setForm((f) => ({ ...f, price: v }))} type="number" required />
+                    </div>
+                    {/* Piece counts */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {form.halfPrice && (
+                        <Field
+                          label="Pieces — half plate (optional)"
+                          value={form.halfPieces}
+                          onChange={(v) => setForm((f) => ({ ...f, halfPieces: v }))}
+                          type="number"
+                          placeholder="e.g. 6"
+                        />
+                      )}
+                      <Field
+                        label={form.halfPrice ? "Pieces — full plate (optional)" : "Pieces per serving (optional)"}
+                        value={form.pieces}
+                        onChange={(v) => setForm((f) => ({ ...f, pieces: v }))}
+                        type="number"
+                        placeholder="e.g. 12"
+                      />
+                    </div>
+                  </>
+                )}
+
                 <div>
                   <label className="font-body text-xs font-600 text-gray-500 mb-1.5 block">Description</label>
                   <textarea

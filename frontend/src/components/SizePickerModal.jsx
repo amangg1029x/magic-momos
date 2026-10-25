@@ -17,26 +17,45 @@ import { X } from "lucide-react";
 export default function SizePickerModal({ open, item, onSelect, onClose }) {
   if (!item) return null;
 
-  const OPTIONS = [
-    {
-      size:     "half",
-      label:    "Half Plate",
-      sublabel: item.halfPieces
-        ? `Great for light hunger or trying a new item · ${item.halfPieces} pcs`
-        : "Great for light hunger or trying a new item",
-      price:    item.halfPrice,
-      emoji:    "🍽️",
-    },
-    {
-      size:     "full",
-      label:    "Full Plate",
-      sublabel: item.pieces
-        ? `Full serving — the crowd favourite · ${item.pieces} pcs`
-        : "Full serving — the crowd favourite",
-      price:    item.price,
-      emoji:    "🥣",
-    },
-  ];
+  let OPTIONS = [];
+
+  if (Array.isArray(item.sizes) && item.sizes.length > 0) {
+    OPTIONS = item.sizes.map((s) => {
+      let defaultEmoji = "🍕";
+      if (s.key === "s" || s.key === "small") defaultEmoji = "🍕";
+      else if (s.key === "m" || s.key === "medium") defaultEmoji = "🍕";
+      else if (s.key === "l" || s.key === "large") defaultEmoji = "🍕";
+
+      return {
+        size:     s.key,
+        label:    s.label,
+        sublabel: s.sublabel || `${s.label} portion`,
+        price:    s.price,
+        emoji:    s.emoji || defaultEmoji,
+      };
+    });
+  } else {
+    OPTIONS = [
+      {
+        size:     "half",
+        label:    "Half Plate",
+        sublabel: item.halfPieces
+          ? `Great for light hunger or trying a new item · ${item.halfPieces} pcs`
+          : "Great for light hunger or trying a new item",
+        price:    item.halfPrice,
+        emoji:    "🍽️",
+      },
+      {
+        size:     "full",
+        label:    "Full Plate",
+        sublabel: item.pieces
+          ? `Full serving — the crowd favourite · ${item.pieces} pcs`
+          : "Full serving — the crowd favourite",
+        price:    item.price,
+        emoji:    "🥣",
+      },
+    ];
+  }
 
   return (
     <AnimatePresence>

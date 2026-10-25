@@ -71,6 +71,8 @@ export default function MenuGrid({ items: allItems, category, search, cartItems,
     imageUrl: item.imageUrl,
     price:    item.price,
     halfPrice: item.halfPrice,
+    sizes:    item.sizes,
+    sizeType: item.sizeType,
   });
 
   return (

@@ -19,28 +19,43 @@ import SizePickerModal from "./SizePickerModal";
 export default function MenuItemCard({ item, cartItems = [], onAdd, onInc, onDec }) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const hasHalfFull = item.halfPrice != null && item.halfPrice > 0;
+  const hasCustomSizes = Array.isArray(item.sizes) && item.sizes.length > 0;
+  const hasHalfFull = !hasCustomSizes && item.halfPrice != null && item.halfPrice > 0;
+  const isMultiSize = hasCustomSizes || hasHalfFull;
 
-  // Cart keys for each size variant
-  const halfKey = `${item.itemId ?? item.id}-half`;
-  const fullKey = `${item.itemId ?? item.id}-full`;
+  // Variants list for steppers if multi-size
+  const variants = hasCustomSizes
+    ? item.sizes.map((s) => ({
+        size:  s.key,
+        label: s.label?.charAt(0).toUpperCase() || s.key.toUpperCase(),
+        fullLabel: s.label,
+        key:   `${item.itemId ?? item.id}-${s.key}`,
+        price: s.price,
+      }))
+    : hasHalfFull
+    ? [
+        { size: "half", label: "H", fullLabel: "Half", key: `${item.itemId ?? item.id}-half`, price: item.halfPrice },
+        { size: "full", label: "F", fullLabel: "Full", key: `${item.itemId ?? item.id}-full`, price: item.price },
+      ]
+    : [];
 
-  const halfEntry = cartItems.find((i) => i.cartKey === halfKey);
-  const fullEntry = cartItems.find((i) => i.cartKey === fullKey);
+  // Cart variant entries
+  const variantEntries = variants.map((v) => {
+    const entry = cartItems.find((i) => i.cartKey === v.key);
+    return { ...v, qty: entry?.qty ?? 0 };
+  });
 
-  const halfQty = halfEntry?.qty ?? 0;
-  const fullQty = fullEntry?.qty ?? 0;
-  const totalQty = halfQty + fullQty;
-  const inCart = totalQty > 0;
+  const totalVariantQty = variantEntries.reduce((sum, v) => sum + v.qty, 0);
+  const inCart = totalVariantQty > 0;
 
-  // For non-half/full items, use the plain numeric id as the key
+  // For standard non-multi items, use the plain numeric id as the key
   const plainKey = String(item.itemId ?? item.id);
   const plainEntry = cartItems.find((i) => i.cartKey === plainKey);
   const plainQty = plainEntry?.qty ?? 0;
   const plainInCart = plainQty > 0;
 
   const handleAddClick = () => {
-    if (hasHalfFull) {
+    if (isMultiSize) {
       setPickerOpen(true);
     } else {
       onAdd(item, "full");
@@ -165,7 +180,21 @@ export default function MenuItemCard({ item, cartItems = [], onAdd, onInc, onDec
         <div className="flex flex-col gap-2.5 pt-3 border-t border-mm-border">
           {/* price display */}
           <div>
-            {hasHalfFull ? (
+            {hasCustomSizes ? (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {item.sizes.map((s, idx) => (
+                  <div key={s.key} className="flex items-center gap-1">
+                    <div className="flex flex-col leading-none">
+                      <span className="font-body text-[10px] text-mm-muted uppercase tracking-wider">{s.label || s.key}</span>
+                      <span className="font-display text-sm sm:text-base text-mm-cream">₹{s.price}</span>
+                    </div>
+                    {idx < item.sizes.length - 1 && (
+                      <span className="text-mm-border font-body text-xs ml-0.5">·</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : hasHalfFull ? (
               <div className="flex items-center gap-2">
                 <div className="flex flex-col leading-none">
                   <span className="font-body text-[10px] text-mm-muted uppercase tracking-wider">Half</span>
@@ -197,8 +226,8 @@ export default function MenuItemCard({ item, cartItems = [], onAdd, onInc, onDec
           </div>
 
           {/* cart controls */}
-          {hasHalfFull ? (
-            /* ── Half/Full items: show steppers per size OR the Add button ── */
+          {isMultiSize ? (
+            /* ── Multi-size items: show steppers per size OR the Add button ── */
             <div>
               {!inCart ? (
                 /* No variants in cart yet → single Add button opens picker */
@@ -216,12 +245,9 @@ export default function MenuItemCard({ item, cartItems = [], onAdd, onInc, onDec
                   Add
                 </motion.button>
               ) : (
-                /* One or both variants in cart → show per-size steppers */
+                /* One or more variants in cart → show per-size steppers */
                 <div className="space-y-1.5">
-                  {[
-                    { size: "half", label: "H", qty: halfQty, key: halfKey, price: item.halfPrice },
-                    { size: "full", label: "F", qty: fullQty, key: fullKey, price: item.price },
-                  ].map(({ size, label, qty, key, price }) => (
+                  {variantEntries.map(({ size, label, qty, key, price }) => (
                     <div key={size} className="flex items-center justify-between gap-2">
                       <span className="font-body text-xs text-mm-muted w-5 shrink-0">{label}</span>
 

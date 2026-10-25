@@ -129,6 +129,7 @@ export default function MenuHighlights() {
         snacks: "text-green-600",
         sides: "text-pink-600",
         drinks: "text-blue-600",
+        pizza: "text-amber-600",
     };
     const GRADIENT_MAP = {
         momos: "bg-gradient-to-br from-red-500 to-pink-500",
@@ -136,6 +137,7 @@ export default function MenuHighlights() {
         snacks: "bg-gradient-to-br from-green-500 to-yellow-500",
         sides: "bg-gradient-to-br from-pink-500 to-purple-500",
         drinks: "bg-gradient-to-br from-blue-500 to-teal-500",
+        pizza: "bg-gradient-to-br from-amber-500 to-orange-500",
     };
 
     // Use popular flag as a placeholder for highlights

@@ -34,7 +34,7 @@ const loginRules = [
 // ── Menu validators ───────────────────────────────────────────────────────────
 const menuItemRules = [
   body("category")
-    .isIn(["momos", "rolls", "snacks", "sides", "drinks"])
+    .isIn(["momos", "rolls", "snacks", "sides", "drinks", "pizza"])
     .withMessage("Invalid category"),
   body("name").trim().notEmpty().withMessage("Item name is required"),
   body("desc").trim().notEmpty().withMessage("Description is required"),
@@ -43,6 +43,8 @@ const menuItemRules = [
   body("spicy").optional().isBoolean(),
   body("popular").optional().isBoolean(),
   body("available").optional().isBoolean(),
+  body("sizeType").optional().isIn(["standard", "half_full", "s_m_l"]),
+  body("sizes").optional().isArray(),
   body("halfPrice").optional().isFloat({ min: 1 }).withMessage("Half price must be a positive number"),
   body("pieces").optional().isInt({ min: 1 }).withMessage("Pieces must be a positive integer"),
   body("halfPieces").optional().isInt({ min: 1 }).withMessage("Half pieces must be a positive integer"),
@@ -58,7 +60,7 @@ const placeOrderRules = [
   body("items").isArray({ min: 1 }).withMessage("Order must contain at least one item"),
   body("items.*.itemId").isNumeric().withMessage("Each item must have a valid itemId"),
   body("items.*.qty").isInt({ min: 1 }).withMessage("Quantity must be at least 1"),
-  body("items.*.size").optional().isIn(["half", "full"]).withMessage("Invalid item size"),
+  body("items.*.size").optional().isString().withMessage("Invalid item size"),
   body("address.street").trim().notEmpty().withMessage("Delivery address is required"),
   body("address.pincode")
     .matches(/^\d{6}$/)

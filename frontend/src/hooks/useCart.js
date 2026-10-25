@@ -73,19 +73,33 @@ export function useCart() {
   // ── Cart mutations ────────────────────────────────────────────────────────
   const addItem = useCallback((item, size = "full") => {
     setItems((prev) => {
-      const hasHalfFull = item.halfPrice != null && item.halfPrice > 0;
-      const cartKey = hasHalfFull ? `${item.id}-${size}` : String(item.id);
+      const hasCustomSizes = Array.isArray(item.sizes) && item.sizes.length > 0;
+      const hasHalfFull = !hasCustomSizes && item.halfPrice != null && item.halfPrice > 0;
+      const hasMultiSize = hasCustomSizes || hasHalfFull;
+
+      const cartKey = hasMultiSize ? `${item.id}-${size}` : String(item.id);
       const exists = prev.find((i) => i.cartKey === cartKey);
       if (exists) {
         return prev.map((i) =>
           i.cartKey === cartKey ? { ...i, qty: i.qty + 1 } : i
         );
       }
-      
-      const price = (hasHalfFull && size === "half") ? item.halfPrice : item.price;
-      const displayName = hasHalfFull 
-        ? `${item.name} (${size === "half" ? "Half" : "Full"})` 
-        : item.name;
+
+      let price = item.price;
+      let displayName = item.name;
+
+      if (hasCustomSizes) {
+        const foundSize = item.sizes.find(
+          (s) => s.key === size || s.label?.toLowerCase() === size?.toLowerCase()
+        ) || item.sizes[0];
+        if (foundSize) {
+          price = foundSize.price;
+          displayName = `${item.name} (${foundSize.label || size.toUpperCase()})`;
+        }
+      } else if (hasHalfFull) {
+        price = (size === "half") ? item.halfPrice : item.price;
+        displayName = `${item.name} (${size === "half" ? "Half" : "Full"})`;
+      }
 
       return [
         ...prev,
@@ -97,7 +111,7 @@ export function useCart() {
           imageUrl: item.imageUrl,
           price:    price,
           qty:      1,
-          size:     hasHalfFull ? size : null,
+          size:     hasMultiSize ? size : null,
         },
       ];
     });
